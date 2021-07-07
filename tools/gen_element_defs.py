@@ -61,6 +61,8 @@ def print_table():
 			flags.append("ELEMENT_PLACEABLE_ON_TOP")
 		if ElementDefs[i].Walkable:
 			flags.append("ELEMENT_WALKABLE")
+		if ElementDefs[i].Cycle > -1:
+			flags.append("ELEMENT_TYPICALLY_STATTED")
 		# Bools
 		if len(flags) > 0:
 			print("\t\t%s," % " | ".join(flags))
@@ -465,8 +467,8 @@ ElementDefs[14].Name = "Energizer";
 ElementDefs[29].Character = 206;
 ElementDefs[29].Cycle = 1;
 ElementDefs[29].TickProc = "ElementBlinkWallTick";
-ElementDefs[29].HasDrawProc = True;
-ElementDefs[29].DrawProc = "ElementBlinkWallDraw";
+# ElementDefs[29].HasDrawProc = True;
+# ElementDefs[29].DrawProc = "ElementBlinkWallDraw";
 ElementDefs[29].EditorCategory = "EditorCategoryTerrain";
 ElementDefs[29].EditorShortcut = "L";
 ElementDefs[29].Name = "Blink wall";

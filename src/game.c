@@ -183,7 +183,8 @@ void game_play_loop(bool board_changed) {
 				const zoo_element_def_t *element = &zoo_element_defs[ZOO_TILE(stat->x, stat->y).element];
 
 				if (element->tick_proc != 0 && stat->cycle != 0) {
-					if (stat->cycle == 1 || ((zoo_game_state.current_tick % stat->cycle) == (zoo_game_state.current_stat_ticked % stat->cycle))) {
+					// if (stat->cycle == 1 || ((zoo_game_state.current_tick % stat->cycle) == (zoo_game_state.current_stat_ticked % stat->cycle))) {
+					if (stat->cycle == 1 || (((int16_t) zoo_game_state.current_tick - zoo_game_state.current_stat_ticked) % stat->cycle) == 0) {
 						element->tick_proc(zoo_game_state.current_stat_ticked);
 					}
 				}
@@ -401,7 +402,34 @@ void damage_stat(uint8_t stat_id) {
 	zoo_tile_t *tile = &ZOO_TILE(stat->x, stat->y);
 
 	if (stat_id == 0) {
-		// TODO: player handling
+		if (zoo_world_info.health > 0) {
+			zoo_world_info.health -= 10;
+
+			game_update_sidebar();
+			// TODO: DisplayMessage
+
+			tile->color = 0x70 | (zoo_element_defs[E_PLAYER].color & 0xF);
+
+			if (zoo_world_info.health > 0) {
+				zoo_world_info.board_time_sec = 0;
+				if (zoo_board_info.flags & BOARD_REENTER_WHEN_ZAPPED) {
+					sound_queue(4, sound_player_zapped);
+
+					uint8_t old_x = stat->x;
+					uint8_t old_y = stat->y;
+					tile->element = E_EMPTY;
+					board_draw_tile(old_x, old_y);
+					stat->x = zoo_board_info.start_player_x;
+					stat->y = zoo_board_info.start_player_y;
+					board_redraw();
+
+					zoo_game_state.paused = true;
+				}
+				sound_queue(4, sound_player_damage);
+			} else {
+				sound_queue(5, sound_player_game_over);
+			}
+		}
 	} else {
 		switch (tile->element) {
 			case E_BULLET:
@@ -424,6 +452,32 @@ void board_damage_tile(uint8_t x, uint8_t y) {
 	} else {
 		ZOO_TILE(x, y).element = E_EMPTY;
 		board_draw_tile(x, y);
+	}
+}
+
+void game_update_sidebar(void) {
+	// TODO
+}
+
+void board_attack(uint8_t stat_id, uint8_t x, uint8_t y) {
+	if (stat_id == 0 && zoo_world_info.energizer_ticks > 0) {
+		zoo_world_info.score += zoo_element_defs[ZOO_TILE(x, y).element].score_value;
+		game_update_sidebar();
+	} else {
+		damage_stat(stat_id);
+	}
+
+	if (stat_id > 0 && stat_id <= zoo_game_state.current_stat_ticked) {
+		zoo_game_state.current_stat_ticked--;
+	}
+
+	if ((ZOO_TILE(x, y).element == E_PLAYER) && zoo_world_info.energizer_ticks > 0) {
+		zoo_stat_t *attacker_stat = &ZOO_STAT(stat_id);
+		zoo_world_info.score += zoo_element_defs[ZOO_TILE(attacker_stat->x, attacker_stat->y).element].score_value;
+		game_update_sidebar();
+	} else {
+		board_damage_tile(x, y);
+		sound_queue(2, sound_damage);
 	}
 }
 

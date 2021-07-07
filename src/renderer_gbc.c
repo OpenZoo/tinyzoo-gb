@@ -267,9 +267,6 @@ static volatile uint16_t asm_tmp_pal2;
 
 static void text_cgb_push_color(void) {
 __asm
-	push bc
-	push de
-
 	ld hl, #(_asm_tmp_pal1)
 	ld b, (hl)
 	inc hl
@@ -306,17 +303,12 @@ __asm
 	xor a, a
 	ldh (_SVBK_REG + 0), a
 	ei
-
-	pop de
-	pop bc
 __endasm;
 }
 
 static void text_cgb_push_char(uint16_t pos, uint8_t v1, uint8_t v2) {
 __asm
-	push bc
-	
-	ldhl sp, #7
+	ldhl sp, #5
 	ld c, (hl)
 	dec hl
 	ld b, (hl)
@@ -343,8 +335,6 @@ SyncLoopEnd:
 	ld (hl), b
 
 	ei
-
-	pop bc
 __endasm;
 }
 
