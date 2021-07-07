@@ -112,14 +112,15 @@ typedef struct {
 #ifndef __GAMEVARS_INTERNAL__
 extern zoo_board_info_t zoo_board_info;
 extern zoo_world_info_t zoo_world_info;
-extern zoo_tile_t zoo_tiles[64 * 27];
+extern zoo_tile_t zoo_tiles[62 * 27];
+extern zoo_tile_t *const zoo_tiles_y[27];
 extern uint8_t zoo_stat_count;
 extern uint8_t zoo_stat_data[MAX_DATA_OFS_SIZE];
 extern zoo_stat_t zoo_stats[MAX_STAT + 3];
 extern zoo_game_state_t zoo_game_state;
 #endif
 
-#define ZOO_TILE(x, y) zoo_tiles[((y) << 6) | (x)]
+#define ZOO_TILE(x, y) zoo_tiles_y[(y)][(x)]
 #define ZOO_TILE_COPY(v, w) *((uint16_t*) &(v)) = *((uint16_t*) &(w))
 #define ZOO_TILE_ASSIGN(v, x, y) *((uint16_t*) &(v)) = *((uint16_t*) &ZOO_TILE((x), (y)))
 #define ZOO_STAT(id) zoo_stats[((id) + 1)]

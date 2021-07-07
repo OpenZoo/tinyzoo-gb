@@ -14,6 +14,7 @@ extern const int8_t diagonal_delta_y[8];
 void center_viewport_on_player(void);
 void board_create(void);
 void world_create(void);
+void board_enter(void);
 void board_draw_tile(uint8_t x, uint8_t y);
 uint8_t get_stat_id_at(uint8_t x, uint8_t y);
 void add_stat(uint8_t tx, uint8_t ty, uint8_t element, uint8_t color, uint8_t cycle, const zoo_stat_t *template);

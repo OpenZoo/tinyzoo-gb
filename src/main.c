@@ -19,6 +19,7 @@ void main(void) {
 
 	world_create();
 	load_board_data(_TOWN_BIN);
+	board_enter();
 
 	if (_cpu == CGB_TYPE) {
 		cpu_fast();

@@ -107,6 +107,16 @@ void world_create(void) {
 	// TODO: boardchange
 }
 
+void board_enter(void) {
+	zoo_board_info.start_player_x = ZOO_STAT(0).x;
+	zoo_board_info.start_player_y = ZOO_STAT(0).y;
+
+	// TODO
+
+	zoo_world_info.board_time_sec = 0;
+	game_update_sidebar();
+}
+
 void board_draw_tile(uint8_t x, uint8_t y) {
 	// Viewport check
 	uint8_t vx = x - viewport_x;
@@ -461,6 +471,7 @@ void damage_stat(uint8_t stat_id) {
 					board_draw_tile(old_x, old_y);
 					stat->x = zoo_board_info.start_player_x;
 					stat->y = zoo_board_info.start_player_y;
+					center_viewport_on_player();
 					board_redraw();
 
 					zoo_game_state.paused = true;
