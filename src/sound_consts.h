@@ -23,5 +23,7 @@ extern const uint8_t *sound_gem_pickup;
 extern const uint8_t *sound_torch_pickup;
 extern const uint8_t *sound_water_splash;
 extern const uint8_t *sound_bomb_activated;
+extern const uint8_t *sound_slime_touch;
+extern const uint8_t *sound_energizer_loop;
 
 #endif /* __SOUND_CONSTS_H__ */

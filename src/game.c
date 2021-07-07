@@ -211,6 +211,45 @@ void game_play_loop(bool board_changed) {
 }
 
 uint8_t get_stat_id_at(uint8_t x, uint8_t y) {
+#ifdef GBZ80
+__asm
+		; (hl) - stat pointer
+		; a - compared value
+		; bc - checked value
+		; d - max stat count
+		; e - counter
+		ld		e, #0
+		ldhl	sp, #2
+		ld		c, (hl)
+		inc		hl
+		ld		b, (hl)
+		ld		hl, #(_zoo_stats+16)
+GetStatIdAtLoop:
+		ld		a, (hl+)
+		cp		a, c
+		ld		a, (hl+)
+		jr		nz, GetStatIdAtNotFound
+		cp		a, b
+		jr		nz, GetStatIdAtNotFound
+		ret
+GetStatIdAtNotFound:
+		; hl += 14
+		ld		a, l
+		add		a, #14
+		ld		l, a
+		ld		a, h
+		adc		a, #0
+		ld		h, a
+		; e += 1
+        ld      a, (#_zoo_stat_count)
+		cp		a, e
+		jr		z, GetStatIdFinished
+		inc		e
+		jp		GetStatIdAtLoop
+GetStatIdFinished:
+        ld      e, #0xff
+__endasm;
+#else
 	zoo_stat_t *stat = zoo_stats + 1;
 
 	for (uint8_t i = 0; i <= zoo_stat_count; i++, stat++) {
@@ -219,6 +258,7 @@ uint8_t get_stat_id_at(uint8_t x, uint8_t y) {
 	}
 
 	return STAT_ID_NONE;
+#endif
 }
 
 void add_stat(uint8_t tx, uint8_t ty, uint8_t element, uint8_t color, uint8_t cycle, const zoo_stat_t *template) {

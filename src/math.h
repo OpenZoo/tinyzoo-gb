@@ -14,33 +14,10 @@
 	default: difference16 \
 )(x)
 
-static inline int8_t signum8(int8_t x) {
-	if (x < 0) {
-		return -1;
-	} else if (x > 0) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-static inline int8_t signum16(int16_t x) {
-	if (x < 0) {
-		return -1;
-	} else if (x > 0) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-static inline int8_t difference8(int8_t a, int8_t b) {
-	return abs(a - b);
-}
-
-static inline int16_t difference16(int16_t a, int16_t b) {
-	return abs(a - b);
-}
+int8_t signum8(int8_t x);
+int8_t signum16(int16_t x);
+int8_t difference8(int8_t a, int8_t b);
+int16_t difference16(int16_t a, int16_t b);
 
 int16_t rand(int16_t max);
 void srand(uint32_t seed);

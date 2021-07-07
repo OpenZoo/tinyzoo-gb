@@ -11,9 +11,11 @@ LCC = $(GBDK_HOME)bin/lcc
 
 # You can set flags for LCC here
 # For example, you can uncomment the line below to turn on debug output
-LCCFLAGS = -debug -Wm-yt27 -Wm-ya16 -Wm-yo4
+LCCFLAGS = -debug -Wm-yt27 -Wm-ya16 -Wm-yo4 -DGBZ80
 # optimizations
 LCCFLAGS += -Wf--max-allocs-per-node50000 -Wf--opt-code-speed
+# profiling
+# LCCFLAGS += -DPROFILING -Wf--profile
 # ASM
 LCCFLAGS += -Wa-I$(GBDK_HOME)lib/small/asxxxx/ -Wa-l
 # GBC
@@ -26,8 +28,11 @@ SRCDIR      = src
 OBJDIR      = obj
 RESDIR      = res
 BINS	    = $(OBJDIR)/$(PROJECTNAME).gb
-CSOURCES    = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.c))) $(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/*.c)))
-ASMSOURCES  = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.s)))
+CSOURCES    = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.c))) \
+	$(foreach dir,$(SRCDIR)/elements,$(notdir $(wildcard $(dir)/*.c))) \
+	$(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/*.c)))
+ASMSOURCES  = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.s))) \
+	$(foreach dir,$(SRCDIR)/elements,$(notdir $(wildcard $(dir)/*.s)))
 OBJS       = $(CSOURCES:%.c=$(OBJDIR)/%.o) $(ASMSOURCES:%.s=$(OBJDIR)/%.o)
 
 all:	prepare $(BINS)
@@ -38,6 +43,10 @@ make.bat: Makefile
 
 # Compile .c files in "src/" to .o object files
 $(OBJDIR)/%.o:	$(SRCDIR)/%.c
+	$(LCC) $(LCCFLAGS) -c -o $@ $<
+
+# Compile .c files in "src/elements/" to .o object files
+$(OBJDIR)/%.o:	$(SRCDIR)/elements/%.c
 	$(LCC) $(LCCFLAGS) -c -o $@ $<
 
 # Compile .c files in "res/" to .o object files

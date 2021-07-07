@@ -10,6 +10,10 @@
 #include "board_manager.h"
 #include "town_bin.h"
 
+#ifdef PROFILING
+#include <gb/bgb_emu.h>
+#endif
+
 void main(void) {
 	srand(1);
 
