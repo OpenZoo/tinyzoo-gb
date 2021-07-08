@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gb/gb.h>
 #include "gamevars.h"
 #include "game.h"
 #include "elements.h"
@@ -151,6 +152,8 @@ NotDark:
 		const zoo_element_def_t *def = zoo_element_defs + tile.element;
 		uint8_t ch;
 		if (def->draw_proc != 0) {
+			SWITCH_ROM_MBC5(1);
+
 			ch = def->draw_proc(x, y);
 		} else {
 			ch = def->character;
@@ -185,6 +188,9 @@ void game_play_loop(bool board_changed) {
 
 	zoo_game_state.current_tick = rand(100);
 	zoo_game_state.current_stat_ticked = zoo_stat_count + 1;
+
+	SWITCH_ROM_MBC5(1);
+
 	do {
 		// TODO: if paused
 		if (zoo_game_state.current_stat_ticked <= zoo_stat_count) {

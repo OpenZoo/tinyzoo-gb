@@ -1,3 +1,5 @@
+#pragma bank 1
+
 #include "../elements.h"
 #include "../elements_utils.h"
 #include "../gamevars.h"
@@ -13,7 +15,25 @@ uint8_t ElementBombDraw(uint8_t x, uint8_t y) {
 }
 
 void ElementBombTick(uint8_t stat_id) {
-	// TODO
+	zoo_stat_t *stat = &ZOO_STAT(stat_id);
+	if (stat->p1 > 0) {
+		stat->p1--;
+		board_draw_tile(stat->x, stat->y);
+
+		if (stat->p1 == 1) {
+			sound_queue(1, sound_bomb_explosion);
+			// TODO
+		} else if (stat->p1 == 0) {
+			uint8_t old_x = stat->x;
+			uint8_t old_y = stat->y;
+			remove_stat(stat_id); 
+			// TODO
+		} else if ((stat->p1 & 1) == 0) {
+			sound_queue(1, sound_bomb_tick1);
+		} else {
+			sound_queue(1, sound_bomb_tick2);
+		}
+	}
 }
 
 void ElementBombTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {

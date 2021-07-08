@@ -7,10 +7,6 @@ extern uint8_t timer_state;
 extern uint8_t timer_speed_base;
 extern uint8_t timer_speed_drum;
 
-void sound_queue(int8_t priority, const uint8_t *data) {
-	// TODO
-}
-
 void timer_init(void) {
 	dhsecs = 0;
 	timer_state = 0;

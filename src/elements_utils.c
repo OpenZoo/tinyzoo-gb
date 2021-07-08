@@ -1,3 +1,5 @@
+#pragma bank 1
+
 #include "elements.h"
 #include "elements_utils.h"
 #include "game.h"

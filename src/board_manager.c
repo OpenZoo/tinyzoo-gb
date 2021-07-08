@@ -1,9 +1,13 @@
 #include <string.h>
+#include <gb/gb.h>
 #include "gamevars.h"
 #include "game.h"
 #include "board_manager.h"
 
-void load_board_data(const uint8_t *data) {
+void load_board_data(const uint8_t *data) NONBANKED {
+	uint8_t prev_bank = _current_bank;
+	SWITCH_ROM_MBC5(3);
+
 	// board length
 	data += 2;
 
@@ -32,6 +36,8 @@ void load_board_data(const uint8_t *data) {
 
 	zoo_stat_count = *(data++);
 	memcpy(zoo_stats + 1, data, sizeof(zoo_stat_t) * (zoo_stat_count + 1));
+
+	SWITCH_ROM_MBC5(prev_bank);
 
 	center_viewport_on_player();
 }

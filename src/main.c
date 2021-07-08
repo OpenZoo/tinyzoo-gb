@@ -17,6 +17,8 @@
 void main(void) {
 	srand(1);
 
+	sound_init();
+
 	world_create();
 	load_board_data(_TOWN_BIN);
 	board_enter();

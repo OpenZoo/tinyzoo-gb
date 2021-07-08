@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include "sound_freqs.inc"
+
 const uint8_t sound_transporter_move[] = {
 	18,
 	48, 1, 66, 1, 52, 1, 70, 1, 56, 1, 74, 1, 64, 1, 82, 1
@@ -110,6 +112,21 @@ const uint8_t sound_bomb_activated[] = {
 	48, 1, 53, 1, 64, 1, 69, 1, 80, 1
 };
 
+const uint8_t sound_bomb_explosion[] = {
+	12,
+	96, 1, 80, 1, 60, 1, 48, 1, 32, 1, 16, 1
+};
+
+const uint8_t sound_bomb_tick1[] = {
+	2,
+	248, 1
+};
+
+const uint8_t sound_bomb_tick2[] = {
+	2,
+	248, 1
+};
+
 const uint8_t sound_energizer_loop[] = {
 	128,
 	32, 3, 35, 3, 36, 3, 37, 3, 53, 3, 37, 3, 35, 3, 32, 3, // 16
@@ -125,4 +142,14 @@ const uint8_t sound_energizer_loop[] = {
 const uint8_t sound_slime_touch[] = {
 	4,
 	32, 1, 35, 1
+};
+
+const uint8_t sound_duplicator_success[] = {
+	10,
+	48, 2, 50, 2, 52, 2, 53, 2, 55, 2
+};
+
+const uint8_t sound_duplicator_failure[] = {
+	4,
+	24, 1, 22, 1
 };

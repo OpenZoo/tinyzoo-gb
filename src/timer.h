@@ -3,8 +3,12 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <gb/gb.h>
 
-void sound_queue(int8_t priority, const uint8_t *data);
+void sound_init(void) BANKED;
+void sound_clear_queue(void) BANKED;
+void sound_queue(int8_t priority, const uint8_t *data) BANKED;
+
 void timer_init(void);
 uint16_t timer_hsecs(void);
 bool timer_has_time_elapsed(uint16_t *ctr, uint16_t duration);
