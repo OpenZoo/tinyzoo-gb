@@ -3,7 +3,7 @@
 #include <string.h>
 #include <gb/gb.h>
 #include "renderer.h"
-#include "../res/font_default.h"
+#include "font_manager.h"
 
 static void vblank_isr(void) {
 	SCX_REG = scx_shadow_reg;
@@ -11,13 +11,7 @@ static void vblank_isr(void) {
 }
 
 static void dmg_text_init(void) {
-	volatile uint8_t *vptr = (uint8_t*) 0x8000;
-	const uint8_t *fptr = _font_default_bin;
-	for (uint16_t i = 0; i < 2048; i++, fptr++) {
-		while (STAT_REG & 0x02);
-		*(vptr++) = *fptr;
-		*(vptr++) = *fptr;
-	}
+	font_8x8_install(0, 3);
 
 	vblank_isr();
 	add_VBL(vblank_isr);

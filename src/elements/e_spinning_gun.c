@@ -8,7 +8,7 @@
 #include "../sound_consts.h"
 #include "../timer.h"
 
-static uint8_t spinning_gun_tiles[4] = {24, 26, 25, 27};
+static const uint8_t spinning_gun_tiles[4] = {24, 26, 25, 27};
 
 uint8_t ElementSpinningGunDraw(uint8_t x, uint8_t y) {
 	return spinning_gun_tiles[(zoo_game_state.current_tick >> 1) & 3];

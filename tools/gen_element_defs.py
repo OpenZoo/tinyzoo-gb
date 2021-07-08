@@ -467,8 +467,8 @@ ElementDefs[14].Name = "Energizer";
 ElementDefs[29].Character = 206;
 ElementDefs[29].Cycle = 1;
 ElementDefs[29].TickProc = "ElementBlinkWallTick";
-# ElementDefs[29].HasDrawProc = True;
-# ElementDefs[29].DrawProc = "ElementBlinkWallDraw";
+ElementDefs[29].HasDrawProc = True;
+ElementDefs[29].DrawProc = "ElementBlinkWallDraw";
 ElementDefs[29].EditorCategory = "EditorCategoryTerrain";
 ElementDefs[29].EditorShortcut = "L";
 ElementDefs[29].Name = "Blink wall";
@@ -505,5 +505,13 @@ ElementDefs[36].ParamTextName = "Edit Program";
 ElementDefs[2].TickProc = "ElementMessageTimerTick";
 
 ElementDefs[1].TouchProc = "ElementBoardEdgeTouch";
+
+# GB/GBC port patches
+# - remove unnecessary ElementBlinkWallDraw
+ElementDefs[29].HasDrawProc = False;
+ElementDefs[29].DrawProc = "ElementDefaultDraw";
+# - add ElementPlayerDraw (to handle energizer highlights)
+ElementDefs[4].HasDrawProc = True;
+ElementDefs[4].DrawProc = "ElementPlayerDraw";
 
 print_table()

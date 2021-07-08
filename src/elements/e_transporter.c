@@ -8,8 +8,8 @@
 #include "../sound_consts.h"
 #include "../timer.h"
 
-static uint8_t transporter_ns_tiles[8] = {'^', '~', '^', '-', 'v', '_', 'v', '-'};
-static uint8_t transporter_ew_tiles[8] = {'(', '<', '(', 179, ')', '>', ')', 179};
+static const uint8_t transporter_ns_tiles[8] = {'^', '~', '^', '-', 'v', '_', 'v', '-'};
+static const uint8_t transporter_ew_tiles[8] = {'(', '<', '(', 179, ')', '>', ')', 179};
 
 uint8_t ElementTransporterDraw(uint8_t x, uint8_t y) {
 	zoo_stat_t *stat = &ZOO_STAT_AT(x, y);

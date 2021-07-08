@@ -8,7 +8,7 @@
 #include "../sound_consts.h"
 #include "../timer.h"
 
-static uint8_t star_tiles[4] = {179, '/', 196, '\\'};
+static const uint8_t star_tiles[4] = {179, '/', 196, '\\'};
 
 uint8_t ElementStarDraw(uint8_t x, uint8_t y) {
 	uint8_t c = ZOO_TILE(x, y).color;

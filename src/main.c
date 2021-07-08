@@ -8,7 +8,6 @@
 #include "timer.h"
 
 #include "board_manager.h"
-#include "town_bin.h"
 
 #ifdef PROFILING
 #include <gb/bgb_emu.h>
@@ -20,8 +19,9 @@ void main(void) {
 	sound_init();
 
 	world_create();
-	load_board_data(_TOWN_BIN);
-	board_enter();
+
+	load_world(0);
+	load_board(zoo_world_info.current_board);
 
 	if (_cpu == CGB_TYPE) {
 		cpu_fast();
@@ -31,6 +31,8 @@ void main(void) {
 	}
 
 	timer_init();
+
+	board_enter();
 
 	game_play_loop(true);
 

@@ -99,6 +99,7 @@ typedef struct {
 	// TODO: Flags
 	int16_t board_time_sec;
 	int16_t board_time_hsec;
+	uint8_t board_count;
 } zoo_world_info_t;
 
 typedef struct {
@@ -107,6 +108,8 @@ typedef struct {
 	uint16_t tick_time_counter;
 	uint16_t current_tick;
 	uint8_t current_stat_ticked;
+	uint8_t game_state_element;
+	uint8_t tick_time_duration;
 } zoo_game_state_t;
 
 #ifndef __GAMEVARS_INTERNAL__

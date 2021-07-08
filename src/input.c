@@ -2,6 +2,7 @@
 #include "input.h"
 
 int8_t input_delta_x, input_delta_y;
+bool input_shift_pressed;
 
 void input_update(void) {
 	uint8_t keys = joypad();
@@ -22,4 +23,6 @@ void input_update(void) {
 		input_delta_x = 0;
 		input_delta_y = 0;
 	}
+
+	input_shift_pressed = (keys & J_A) ? 1 : 0;
 }

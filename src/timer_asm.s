@@ -36,7 +36,9 @@
 	push af
 	ld a, #0x02
 	ld (0x2000), a
+	
 	call (_sound_update)
+
 	pop af
 	ld (0x2000), a
 

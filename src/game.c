@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gb/gb.h>
+#include "board_manager.h"
 #include "gamevars.h"
 #include "game.h"
 #include "elements.h"
@@ -10,22 +11,6 @@
 #include "renderer.h"
 #include "sound_consts.h"
 #include "timer.h"
-
-static const zoo_tile_t TileNormal = {E_NORMAL, 0x0E};
-static const zoo_stat_t StatCreateMinusOne = {
-	0, 1,
-	0, 0, 0,
-	0, 1, 0,
-	1, 1,
-	{1, 0}
-};
-static const zoo_stat_t StatCreatePlayer = {
-	BOARD_WIDTH >> 1, BOARD_HEIGHT >> 1,
-	0, 0, 1,
-	0, 0, 0,
-	STAT_ID_NONE, STAT_ID_NONE,
-	{0, 0}
-};
 
 const zoo_stat_t stat_template_default = {
 	0, 0,
@@ -47,13 +32,8 @@ const int8_t neighbor_delta_y[4] = {-1, 1, 0, 0};
 const int8_t diagonal_delta_x[8] = {-1, 0, 1, 1, 1, 0, -1, -1};
 const int8_t diagonal_delta_y[8] = {1, 1, 1, 0, -1, -1, -1, 0};
 
-static uint8_t viewport_x = 1;
-static uint8_t viewport_y = 1;
-
-#define VIEWPORT_MIN_X 1
-#define VIEWPORT_MAX_X (BOARD_WIDTH - VIEWPORT_WIDTH + 1)
-#define VIEWPORT_MIN_Y 1
-#define VIEWPORT_MAX_Y (BOARD_HEIGHT - VIEWPORT_HEIGHT + 1)
+uint8_t viewport_x = 1;
+uint8_t viewport_y = 1;
 
 void center_viewport_on_player(void) {
 	int8_t vx = ZOO_STAT(0).x - VIEWPORT_CENTER_X;
@@ -67,47 +47,6 @@ void center_viewport_on_player(void) {
 	viewport_y = vy;
 }
 
-void board_create(void) {
-	memset(&zoo_board_info, 0, sizeof(zoo_board_info));
-	memset(zoo_tiles, 0, sizeof(zoo_tile_t) * 64 * 27);
-	
-	zoo_board_info.max_shots = 255;
-
-	for (uint8_t iy = 0; iy <= BOARD_HEIGHT + 1; iy++) {
-		ZOO_TILE(0, iy).element = E_BOARD_EDGE;
-		ZOO_TILE(BOARD_WIDTH + 1, iy).element = E_BOARD_EDGE;
-	}
-	for (uint8_t ix = 0; ix <= BOARD_WIDTH; ix++) {
-		ZOO_TILE(ix, 0).element = E_BOARD_EDGE;
-		ZOO_TILE(ix, BOARD_HEIGHT + 1).element = E_BOARD_EDGE;
-	}
-	for (uint8_t iy = 1; iy <= BOARD_HEIGHT; iy++) {
-		ZOO_TILE_COPY(ZOO_TILE(1, iy), TileNormal);
-		ZOO_TILE_COPY(ZOO_TILE(BOARD_WIDTH, iy), TileNormal);
-	}
-	for (uint8_t ix = 2; ix < BOARD_WIDTH; ix++) {
-		ZOO_TILE_COPY(ZOO_TILE(ix, 1), TileNormal);
-		ZOO_TILE_COPY(ZOO_TILE(ix, BOARD_HEIGHT), TileNormal);
-	}
-
-	zoo_stat_count = 0;
-	ZOO_STAT(-1) = StatCreateMinusOne; 
-
-	ZOO_TILE(BOARD_WIDTH >> 1, BOARD_HEIGHT >> 1).element = E_PLAYER;
-	ZOO_TILE(BOARD_WIDTH >> 1, BOARD_HEIGHT >> 1).color = 0x1F; // TODO
-
-	ZOO_STAT(0) = StatCreatePlayer;
-	center_viewport_on_player();
-}
-
-void world_create(void) {
-	// TODO: boardcount, boardlen, messagenotshownflags
-	board_create();
-	memset(&zoo_world_info, 0, sizeof(zoo_world_info));
-	zoo_world_info.health = 100;
-	// TODO: boardchange
-}
-
 void board_enter(void) {
 	zoo_board_info.start_player_x = ZOO_STAT(0).x;
 	zoo_board_info.start_player_y = ZOO_STAT(0).y;
@@ -116,6 +55,29 @@ void board_enter(void) {
 
 	zoo_world_info.board_time_sec = 0;
 	game_update_sidebar();
+
+	center_viewport_on_player();
+	board_redraw(); // TODO: not here...
+	zoo_game_state.game_state_element = E_PLAYER; // TODO: not here...
+}
+
+void board_change(uint8_t id) {
+	zoo_tile_t *tile = &ZOO_TILE(ZOO_STAT(0).x, ZOO_STAT(0).y);
+	tile->element = E_PLAYER;
+	tile->color = 0x1F; // player color
+
+	// TODO
+	load_board(id);
+}
+
+void board_draw_char(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
+	// Viewport check
+	uint8_t vx = x - viewport_x;
+	if (vx >= VIEWPORT_WIDTH) return;
+	uint8_t vy = y - viewport_y;
+	if (vy >= VIEWPORT_HEIGHT) return;
+
+	text_draw(vx, vy, chr, col);
 }
 
 void board_draw_tile(uint8_t x, uint8_t y) {
@@ -128,6 +90,9 @@ void board_draw_tile(uint8_t x, uint8_t y) {
 	zoo_tile_t tile;
 	ZOO_TILE_ASSIGN(tile, x, y);
 
+	uint8_t prev_bank = _current_bank;
+	SWITCH_ROM_MBC5(1);
+
 	// Darkness check
 	if ((zoo_board_info.flags & BOARD_IS_DARK)) {
 		const zoo_element_def_t *def = zoo_element_defs + tile.element;
@@ -135,13 +100,13 @@ void board_draw_tile(uint8_t x, uint8_t y) {
 			if (zoo_world_info.torch_ticks > 0) {
 				int16_t dx = ZOO_STAT(0).x - x;
 				int16_t dy = ZOO_STAT(0).y - y;
-				int16_t dist = (dx*dx) + (dy*dy*2);
+				int16_t dist = (dx*dx) + (dy*dy) << 1;
 				if (dist < TORCH_DIST_SQR) {
 					goto NotDark;
 				}
 			}
 			text_draw(vx, vy, 176, 0x07);
-			return;
+			goto BoardDrawTileFinished;
 		}
 	}
 
@@ -152,19 +117,24 @@ NotDark:
 		const zoo_element_def_t *def = zoo_element_defs + tile.element;
 		uint8_t ch;
 		if (def->draw_proc != 0) {
-			SWITCH_ROM_MBC5(1);
-
 			ch = def->draw_proc(x, y);
 		} else {
 			ch = def->character;
 		}
 
 		text_draw(vx, vy, ch, tile.color);
-	} else if (tile.element == E_TEXT_WHITE) {
-		text_draw(vx, vy, tile.color, 0x0F);
 	} else {
-		text_draw(vx, vy, tile.color, 0x0F | ((tile.element - E_TEXT_MIN + 1) << 4));
+		uint8_t color;
+		if (tile.element == E_TEXT_WHITE) {
+			color = 0x0F;
+		} else {
+			color = 0x0F | ((tile.element - E_TEXT_MIN + 1) << 4);
+		}
+		text_draw(vx, vy, tile.color, color);
 	}
+
+BoardDrawTileFinished:
+	SWITCH_ROM_MBC5(prev_bank);
 }
 
 void board_redraw(void) {
@@ -178,22 +148,69 @@ void board_redraw(void) {
 void game_play_loop(bool board_changed) {
 	// TODO
 
-	// TODO ZOO_TILE(ZOO_STAT(0).x, ZOO_STAT(0).y).element
+	ZOO_TILE(ZOO_STAT(0).x, ZOO_STAT(0).y).element = zoo_game_state.game_state_element;
+	ZOO_TILE(ZOO_STAT(0).x, ZOO_STAT(0).y).color = zoo_element_defs[zoo_game_state.game_state_element].color;
 
 	if (board_changed) {
 		board_redraw();
 	}
 
+	zoo_game_state.tick_time_duration = 8;
 	zoo_game_state.play_exit_requested = false;
 
 	zoo_game_state.current_tick = rand(100);
 	zoo_game_state.current_stat_ticked = zoo_stat_count + 1;
 
 	SWITCH_ROM_MBC5(1);
+	bool pause_blink;
 
 	do {
-		// TODO: if paused
-		if (zoo_game_state.current_stat_ticked <= zoo_stat_count) {
+		if (zoo_game_state.paused) {
+			if (timer_has_time_elapsed(&zoo_game_state.tick_time_counter, 25)) {
+				pause_blink = !pause_blink;
+			}
+
+			uint8_t px = ZOO_STAT(0).x;
+			uint8_t py = ZOO_STAT(0).y;
+
+			if (pause_blink) {
+				board_draw_char(px, py, 0x02, 0x1F); // player color/char
+			} else {
+				if (ZOO_TILE(px, py).element == E_PLAYER) {
+					board_draw_char(px, py, ' ', 0x0F);
+				} else {
+					board_draw_tile(px, py);
+				}
+			}
+
+			input_update();
+
+			if (input_delta_x != 0 || input_delta_y != 0) {
+				zoo_element_defs[ZOO_TILE(px + input_delta_x, py + input_delta_y).element]
+					.touch_proc(px + input_delta_x, px + input_delta_y, &input_delta_x, &input_delta_y);
+				px = ZOO_STAT(0).x;
+				py = ZOO_STAT(0).y;
+				uint8_t mpx = px + input_delta_x;
+				uint8_t mpy = py + input_delta_y;
+				if ((mpx != 0 || mpy != 0) && (zoo_element_defs[ZOO_TILE(mpx, mpy).element].flags & ELEMENT_WALKABLE)) {
+					if (ZOO_TILE(px, py).element == E_PLAYER) {
+						move_stat(0, mpx, mpy);
+					} else {
+						board_draw_tile(px, py);
+						ZOO_STAT(0).x = mpx;
+						ZOO_STAT(0).y = mpy;
+						ZOO_TILE(mpx, mpy).element = E_PLAYER;
+						ZOO_TILE(mpx, mpy).color = zoo_element_defs[E_PLAYER].color;
+						board_draw_tile(mpx, mpy);
+						board_redraw();
+					}
+
+					zoo_game_state.paused = false;
+					zoo_game_state.current_tick = rand(100);
+					zoo_game_state.current_stat_ticked = zoo_stat_count + 1;
+				}
+			}
+		} else if (zoo_game_state.current_stat_ticked <= zoo_stat_count) {
 			zoo_stat_t *stat = &ZOO_STAT(zoo_game_state.current_stat_ticked);
 			if (stat->x <= (BOARD_WIDTH + 1) && stat->y <= (BOARD_HEIGHT + 1)) {
 				const zoo_element_def_t *element = &zoo_element_defs[ZOO_TILE(stat->x, stat->y).element];
@@ -213,7 +230,9 @@ void game_play_loop(bool board_changed) {
 			text_update();
 			
 			while (!timer_has_time_elapsed(&zoo_game_state.tick_time_counter, 8)) {
-				// TODO: stop
+			__asm
+				halt
+			__endasm;
 			}
 
 			if (zoo_game_state.current_tick >= 420) zoo_game_state.current_tick = 1;
@@ -279,8 +298,8 @@ __endasm;
 
 void add_stat(uint8_t tx, uint8_t ty, uint8_t element, uint8_t color, uint8_t cycle, const zoo_stat_t *template) {
 	if (zoo_stat_count >= MAX_STAT) return;
-
 	zoo_stat_count++;
+
 	zoo_stat_t *dest_stat = &ZOO_STAT(zoo_stat_count);
 	memcpy(dest_stat, template, sizeof(zoo_stat_t));
 	dest_stat->x = tx;
@@ -301,6 +320,7 @@ void add_stat(uint8_t tx, uint8_t ty, uint8_t element, uint8_t color, uint8_t cy
 	board_draw_tile(tx, ty);
 }
 
+
 void remove_stat(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
 
@@ -310,11 +330,25 @@ void remove_stat(uint8_t stat_id) {
 	ZOO_TILE_COPY(ZOO_TILE(stat->x, stat->y), stat->under);
 	board_draw_tile(stat->x, stat->y);
 
-	// TODO: centipede freeing
+	for (uint8_t i = 1; i <= zoo_stat_count; i++) {
+		zoo_stat_t *cstat = &ZOO_STAT(i);
+		if (cstat->follower > stat_id) {
+			cstat->follower--;
+		} else if (cstat->follower == stat_id) {
+			cstat->follower = 255;
+		}
+		if (cstat->leader > stat_id) {
+			cstat->leader--;
+		} else if (cstat->leader == stat_id) {
+			cstat->leader = 255;
+		}
+	}
 
 	memmove(zoo_stats + stat_id + 1, zoo_stats + stat_id + 2, (zoo_stat_count - stat_id) * sizeof(zoo_stat_t));
 	zoo_stat_count--;
 }
+
+void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y);
 
 void move_stat(uint8_t stat_id, uint8_t new_x, uint8_t new_y) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
@@ -350,79 +384,10 @@ void move_stat(uint8_t stat_id, uint8_t new_x, uint8_t new_y) {
 	board_draw_tile(old_x, old_y);
 
 	if (stat_id == 0) {
-		if ((zoo_board_info.flags & BOARD_IS_DARK) && (zoo_world_info.torch_ticks > 0)) {
-			// TODO: optimize
-			board_redraw();
-		} else {
-			// move viewport?
-			int8_t pox = new_x - viewport_x;
-			int8_t poy = new_y - viewport_y;
-			int8_t dist = difference8(old_x, new_x) + difference8(old_y, new_y);
-
-			if (dist > 1) {
-				// full viewport adjust
-				// TODO: optimize?
-				uint8_t ov_x = viewport_x;
-				uint8_t ov_y = viewport_y;
-				center_viewport_on_player();
-				int8_t vd_y = viewport_y - ov_y;
-				if (viewport_x == ov_x) {
-					text_scroll(0, vd_y);
-					if (vd_y < 0) {
-						for (uint8_t iy = 0; iy < -vd_y; iy++) {
-							for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
-								board_draw_tile(ix + viewport_x, iy + viewport_y);
-							}
-						}
-					} else {
-						for (uint8_t iy = 0; iy < vd_y; iy++) {
-							for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
-								board_draw_tile(ix + viewport_x, viewport_y + VIEWPORT_HEIGHT - 1 - iy);
-							}
-						}
-					}
-				} else {
-					text_mark_redraw();
-					board_redraw();
-				}
-			} else if (pox == VIEWPORT_PLAYER_MIN_X-1) {
-				// move left
-				if (viewport_x > VIEWPORT_MIN_X) {
-					viewport_x--;
-					text_scroll(-1, 0);
-					for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
-						board_draw_tile(viewport_x, iy + viewport_y);
-					}
-				}
-			} else if (pox == VIEWPORT_PLAYER_MAX_X+1) {
-				// move left
-				if (viewport_x < VIEWPORT_MAX_X) {
-					viewport_x++;
-					text_scroll(1, 0);
-					for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
-						board_draw_tile(viewport_x + VIEWPORT_WIDTH - 1, iy + viewport_y);
-					}
-				}
-			} else if (poy == VIEWPORT_PLAYER_MIN_Y-1) {
-				// move up
-				if (viewport_y > VIEWPORT_MIN_Y) {
-					viewport_y--;
-					text_scroll(0, -1);
-					for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
-						board_draw_tile(ix + viewport_x, viewport_y);
-					}
-				}
-			} else if (poy == VIEWPORT_PLAYER_MAX_Y+1) {
-				// move down
-				if (viewport_y < VIEWPORT_MAX_Y) {
-					viewport_y++;
-					text_scroll(0, 1);
-					for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
-						board_draw_tile(ix + viewport_x, viewport_y + VIEWPORT_HEIGHT - 1);
-					}
-				}
-			}
-		}
+		uint8_t prev_bank = _current_bank;
+		SWITCH_ROM_MBC5(2);
+		move_stat_scroll_stat0(old_x, old_y, new_x, new_y);
+		SWITCH_ROM_MBC5(prev_bank);
 	}
 }
 
@@ -541,7 +506,7 @@ void board_attack(uint8_t stat_id, uint8_t x, uint8_t y) {
 void calc_direction_rnd(int8_t *dx, int8_t *dy) {
 	*dx = rand(3) - 1;
 	if (*dx == 0) {
-		*dy = (rand(2) << 1) - 1;
+		*dy = (RAND2() << 1) - 1;
 	} else {
 		*dy = 0;
 	}
@@ -550,7 +515,7 @@ void calc_direction_rnd(int8_t *dx, int8_t *dy) {
 void calc_direction_seek(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	*dx = 0;
 	*dy = 0;
-	if ((rand(2) < 1) || (ZOO_STAT(0).y == y)) {
+	if ((RAND2() < 1) || (ZOO_STAT(0).y == y)) {
 		*dx = signum8(ZOO_STAT(0).x - x);
 	}
 	if (*dx == 0) {

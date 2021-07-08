@@ -4,7 +4,7 @@
 #include <gb/gb.h>
 #include <gb/cgb.h>
 #include "renderer.h"
-#include "../res/font_default.h"
+#include "font_manager.h"
 
 #define COL_LVL_0 0
 #define COL_LVL_1 10
@@ -417,25 +417,11 @@ static void gbc_text_update(void) {
 }
 
 static void gbc_text_init(void) {
-	LCDC_REG = 0x00;
-
-	volatile uint8_t *vptr = (uint8_t*) 0x8000;
-	const uint8_t *fptr = _font_default_bin;
-	for (uint16_t i = 0; i < 2048; i++, fptr++) {
-		while (STAT_REG & 0x02);
-		*(vptr++) = *fptr;
-		*(vptr++) = 0;
-	}
+	font_8x8_install(0, 1);
 
 	VBK_REG = 1;
 
-	vptr = (uint8_t*) 0x8000;
-	fptr = _font_default_bin;
-	for (uint16_t i = 0; i < 2048; i++, fptr++) {
-		while (STAT_REG & 0x02);
-		*(vptr++) = *fptr;
-		*(vptr++) = 0xFF;
-	}
+	font_8x8_install(2, 3);
 
 	VBK_REG = 0;
 

@@ -17,9 +17,7 @@ void ElementDamagingTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	board_attack(0, x, y);
 }
 
-void ElementBoardEdgeTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
-	// TODO
-}
+void ElementBoardEdgeTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy);
 
 void ElementMessageTimerTick(uint8_t stat_id) {
 	// TODO
@@ -29,6 +27,7 @@ void ElementMonitorTick(uint8_t stat_id) {
 	// TODO
 }
 
+uint8_t ElementPlayerDraw(uint8_t x, uint8_t y);
 void ElementPlayerTick(uint8_t stat_id);
 
 void ElementAmmoTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
@@ -127,9 +126,7 @@ void ElementScrollTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	// TODO
 }
 
-void ElementPassageTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
-	// TODO
-}
+void ElementPassageTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy);
 
 uint8_t ElementDuplicatorDraw(uint8_t x, uint8_t y);
 void ElementDuplicatorTick(uint8_t stat_id);
@@ -193,103 +190,40 @@ uint8_t ElementTransporterDraw(uint8_t x, uint8_t y);
 void ElementTransporterTick(uint8_t stat_id);
 void ElementTransporterTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy);
 
+// adds 81 bytes, performance untested
+// #define UNROLL_LINE_DRAW
+
 uint8_t ElementLineDraw(uint8_t x, uint8_t y) {
-	uint8_t i, v, shift;
-	v = 0;
-	shift = 1;
-	// could be unrolled...
+	uint8_t v = 0;
+#ifdef UNROLL_LINE_DRAW
+	uint8_t element = ZOO_TILE(x, y - 1).element;
+	if (element == E_LINE || element == E_BOARD_EDGE) v |= 1;
+	element = ZOO_TILE(x, y + 1).element;
+	if (element == E_LINE || element == E_BOARD_EDGE) v |= 2;
+	element = ZOO_TILE(x - 1, y).element;
+	if (element == E_LINE || element == E_BOARD_EDGE) v |= 4;
+	element = ZOO_TILE(x + 1, y).element;
+	if (element == E_LINE || element == E_BOARD_EDGE) v |= 8;
+#else
+	uint8_t i, shift = 1;
 	for (i = 0; i < 4; i++, shift <<= 1) {
 		uint8_t element = ZOO_TILE(x + neighbor_delta_x[i], y + neighbor_delta_y[i]).element;
 		if (element == E_LINE || element == E_BOARD_EDGE) {
 			v |= shift;
 		}
 	}
+#endif
 	return line_tiles[v];
 }
 
-void ElementBearTick(uint8_t stat_id) {
-	zoo_stat_t *stat = &ZOO_STAT(stat_id);
-	int8_t dx, dy;
-	uint8_t elem;
+void ElementBearTick(uint8_t stat_id);
 
-	if (stat->x != ZOO_STAT(0).x) {
-		if (difference8(stat->y, ZOO_STAT(0).y) <= (8 - stat->p1)) {
-			dx = signum8(ZOO_STAT(0).x - stat->x);
-			dy = 0;
-			goto BearMovement;
-		}
-	}
-
-	if (difference8(stat->x, ZOO_STAT(0).x) <= (8 - stat->p1)) {
-		dx = 0;
-		dy = signum8(ZOO_STAT(0).y - stat->y);
-	} else {
-		dx = 0;
-		dy = 0;
-	}
-
-BearMovement:
-	elem = ZOO_TILE(stat->x + dx, stat->y + dy).element;
-	if (zoo_element_defs[elem].flags & ELEMENT_WALKABLE) {
-		move_stat(stat_id, stat->x + dx, stat->y + dy);
-	} else if (elem == E_PLAYER || elem == E_BREAKABLE) {
-		board_attack(stat_id, stat->x + dx, stat->y + dy);
-	}
-}
-
-void ElementRuffianTick(uint8_t stat_id) {
-	zoo_stat_t *stat = &ZOO_STAT(stat_id);
-	if (stat->step_x == 0 && stat->step_y == 0) {
-		if ((stat->p2 + 8) <= rand(17)) {
-			if (stat->p1 >= rand(9)) {
-				calc_direction_seek(stat->x, stat->y, &stat->step_x, &stat->step_y);
-			} else {
-				calc_direction_rnd(&stat->step_x, &stat->step_y);
-			}
-		}
-	} else {
-		if (((stat->x == ZOO_STAT(0).x) || (stat->y == ZOO_STAT(0).y)) && (rand(9) <= stat->p1)) {	
-			calc_direction_seek(stat->x, stat->y, &stat->step_x, &stat->step_y);
-		}
-
-		uint8_t elem = ZOO_TILE(stat->x + stat->step_x, stat->y + stat->step_y).element;
-		if (elem == E_PLAYER) {
-			board_attack(stat_id, stat->x + stat->step_x, stat->y + stat->step_y);
-		} else if (zoo_element_defs[elem].flags & ELEMENT_WALKABLE) {
-			move_stat(stat_id, stat->x + stat->step_x, stat->y + stat->step_y);
-			if ((stat->p2 + 8) <= rand(17)) {
-				stat->step_x = 0;
-				stat->step_y = 0;
-			}
-		} else {
-			stat->step_x = 0;
-			stat->step_y = 0;
-		}
-	}
-}
+void ElementRuffianTick(uint8_t stat_id);
 
 void ElementSlimeTick(uint8_t stat_id);
 void ElementSlimeTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy);
 
-void ElementSharkTick(uint8_t stat_id) {
-	zoo_stat_t *stat = &ZOO_STAT(stat_id);
-	int8_t dx, dy;
-
-	if (stat->p1 < rand(10)) {
-		calc_direction_rnd(&dx, &dy);
-	} else {
-		calc_direction_seek(stat->x, stat->y, &dx, &dy);
-	}
-
-	switch (ZOO_TILE(stat->x + dx, stat->y + dy).element) {
-		case E_WATER:
-			move_stat(stat_id, stat->x + dx, stat->y + dy);
-			break;
-		case E_PLAYER:
-			board_attack(stat_id, stat->x + dx, stat->y + dy);
-			break;
-	}
-}
+void ElementSharkTick(uint8_t stat_id);
 
 uint8_t ElementConveyorCWDraw(uint8_t x, uint8_t y);
 void ElementConveyorCWTick(uint8_t stat_id);
@@ -302,50 +236,8 @@ void ElementSpinningGunTick(uint8_t stat_id);
 uint8_t ElementPusherDraw(uint8_t x, uint8_t y);
 void ElementPusherTick(uint8_t stat_id);
 
-void ElementLionTick(uint8_t stat_id) {
-	zoo_stat_t *stat = &ZOO_STAT(stat_id);
-	int8_t dx, dy;
-
-	if (stat->p1 < rand(10)) {
-		calc_direction_rnd(&dx, &dy);
-	} else {
-		calc_direction_seek(stat->x, stat->y, &dx, &dy);
-	}
-
-	uint8_t elem = ZOO_TILE(stat->x + dx, stat->y + dy).element;
-	if (zoo_element_defs[elem].flags & ELEMENT_WALKABLE) {
-		move_stat(stat_id, stat->x + dx, stat->y + dy);
-	} else if (elem == E_PLAYER) {
-		board_attack(stat_id, stat->x + dx, stat->y + dy);
-	}
-}
-
-void ElementTigerTick(uint8_t stat_id) {
-	zoo_stat_t *stat = &ZOO_STAT(stat_id);
-	uint8_t element = (stat->p2 & 0x80) ? E_STAR : E_BULLET;
-
-	if ((rand(10) * 3) < (stat->p2 & 0x7F)) {
-		bool shot;
-
-		if (difference8(stat->x, ZOO_STAT(0).x) <= 2) {
-			shot = board_shoot(element, stat->x, stat->y,
-				0, signum8(ZOO_STAT(0).y - stat->y),
-				SHOT_SOURCE_ENEMY);
-		} else {
-			shot = false;
-		}
-
-		if (!shot) {
-			if (difference8(stat->y, ZOO_STAT(0).y) <= 2) {
-				shot = board_shoot(element, stat->x, stat->y,
-					signum8(ZOO_STAT(0).x - stat->x), 0,
-					SHOT_SOURCE_ENEMY);
-			}
-		}
-	}
-
-	ElementLionTick(stat_id);
-}
+void ElementLionTick(uint8_t stat_id);
+void ElementTigerTick(uint8_t stat_id);
 
 void ElementCentipedeHeadTick(uint8_t stat_id);
 void ElementCentipedeSegmentTick(uint8_t stat_id);

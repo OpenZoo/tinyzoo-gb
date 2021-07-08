@@ -7,5 +7,6 @@
 void input_update(void);
 
 extern int8_t input_delta_x, input_delta_y;
+extern bool input_shift_pressed;
 
 #endif /* __INPUT_H__ */

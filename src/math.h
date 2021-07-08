@@ -20,6 +20,9 @@ int8_t difference8(int8_t a, int8_t b);
 int16_t difference16(int16_t a, int16_t b);
 
 int16_t rand(int16_t max);
-void srand(uint32_t seed);
+int16_t rand_mask(int16_t max);
+void srand(uint16_t seed);
+
+#define RAND2() rand_mask(1)
 
 #endif /* __MATH_H__ */

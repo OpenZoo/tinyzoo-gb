@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <gb/gb.h>
 
+extern bool sound_block_queueing;
+
 void sound_init(void) BANKED;
 void sound_clear_queue(void) BANKED;
 void sound_queue(int8_t priority, const uint8_t *data) BANKED;

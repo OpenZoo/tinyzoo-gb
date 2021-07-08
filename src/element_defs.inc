@@ -41,7 +41,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0x02, // character
 		0x1F, // color
 		ELEMENT_DESTRUCTIBLE | ELEMENT_PUSHABLE | ELEMENT_VISIBLE_IN_DARK | ELEMENT_TYPICALLY_STATTED,
-		0, // draw func
+		ElementPlayerDraw, // draw func
 		ElementPlayerTick, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value

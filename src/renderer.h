@@ -2,7 +2,7 @@
 #define __RENDERER_H__
 
 #define VIEWPORT_WIDTH 20
-#define VIEWPORT_HEIGHT 18
+#define VIEWPORT_HEIGHT 17
 
 typedef struct {
 	void (*init)(void);
