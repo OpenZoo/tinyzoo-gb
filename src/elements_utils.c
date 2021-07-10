@@ -3,6 +3,7 @@
 #include "elements.h"
 #include "elements_utils.h"
 #include "game.h"
+#include "math.h"
 #include "sound_consts.h"
 #include "timer.h"
 
@@ -84,6 +85,48 @@ void ElementTransporterMove(uint8_t x, uint8_t y, int8_t dx, int8_t dy) {
 					is_valid_dest = true;
 				}
 			}
+		}
+	}
+}
+
+void DrawPlayerSurroundings(uint8_t x, uint8_t y, uint8_t bomb_phase) {
+	for (uint8_t ix = x - TORCH_DX - 1; ix <= x + TORCH_DX + 1; ix++) {
+		if (ix < 1) continue;
+		if (ix > BOARD_WIDTH) break;
+		for (uint8_t iy = y - TORCH_DY - 1; iy <= y + TORCH_DY + 1; iy++) {
+			if (iy < 1) continue;
+			if (iy > BOARD_HEIGHT) break;
+
+			zoo_tile_t *tile = &ZOO_TILE(ix, iy);
+			if (bomb_phase > 0) {
+				int16_t dx = ix - x;
+				int16_t dy = iy - y;
+				int16_t dist = (dx*dx) + (dy*dy) << 1;
+				if (dist < TORCH_DIST_SQR) {
+					if (bomb_phase == 1) {
+						if (zoo_element_defs[tile->element].flags & ELEMENT_TYPICALLY_TEXTED) {
+							uint8_t i_stat = get_stat_id_at(ix, iy);
+							if (i_stat > 0) {
+								// TODO OopSend
+							}
+						}
+
+						if (tile->element == E_STAR || (zoo_element_defs[tile->element].flags & ELEMENT_DESTRUCTIBLE)) {
+							board_damage_tile(ix, iy);
+						}
+
+						if (tile->element == E_EMPTY || tile->element == E_BREAKABLE) {
+							tile->element = E_BREAKABLE;
+							tile->color = 9 + rand(7);
+						}
+					} else {
+						if (tile->element == E_BREAKABLE) {
+							tile->element = E_EMPTY;
+						}
+					}
+				}
+			}
+			board_draw_tile(ix, iy);
 		}
 	}
 }

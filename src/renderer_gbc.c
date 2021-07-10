@@ -8,10 +8,10 @@
 
 #define COL_LVL_0 0
 #define COL_LVL_1 10
-#define COL_LVL_2 20
-#define COL_LVL_3 30
+#define COL_LVL_2 21
+#define COL_LVL_3 31
 
-static const uint16_t cgb_palette[16] = {
+const uint16_t cgb_palette[16] = {
 	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_0),
 	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
 	RGB(COL_LVL_0, COL_LVL_2, COL_LVL_0),
@@ -30,6 +30,9 @@ static const uint16_t cgb_palette[16] = {
 	RGB(COL_LVL_3, COL_LVL_3, COL_LVL_3)
 };
 
+uint16_t cgb_message_palette[18];
+uint8_t cgb_update_row[4];
+
 static uint8_t draw_offset_x_end = VIEWPORT_WIDTH;
 static uint8_t draw_offset_y_end = VIEWPORT_HEIGHT;
 
@@ -37,11 +40,11 @@ static uint8_t draw_offset_y_end = VIEWPORT_HEIGHT;
 #define cgb_back_col ((uint8_t*) 0xA400)
 
 static uint8_t cgb_color_buffer[16];
-static uint8_t cgb_update_row[4];
 static bool full_redraw;
 
 static uint16_t hblank_isr_sp;
 static uint16_t hblank_isr_pal_pos;
+extern uint8_t ly_bank_switch;
 
 static void vblank_update_palette(void) {
 __asm
@@ -109,6 +112,7 @@ __endasm;
 
 static void hblank_update_palette(void) {
 __asm
+	push hl
 	push bc
 	push de
 
@@ -136,7 +140,11 @@ __asm
 	pop hl
 
 	; increment LY
+	ld a, (_ly_bank_switch)
+	ld b, a
 	ldh a, (_LYC_REG + 0)
+	cp a, b
+	jp nc, .hblank_update_palette_window
 	add a, #0x08
 	ldh (_LYC_REG + 0), a
 
@@ -178,6 +186,7 @@ __asm
 	xor a, a
 	ldh (_SVBK_REG + 0), a
 
+.hblank_update_palette_restore:
 	; restore SP
 	ld hl, #(_hblank_isr_sp)
 	ld c, (hl)
@@ -191,10 +200,52 @@ __asm
 	pop hl
 	pop af
 	reti
+
+.hblank_update_palette_window:
+	; prepare palette register
+	ld a, #0x80
+	ldh (_BCPS_REG + 0), a
+
+	ld hl, #(_cgb_message_palette)
+
+	; set sp for stack copy; hl = BCPD
+	ld sp, hl
+	ld hl, #(_BCPD_REG)
+
+	; preload values (timing is tight)
+	pop bc
+	pop de
+
+	; wait for STAT to be correct
+.hblank_update_palette_window_sync:
+	ldh a, (_STAT_REG + 0)	; 1.5 cycles
+	bit 1, a				; 1 cycles
+	jp nz, .hblank_update_palette_window_sync		; 1.5 cycles
+
+	; budget: 67-71 cycles
+	ld (hl), c	; 1 cycle
+	ld (hl), b	; 1 cycle
+	ld (hl), e	; 1 cycle
+	ld (hl), d	; 1 cycle
+.rept 14
+	pop bc
+	ld (hl), c
+	ld (hl), b
+.endm
+	ld a, #0xC9 ; 8
+	ldh (_LCDC_REG + 0), a ; 12
+	xor a, a ; 4
+	ldh (_SCX_REG + 0), a ; 12
+	ldh (_SCY_REG + 0), a ; 12
+
+	jp .hblank_update_palette_restore
+
 __endasm;
 }
 
-static void vblank_isr(void) {
+void gbc_vblank_isr(void) {
+	LCDC_REG = 0b11010001;
+
 	uint8_t local_doy = scy_shadow_reg >> 3;
 
 	SCX_REG = scx_shadow_reg;
@@ -382,6 +433,8 @@ static void text_cgb_update_row(uint8_t y) {
 	}
 }
 
+void gbc_text_init(void);
+
 static void gbc_text_update(void) {
 	bool ram_enabled = false;
 
@@ -414,27 +467,6 @@ static void gbc_text_update(void) {
 	scx_shadow_reg = draw_offset_x << 3;
 	scy_shadow_reg = draw_offset_y << 3;
 	full_redraw = false;
-}
-
-static void gbc_text_init(void) {
-	font_8x8_install(0, 1);
-
-	VBK_REG = 1;
-
-	font_8x8_install(2, 3);
-
-	VBK_REG = 0;
-
-	cgb_update_row[0] = 0xFF;
-	cgb_update_row[1] = 0xFF;
-	cgb_update_row[2] = 0xFF;
-	cgb_update_row[3] = 0xFF;
-
-	vblank_isr();
-	add_VBL(vblank_isr);
-
-	STAT_REG = 0b01000000;
-	IE_REG |= LCD_IFLAG;
 }
 
 static void gbc_text_mark_redraw(void) {

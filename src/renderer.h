@@ -31,4 +31,4 @@ void text_init(const renderer_t *renderer);
 #define text_scroll(a, b) active_renderer.scroll(a, b)
 #define text_update() active_renderer.update()
 
-#endif /* __TEXT_H__ */
+#endif /* __RENDERER_H__ */

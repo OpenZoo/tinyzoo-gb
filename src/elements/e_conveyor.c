@@ -12,16 +12,19 @@ static void ElementConveyorTick(uint8_t x, uint8_t y, int8_t dir) {
 	uint8_t i_min, i_max;
 	if (dir == 1) {
 		i_min = 0;
-		i_max = 7;
+		i_max = 8;
 	} else {
 		i_min = 7;
-		i_max = 0;
+		i_max = 255;
 	}
 
 	bool can_move = true;
 	uint8_t tx, ty;
 	zoo_tile_t tiles[8];
 	uint8_t stat_ids[8];
+
+	// Moved from CWTick/CCWTick
+	board_draw_tile(x, y);
 
 	for (uint8_t i = i_min; i != i_max; i += dir) {
 		tx = x + diagonal_delta_x[i];
@@ -88,8 +91,7 @@ uint8_t ElementConveyorCWDraw(uint8_t x, uint8_t y) {
 
 void ElementConveyorCWTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
-	board_draw_tile(stat->x, stat->y);
-	ElementConveyorTick(stat->x, stat->y, -1);
+	ElementConveyorTick(stat->x, stat->y, 1);
 }
 
 uint8_t ElementConveyorCCWDraw(uint8_t x, uint8_t y) {
@@ -98,6 +100,5 @@ uint8_t ElementConveyorCCWDraw(uint8_t x, uint8_t y) {
 
 void ElementConveyorCCWTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
-	board_draw_tile(stat->x, stat->y);
-	ElementConveyorTick(stat->x, stat->y, 1);
+	ElementConveyorTick(stat->x, stat->y, -1);
 }

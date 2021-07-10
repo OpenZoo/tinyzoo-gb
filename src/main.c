@@ -18,17 +18,17 @@ void main(void) {
 
 	sound_init();
 
-	world_create();
-
-	load_world(0);
-	load_board(zoo_world_info.current_board);
-
 	if (_cpu == CGB_TYPE) {
 		cpu_fast();
 		text_init(&renderer_gbc);
 	} else {
 		text_init(&renderer_dmg);
 	}
+
+	world_create();
+
+	load_world(0);
+	load_board(zoo_world_info.current_board);
 
 	timer_init();
 

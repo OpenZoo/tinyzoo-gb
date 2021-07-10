@@ -8,7 +8,6 @@
 	.org	0x48
 .int_LCD:
 	push	af
-	push	hl
 	jp	_hblank_isr_jp
 
 	.area	_BSS

@@ -94,7 +94,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 	{ // 10 - Scroll
 		0xE8, // character
 		0x0F, // color
-		ELEMENT_PUSHABLE | ELEMENT_TYPICALLY_STATTED,
+		ELEMENT_PUSHABLE | ELEMENT_TYPICALLY_STATTED | ELEMENT_TYPICALLY_TEXTED,
 		0, // draw func
 		ElementScrollTick, // tick func
 		ElementScrollTouch, // touch func
@@ -328,7 +328,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 	{ // 36 - Object
 		0x02, // character
 		COLOR_CHOICE_ON_BLACK, // color
-		ELEMENT_TYPICALLY_STATTED,
+		ELEMENT_TYPICALLY_STATTED | ELEMENT_TYPICALLY_TEXTED,
 		ElementObjectDraw, // draw func
 		ElementObjectTick, // tick func
 		ElementObjectTouch, // touch func

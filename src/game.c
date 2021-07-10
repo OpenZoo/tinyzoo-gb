@@ -56,9 +56,11 @@ void board_enter(void) {
 	zoo_world_info.board_time_sec = 0;
 	game_update_sidebar();
 
+	zoo_game_state.game_state_element = E_PLAYER; // TODO: not here...
+
 	center_viewport_on_player();
 	board_redraw(); // TODO: not here...
-	zoo_game_state.game_state_element = E_PLAYER; // TODO: not here...
+	text_update();
 }
 
 void board_change(uint8_t id) {
@@ -153,6 +155,7 @@ void game_play_loop(bool board_changed) {
 
 	if (board_changed) {
 		board_redraw();
+		text_update();
 	}
 
 	zoo_game_state.tick_time_duration = 8;
@@ -202,7 +205,10 @@ void game_play_loop(bool board_changed) {
 						ZOO_TILE(mpx, mpy).element = E_PLAYER;
 						ZOO_TILE(mpx, mpy).color = zoo_element_defs[E_PLAYER].color;
 						board_draw_tile(mpx, mpy);
+
+						center_viewport_on_player();
 						board_redraw();
+						text_update();
 					}
 
 					zoo_game_state.paused = false;
@@ -247,42 +253,43 @@ void game_play_loop(bool board_changed) {
 
 uint8_t get_stat_id_at(uint8_t x, uint8_t y) {
 #ifdef GBZ80
+	x; y;
 __asm
-		; (hl) - stat pointer
-		; a - compared value
-		; bc - checked value
-		; d - max stat count
-		; e - counter
-		ld		e, #0
-		ldhl	sp, #2
-		ld		c, (hl)
-		inc		hl
-		ld		b, (hl)
-		ld		hl, #(_zoo_stats+16)
+	; (hl) - stat pointer
+	; a - compared value
+	; bc - checked value
+	; d - max stat count
+	; e - counter
+	ld		e, #0
+	ldhl	sp, #2
+	ld		c, (hl)
+	inc		hl
+	ld		b, (hl)
+	ld		hl, #(_zoo_stats+16)
 GetStatIdAtLoop:
-		ld		a, (hl+)
-		cp		a, c
-		ld		a, (hl+)
-		jr		nz, GetStatIdAtNotFound
-		cp		a, b
-		jr		nz, GetStatIdAtNotFound
-		ret
+	ld		a, (hl+)
+	cp		a, c
+	ld		a, (hl+)
+	jr		nz, GetStatIdAtNotFound
+	cp		a, b
+	jr		nz, GetStatIdAtNotFound
+	ret
 GetStatIdAtNotFound:
-		; hl += 14
-		ld		a, l
-		add		a, #14
-		ld		l, a
-		ld		a, h
-		adc		a, #0
-		ld		h, a
-		; e += 1
-        ld      a, (#_zoo_stat_count)
-		cp		a, e
-		jr		z, GetStatIdFinished
-		inc		e
-		jp		GetStatIdAtLoop
+	; hl += 14
+	ld		a, l
+	add		a, #14
+	ld		l, a
+	ld		a, h
+	adc		a, #0
+	ld		h, a
+	; e += 1
+	ld      a, (#_zoo_stat_count)
+	cp		a, e
+	jr		z, GetStatIdFinished
+	inc		e
+	jp		GetStatIdAtLoop
 GetStatIdFinished:
-        ld      e, #0xff
+	ld      e, #0xff
 __endasm;
 #else
 	zoo_stat_t *stat = zoo_stats + 1;
@@ -444,6 +451,7 @@ void damage_stat(uint8_t stat_id) {
 					stat->y = zoo_board_info.start_player_y;
 					center_viewport_on_player();
 					board_redraw();
+					text_update();
 
 					zoo_game_state.paused = true;
 				}
@@ -475,10 +483,6 @@ void board_damage_tile(uint8_t x, uint8_t y) {
 		ZOO_TILE(x, y).element = E_EMPTY;
 		board_draw_tile(x, y);
 	}
-}
-
-void game_update_sidebar(void) {
-	// TODO
 }
 
 void board_attack(uint8_t stat_id, uint8_t x, uint8_t y) {

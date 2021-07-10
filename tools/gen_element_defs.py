@@ -63,6 +63,8 @@ def print_table():
 			flags.append("ELEMENT_WALKABLE")
 		if ElementDefs[i].Cycle > -1:
 			flags.append("ELEMENT_TYPICALLY_STATTED")
+		if len(ElementDefs[i].ParamTextName) > 0:
+			flags.append("ELEMENT_TYPICALLY_TEXTED")
 		# Bools
 		if len(flags) > 0:
 			print("\t\t%s," % " | ".join(flags))

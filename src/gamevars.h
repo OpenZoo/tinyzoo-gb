@@ -59,6 +59,7 @@ typedef struct {
 #define ELEMENT_PLACEABLE_ON_TOP 0x08
 #define ELEMENT_WALKABLE 0x10
 #define ELEMENT_TYPICALLY_STATTED 0x20
+#define ELEMENT_TYPICALLY_TEXTED 0x40
 
 typedef uint8_t (*zoo_element_draw_proc)(uint8_t x, uint8_t y);
 typedef void (*zoo_element_tick_proc)(uint8_t stat_id);

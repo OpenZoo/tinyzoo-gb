@@ -5,19 +5,36 @@
 #include "renderer.h"
 #include "font_manager.h"
 
-static void vblank_isr(void) {
+extern uint8_t ly_bank_switch;
+
+void dmg_hblank_switch_window(void) {
+__asm
+	ld a, #0xC9 ; 8
+
+.hblank_switch_window_sync:
+	ldh a, (_STAT_REG + 0)	; 1.5 cycles
+	bit 1, a				; 1 cycles
+	jp nz, .hblank_switch_window_sync		; 1.5 cycles
+
+	ldh (_LCDC_REG + 0), a ; 12
+	xor a, a ; 4
+	ldh (_SCX_REG + 0), a ; 12
+	ldh (_SCY_REG + 0), a ; 12
+
+	pop af
+	reti
+__endasm;
+}
+
+void dmg_vblank_isr(void) {
+	LCDC_REG = 0b11010001;
+	LYC_REG = ly_bank_switch;
+
 	SCX_REG = scx_shadow_reg;
 	SCY_REG = scy_shadow_reg;
 }
 
-static void dmg_text_init(void) {
-	font_8x8_install(0, 3);
-
-	vblank_isr();
-	add_VBL(vblank_isr);
-
-	BGP_REG = 0b11001100;
-}
+void dmg_text_init(); // bank 3
 
 static void dmg_text_draw(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
 /*	x = (draw_offset_x + x) & 0x1F;

@@ -36,7 +36,13 @@ with open(out_filename, "wb") as fp:
 				if pxl[0] > 128:
 					v = v | (1 << vp)
 				vp = vp + 1
-				if vp >= 8:
-					fp.write(struct.pack("<B", v))
-					v = 0
-					vp = 0
+				if format == 'b':
+					if vp >= 4:
+						fp.write(struct.pack("<B", v | (v << 4)))
+						v = 0
+						vp = 0
+				else:
+					if vp >= 8:
+						fp.write(struct.pack("<B", v))
+						v = 0
+						vp = 0
