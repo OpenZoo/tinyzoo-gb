@@ -72,7 +72,7 @@ void ElementPlayerTick(uint8_t stat_id) {
 				if (bullet_count < zoo_board_info.max_shots) {
 					if (board_shoot(E_BULLET, stat->x, stat->y, player_dir_x, player_dir_y, SHOT_SOURCE_PLAYER)) {
 						zoo_world_info.ammo--;
-						game_update_sidebar();
+						game_update_sidebar_ammo();
 
 						sound_queue(2, sound_player_shoot);
 
@@ -100,10 +100,11 @@ void ElementPlayerTick(uint8_t stat_id) {
 
 	if (zoo_world_info.torch_ticks > 0) {
 		if ((--zoo_world_info.torch_ticks) <= 0) {
-			// TODO
+			DrawPlayerSurroundings(stat->x, stat->y, 0);
 			sound_queue(3, sound_torch_burnout);
 		}
 
+		// TODO
 		/* if ((zoo_world_info.torch_ticks % 40) == 0) {
 			game_update_sidebar();
 		} */

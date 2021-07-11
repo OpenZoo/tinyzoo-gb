@@ -37,7 +37,7 @@ TryMove:
 	)) {
 		if (zoo_element_defs[ielem].score_value != 0) {
 			zoo_world_info.score += zoo_element_defs[ielem].score_value;
-			game_update_sidebar();
+			game_update_sidebar_score();
 		}
 		board_attack(stat_id, ix, iy);
 		return;

@@ -34,7 +34,7 @@ void ElementAmmoTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	zoo_world_info.ammo += 5;
 
 	ZOO_TILE(x, y).element = E_EMPTY;
-	game_update_sidebar();
+	game_update_sidebar_ammo();
 	sound_queue(2, sound_ammo_pickup);
 
 	// TODO
@@ -45,7 +45,7 @@ void ElementTorchTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	ZOO_TILE(x, y).element = E_EMPTY;
 	
 	board_draw_tile(x, y);
-	game_update_sidebar();
+	game_update_sidebar_torches();
 
 	// TODO
 
@@ -58,7 +58,9 @@ void ElementGemTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	zoo_world_info.score += 10;
 
 	ZOO_TILE(x, y).element = E_EMPTY;
-	game_update_sidebar();
+	game_update_sidebar_health();
+	game_update_sidebar_gems_time();
+	game_update_sidebar_score();
 	sound_queue(2, sound_gem_pickup);
 
 	// TODO
@@ -78,7 +80,7 @@ void ElementKeyTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 		} else {
 			zoo_world_info.keys |= key_shift;
 			tile->element = E_EMPTY;
-			game_update_sidebar();
+			game_update_sidebar_keys();
 
 			// TODO
 			sound_queue(2, sound_key_success);
@@ -102,7 +104,7 @@ void ElementDoorTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 			board_draw_tile(x, y);
 
 			zoo_world_info.keys &= ~key_shift;
-			game_update_sidebar();
+			game_update_sidebar_keys();
 
 			// TODO
 			sound_queue(3, sound_door_success);
@@ -142,7 +144,6 @@ void ElementEnergizerTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	board_draw_tile(x, y);
 
 	zoo_world_info.energizer_ticks = 75;
-	game_update_sidebar();
 
 	// TODO
 }

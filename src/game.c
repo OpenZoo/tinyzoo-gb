@@ -54,7 +54,7 @@ void board_enter(void) {
 	// TODO
 
 	zoo_world_info.board_time_sec = 0;
-	game_update_sidebar();
+	game_update_sidebar_all();
 
 	zoo_game_state.game_state_element = E_PLAYER; // TODO: not here...
 
@@ -235,7 +235,7 @@ void game_play_loop(bool board_changed) {
 		if (zoo_game_state.current_stat_ticked > zoo_stat_count && !zoo_game_state.play_exit_requested) {
 			text_update();
 			
-			while (!timer_has_time_elapsed(&zoo_game_state.tick_time_counter, 8)) {
+			while (!timer_has_time_elapsed(&zoo_game_state.tick_time_counter, zoo_game_state.tick_time_duration)) {
 			__asm
 				halt
 			__endasm;
@@ -339,15 +339,19 @@ void remove_stat(uint8_t stat_id) {
 
 	for (uint8_t i = 1; i <= zoo_stat_count; i++) {
 		zoo_stat_t *cstat = &ZOO_STAT(i);
-		if (cstat->follower > stat_id) {
-			cstat->follower--;
-		} else if (cstat->follower == stat_id) {
-			cstat->follower = 255;
+		if (cstat->follower < 254) {
+			if (cstat->follower > stat_id) {
+				cstat->follower--;
+			} else if (cstat->follower == stat_id) {
+				cstat->follower = 255;
+			}
 		}
-		if (cstat->leader > stat_id) {
-			cstat->leader--;
-		} else if (cstat->leader == stat_id) {
-			cstat->leader = 255;
+		if (cstat->leader < 254) {
+			if (cstat->leader > stat_id) {
+				cstat->leader--;
+			} else if (cstat->leader == stat_id) {
+				cstat->leader = 255;
+			}
 		}
 	}
 
@@ -433,7 +437,7 @@ void damage_stat(uint8_t stat_id) {
 		if (zoo_world_info.health > 0) {
 			zoo_world_info.health -= 10;
 
-			game_update_sidebar();
+			game_update_sidebar_health();
 			// TODO: DisplayMessage
 
 			tile->color = 0x70 | (zoo_element_defs[E_PLAYER].color & 0xF);
@@ -488,7 +492,7 @@ void board_damage_tile(uint8_t x, uint8_t y) {
 void board_attack(uint8_t stat_id, uint8_t x, uint8_t y) {
 	if (stat_id == 0 && zoo_world_info.energizer_ticks > 0) {
 		zoo_world_info.score += zoo_element_defs[ZOO_TILE(x, y).element].score_value;
-		game_update_sidebar();
+		game_update_sidebar_score();
 	} else {
 		damage_stat(stat_id);
 	}
@@ -500,7 +504,7 @@ void board_attack(uint8_t stat_id, uint8_t x, uint8_t y) {
 	if ((ZOO_TILE(x, y).element == E_PLAYER) && zoo_world_info.energizer_ticks > 0) {
 		zoo_stat_t *attacker_stat = &ZOO_STAT(stat_id);
 		zoo_world_info.score += zoo_element_defs[ZOO_TILE(attacker_stat->x, attacker_stat->y).element].score_value;
-		game_update_sidebar();
+		game_update_sidebar_score();
 	} else {
 		board_damage_tile(x, y);
 		sound_queue(2, sound_damage);

@@ -49,7 +49,6 @@ extern uint8_t ly_bank_switch;
 static void vblank_update_palette(void) {
 __asm
 	push bc
-	push de
 
 	; backup sp
 	ld (_hblank_isr_sp), sp
@@ -105,7 +104,6 @@ __asm
 	ld l, c
 	ld sp, hl
 
-	pop de
 	pop bc
 __endasm;
 }

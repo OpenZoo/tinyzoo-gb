@@ -12,6 +12,18 @@ uint8_t scx_shadow_reg = 0;
 uint8_t scy_shadow_reg = 0;
 uint8_t ly_bank_switch;
 
+uint8_t sidebar_tile_data_len;
+uint16_t sidebar_tile_data_address;
+uint8_t sidebar_tile_data[64];
+volatile bool sidebar_tile_data_awaiting = false;
+
+void sidebar_vbl_copy_data(void) {
+	if (sidebar_tile_data_awaiting) {
+		memcpy((uint8_t*) sidebar_tile_data_address, sidebar_tile_data, sidebar_tile_data_len);
+		sidebar_tile_data_awaiting = false;
+	}
+}
+
 void text_init(const renderer_t *renderer) {
 	LCDC_REG = 0x00;
 	hblank_isr_jp = 0xC3;
@@ -31,4 +43,6 @@ void text_init(const renderer_t *renderer) {
 	active_renderer.init();
 
 	SWITCH_ROM_MBC5(prev_bank);
+
+	add_VBL(sidebar_vbl_copy_data);
 }

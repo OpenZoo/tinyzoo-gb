@@ -36,6 +36,15 @@ void board_attack(uint8_t stat_id, uint8_t x, uint8_t y);
 void calc_direction_rnd(int8_t *dx, int8_t *dy);
 void calc_direction_seek(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy);
 void game_play_loop(bool board_changed);
-void game_update_sidebar(void);
+
+void game_redraw_sidebar_all(void);
+
+void game_update_sidebar_all(void);
+void game_update_sidebar_health(void);
+void game_update_sidebar_ammo(void);
+void game_update_sidebar_gems_time(void);
+void game_update_sidebar_torches(void);
+void game_update_sidebar_score(void);
+void game_update_sidebar_keys(void);
 
 #endif

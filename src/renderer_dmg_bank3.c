@@ -18,14 +18,13 @@ void dmg_text_init(void) {
 	add_VBL(dmg_vblank_isr);
 
 	// set bottom bar
-	uint8_t *bottom_bar_ptr = 0x9C00 + (17 << 5); 
+	uint8_t *bottom_bar_ptr = (uint8_t*) (0x9C00 + (17 << 5)); 
 	for (uint8_t i = 0; i < 20; i++, bottom_bar_ptr++) {
 		*bottom_bar_ptr = i;
 	}
 
 	hblank_isr_ip = (uint16_t) dmg_hblank_switch_window;
 
-	BGP_REG = 0b11001100;
 	STAT_REG = 0b01000000;
 	IE_REG |= LCD_IFLAG;
 }

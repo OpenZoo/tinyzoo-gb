@@ -20,6 +20,8 @@ __asm
 	xor a, a ; 4
 	ldh (_SCX_REG + 0), a ; 12
 	ldh (_SCY_REG + 0), a ; 12
+	ld a, #27 ; 8
+	ldh (_BGP_REG + 0), a ; 12
 
 	pop af
 	reti
@@ -28,6 +30,7 @@ __endasm;
 
 void dmg_vblank_isr(void) {
 	LCDC_REG = 0b11010001;
+	BGP_REG = 0b11100100;
 	LYC_REG = ly_bank_switch;
 
 	SCX_REG = scx_shadow_reg;
