@@ -6,6 +6,7 @@
 #include "../game.h"
 #include "../input.h"
 #include "../math.h"
+#include "../message_consts.h"
 #include "../sound_consts.h"
 #include "../timer.h"
 
@@ -54,9 +55,15 @@ void ElementPlayerTick(uint8_t stat_id) {
 
 		if (player_dir_x != 0 || player_dir_y != 0) {
 			if (zoo_board_info.max_shots == 0) {
-				// TODO: DisplayMessage
+				if (!(msg_flags.f1 & MSG_FLAG1_NO_SHOOTING)) {
+					display_message(200, NULL, msg_no_shooting_line1, msg_no_shooting_line2);
+					msg_flags.f1 |= MSG_FLAG1_NO_SHOOTING;
+				}
 			} else if (zoo_world_info.ammo == 0) {
-				// TODO: DisplayMessage
+				if (!(msg_flags.f1 & MSG_FLAG1_OUT_OF_AMMO)) {
+					display_message(200, NULL, msg_out_of_line1, msg_out_of_ammo_line2);
+					msg_flags.f1 |= MSG_FLAG1_OUT_OF_AMMO;
+				}
 			} else {
 				uint8_t bullet_count = 0;
 				if (zoo_board_info.max_shots <= zoo_stat_count) {
@@ -126,7 +133,7 @@ void ElementPlayerTick(uint8_t stat_id) {
 			zoo_world_info.board_time_sec++;
 
 			if ((zoo_board_info.time_limit_sec - 10) == zoo_world_info.board_time_sec) {
-				// TODO: DisplayMessage
+				display_message(200, NULL, NULL, msg_out_of_time);
 				sound_queue(3, sound_time_running_out);
 			} else if (zoo_world_info.board_time_sec > zoo_board_info.time_limit_sec) {
 				damage_stat(0);

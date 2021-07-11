@@ -47,4 +47,6 @@ void game_update_sidebar_torches(void);
 void game_update_sidebar_score(void);
 void game_update_sidebar_keys(void);
 
+void display_message(uint8_t time, const char* line1, const char* line2, const char* line3);
+
 #endif

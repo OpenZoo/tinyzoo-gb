@@ -3,6 +3,7 @@
 
 zoo_board_info_t zoo_board_info;
 zoo_world_info_t zoo_world_info;
+zoo_message_flags_t msg_flags;
 zoo_tile_t zoo_tiles[62 * 27];
 uint8_t zoo_stat_count;
 zoo_stat_t zoo_stats[MAX_STAT + 3];

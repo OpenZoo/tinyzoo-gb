@@ -45,6 +45,8 @@ static bool full_redraw;
 static uint16_t hblank_isr_sp;
 static uint16_t hblank_isr_pal_pos;
 extern uint8_t ly_bank_switch;
+static uint8_t new_lcdc_val;
+static uint8_t ly_bank_switch_mirror;
 
 static void vblank_update_palette(void) {
 __asm
@@ -108,6 +110,21 @@ __asm
 __endasm;
 }
 
+static void gbc_hblank_switch_window(void) {
+__asm
+.hblank_switch_window_sync:
+	ldh a, (_STAT_REG + 0)	; 1.5 cycles
+	bit 1, a				; 1 cycles
+	jp nz, .hblank_switch_window_sync		; 1.5 cycles
+
+	ld a, #0xC9 ; 8
+	ldh (_LCDC_REG + 0), a ; 12
+
+	pop af
+	reti
+__endasm;
+}
+
 static void hblank_update_palette(void) {
 __asm
 	push hl
@@ -138,7 +155,7 @@ __asm
 	pop hl
 
 	; increment LY
-	ld a, (_ly_bank_switch)
+	ld a, (_ly_bank_switch_mirror)
 	ld b, a
 	ldh a, (_LYC_REG + 0)
 	cp a, b
@@ -230,29 +247,40 @@ __asm
 	ld (hl), c
 	ld (hl), b
 .endm
-	ld a, #0xC9 ; 8
+	ld a, (_new_lcdc_val) ; 8
 	ldh (_LCDC_REG + 0), a ; 12
 	xor a, a ; 4
 	ldh (_SCX_REG + 0), a ; 12
 	ldh (_SCY_REG + 0), a ; 12
+
+	ld a, #135
+	ldh (_LYC_REG + 0), a
+	ld a, #<(_gbc_hblank_switch_window)
+	ld (_hblank_isr_ip), a
+	ld a, #>(_gbc_hblank_switch_window)
+	ld (_hblank_isr_ip+1), a
 
 	jp .hblank_update_palette_restore
 
 __endasm;
 }
 
-void gbc_vblank_isr(void) {
-	LCDC_REG = 0b11010001;
+void sidebar_vbl_copy_data(void);
 
+void gbc_vblank_isr(void) {
 	uint8_t local_doy = scy_shadow_reg >> 3;
 
+	LCDC_REG = 0b11010001;
 	SCX_REG = scx_shadow_reg;
 	SCY_REG = scy_shadow_reg;
 
 	hblank_isr_ip = (uint16_t) hblank_update_palette;
 	hblank_isr_pal_pos = 0xD000 | (local_doy << 6);
 	LYC_REG = 7;
+	ly_bank_switch_mirror = ly_bank_switch;
+	new_lcdc_val = (ly_bank_switch < 135) ? 0xD9 : 0xC9;
 
+	sidebar_vbl_copy_data();
 	vblank_update_palette();
 }
 

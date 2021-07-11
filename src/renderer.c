@@ -12,14 +12,19 @@ uint8_t scx_shadow_reg = 0;
 uint8_t scy_shadow_reg = 0;
 uint8_t ly_bank_switch;
 
+uint8_t sidebar_tile_data_ly_switch;
 uint8_t sidebar_tile_data_len;
 uint16_t sidebar_tile_data_address;
-uint8_t sidebar_tile_data[64];
+__at(0xC040) static uint8_t sidebar_tile_data[96];
 volatile bool sidebar_tile_data_awaiting = false;
 
 void sidebar_vbl_copy_data(void) {
 	if (sidebar_tile_data_awaiting) {
 		memcpy((uint8_t*) sidebar_tile_data_address, sidebar_tile_data, sidebar_tile_data_len);
+		if (sidebar_tile_data_ly_switch != 0) {
+			ly_bank_switch = sidebar_tile_data_ly_switch;
+			sidebar_tile_data_ly_switch = 0;
+		}
 		sidebar_tile_data_awaiting = false;
 	}
 }
@@ -31,6 +36,7 @@ void text_init(const renderer_t *renderer) {
 	// not using sprites here
 	_shadow_OAM_base = 0;
 
+	wait_vbl_done();
 	// clear bottom bar tiles
 	memset((uint8_t*) 0x9000, 0, 20 * 16);
 
@@ -43,6 +49,4 @@ void text_init(const renderer_t *renderer) {
 	active_renderer.init();
 
 	SWITCH_ROM_MBC5(prev_bank);
-
-	add_VBL(sidebar_vbl_copy_data);
 }

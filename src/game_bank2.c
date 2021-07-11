@@ -67,7 +67,8 @@ void board_create(void) BANKED {
 }
 
 void world_create(void) BANKED {
-	// TODO: boardcount, boardlen, messagenotshownflags
+	// TODO: boardcount, boardlen
+	memset(&msg_flags, 0, sizeof(msg_flags));
 	board_create();
 	memset(&zoo_world_info, 0, sizeof(zoo_world_info));
 	zoo_world_info.health = 100;

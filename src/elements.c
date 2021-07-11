@@ -6,6 +6,7 @@
 #include "game.h"
 #include "input.h"
 #include "math.h"
+#include "message_consts.h"
 #include "sound_consts.h"
 #include "timer.h"
 
@@ -19,9 +20,7 @@ void ElementDamagingTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 
 void ElementBoardEdgeTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy);
 
-void ElementMessageTimerTick(uint8_t stat_id) {
-	// TODO
-}
+void ElementMessageTimerTick(uint8_t stat_id);
 
 void ElementMonitorTick(uint8_t stat_id) {
 	// TODO
@@ -37,7 +36,10 @@ void ElementAmmoTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	game_update_sidebar_ammo();
 	sound_queue(2, sound_ammo_pickup);
 
-	// TODO
+	if (!(msg_flags.f1 & MSG_FLAG1_AMMO)) {
+		display_message(200, NULL, NULL, msg_ammo_pickup);
+		msg_flags.f1 |= MSG_FLAG1_AMMO;
+	}
 }
 
 void ElementTorchTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
@@ -47,7 +49,10 @@ void ElementTorchTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	board_draw_tile(x, y);
 	game_update_sidebar_torches();
 
-	// TODO
+	if (!(msg_flags.f1 & MSG_FLAG1_TORCH)) {
+		display_message(200, msg_torch_pickup_line1, msg_torch_pickup_line2, msg_torch_pickup_line3);
+		msg_flags.f1 |= MSG_FLAG1_TORCH;
+	}
 
 	sound_queue(3, sound_torch_pickup);
 }
@@ -63,7 +68,10 @@ void ElementGemTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	game_update_sidebar_score();
 	sound_queue(2, sound_gem_pickup);
 
-	// TODO
+	if (!(msg_flags.f2 & MSG_FLAG2_GEM)) {
+		display_message(200, NULL, msg_gem_pickup_line1, msg_gem_pickup_line2);
+		msg_flags.f2 |= MSG_FLAG2_GEM;
+	}
 }
 
 void ElementKeyTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
@@ -144,8 +152,12 @@ void ElementEnergizerTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	board_draw_tile(x, y);
 
 	zoo_world_info.energizer_ticks = 75;
-
-	// TODO
+	if (!(msg_flags.f2 & MSG_FLAG2_ENERGIZER)) {
+		display_message(200, NULL, msg_energizer_pickup_line1, msg_energizer_pickup_line2);
+		msg_flags.f2 |= MSG_FLAG2_ENERGIZER;
+	}
+		
+	// TODO OopSend
 }
 
 uint8_t ElementStarDraw(uint8_t x, uint8_t y);
@@ -155,7 +167,7 @@ void ElementBulletTick(uint8_t stat_id);
 
 void ElementWaterTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	sound_queue(3, sound_water_splash);
-	// TODO
+	display_message(100, NULL, msg_water_touch_line1, msg_water_touch_line2);
 }
 
 void ElementForestTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
@@ -163,8 +175,10 @@ void ElementForestTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	board_draw_tile(x, y);
 
 	sound_queue(3, sound_forest);
-
-	// TODO
+	if (!(msg_flags.f1 & MSG_FLAG1_FOREST)) {
+		display_message(200, NULL, msg_forest_touch_line1, msg_forest_touch_line2);
+		msg_flags.f1 |= MSG_FLAG1_FOREST;
+	}
 }
 
 void ElementPushableTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
@@ -173,7 +187,10 @@ void ElementPushableTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 }
 
 void ElementFakeTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
-	// TODO
+	if (!(msg_flags.f2 & MSG_FLAG2_FAKE)) {
+		display_message(150, NULL, msg_fake_touch_line1, msg_fake_touch_line2);
+		msg_flags.f2 |= MSG_FLAG2_FAKE;
+	}
 }
 
 void ElementInvisibleTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
@@ -181,8 +198,7 @@ void ElementInvisibleTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	board_draw_tile(x, y);
 
 	sound_queue(3, sound_invisible);
-
-	// TODO
+	display_message(100, NULL, msg_invisible_touch_line1, msg_invisible_touch_line2);
 }
 
 void ElementBlinkWallTick(uint8_t stat_id);

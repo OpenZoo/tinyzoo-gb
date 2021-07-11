@@ -7,15 +7,42 @@
 
 extern uint8_t ly_bank_switch;
 
+void dmg_hblank_switch_window_pre(void) {
+__asm
+.hblank_switch_window_pre_sync:
+	ldh a, (_STAT_REG + 0)	; 1.5 cycles
+	bit 1, a				; 1 cycles
+	jp nz, .hblank_switch_window_pre_sync		; 1.5 cycles
+
+	ld a, #0xD9 ; 8
+	ldh (_LCDC_REG + 0), a ; 12
+	xor a, a ; 4
+	ldh (_SCX_REG + 0), a ; 12
+	ldh (_SCY_REG + 0), a ; 12
+	ld a, #27 ; 8
+	ldh (_BGP_REG + 0), a ; 12
+
+	ld a, #135
+	ldh (_LYC_REG + 0), a
+	
+	ld a, #<(_dmg_hblank_switch_window)
+	ld (_hblank_isr_ip), a
+	ld a, #>(_dmg_hblank_switch_window)
+	ld (_hblank_isr_ip+1), a
+
+	pop af
+	reti
+__endasm;
+}
+
 void dmg_hblank_switch_window(void) {
 __asm
-	ld a, #0xC9 ; 8
-
 .hblank_switch_window_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
 	bit 1, a				; 1 cycles
 	jp nz, .hblank_switch_window_sync		; 1.5 cycles
 
+	ld a, #0xC9 ; 8
 	ldh (_LCDC_REG + 0), a ; 12
 	xor a, a ; 4
 	ldh (_SCX_REG + 0), a ; 12
@@ -28,13 +55,21 @@ __asm
 __endasm;
 }
 
+void sidebar_vbl_copy_data(void);
+
 void dmg_vblank_isr(void) {
 	LCDC_REG = 0b11010001;
 	BGP_REG = 0b11100100;
 	LYC_REG = ly_bank_switch;
+	if (ly_bank_switch < 135) {
+		hblank_isr_ip = (uint16_t) dmg_hblank_switch_window_pre;
+	} else {
+		hblank_isr_ip = (uint16_t) dmg_hblank_switch_window;
+	}
 
 	SCX_REG = scx_shadow_reg;
 	SCY_REG = scy_shadow_reg;
+	sidebar_vbl_copy_data();
 }
 
 void dmg_text_init(); // bank 3

@@ -21,7 +21,13 @@ static uint8_t cgb_sidebar_colors[20] = {
 	0, 1, 1, 2, 3
 };
 
+void sidebar_set_message_color(uint8_t color) BANKED {
+	cgb_message_palette[15] = cgb_palette[color];
+}
+
 void gbc_text_init(void) {
+	uint8_t i;
+
 	font_8x8_install(0, 1);
 
 	VBK_REG = 1;
@@ -52,8 +58,11 @@ void gbc_text_init(void) {
 	cgb_message_palette[15] = cgb_palette[10];
 
 	// set bottom bar
-	uint8_t *bottom_bar_ptr = 0x9C00 + (17 << 5); 
-	for (uint8_t i = 0; i < 20; i++, bottom_bar_ptr++) {
+	uint8_t *bottom_bar_ptr = (uint8_t*) 0x9C00 + (13 << 5); 
+	VBK_REG = 1;
+	memset(bottom_bar_ptr, 0b00001011, (32 * 4));
+	bottom_bar_ptr += 128;
+	for (i = 0; i < 20; i++, bottom_bar_ptr++) {
 		VBK_REG = 1;
 		*bottom_bar_ptr = cgb_sidebar_colors[i];
 		VBK_REG = 0;

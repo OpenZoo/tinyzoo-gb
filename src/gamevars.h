@@ -103,6 +103,22 @@ typedef struct {
 	uint8_t board_count;
 } zoo_world_info_t;
 
+#define MSG_FLAG1_AMMO 0x01
+#define MSG_FLAG1_OUT_OF_AMMO 0x02
+#define MSG_FLAG1_NO_SHOOTING 0x04
+#define MSG_FLAG1_TORCH 0x08
+#define MSG_FLAG1_OUT_OF_TORCHES 0x10
+#define MSG_FLAG1_ROOM_NOT_DARK 0x20
+#define MSG_FLAG1_HINT_TORCH 0x40
+#define MSG_FLAG1_FOREST 0x80
+#define MSG_FLAG2_FAKE 0x01
+#define MSG_FLAG2_GEM 0x02
+#define MSG_FLAG2_ENERGIZER 0x04
+
+typedef struct {
+	uint8_t f1, f2;
+} zoo_message_flags_t;
+
 typedef struct {
 	bool paused;
 	bool play_exit_requested;
@@ -118,6 +134,7 @@ extern zoo_board_info_t zoo_board_info;
 extern zoo_world_info_t zoo_world_info;
 extern zoo_tile_t zoo_tiles[62 * 27];
 extern zoo_tile_t *const zoo_tiles_y[27];
+extern zoo_message_flags_t msg_flags;
 extern uint8_t zoo_stat_count;
 extern uint8_t zoo_stat_data[MAX_DATA_OFS_SIZE];
 extern zoo_stat_t zoo_stats[MAX_STAT + 3];

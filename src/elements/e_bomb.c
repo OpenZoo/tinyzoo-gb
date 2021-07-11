@@ -5,6 +5,7 @@
 #include "../gamevars.h"
 #include "../game.h"
 #include "../math.h"
+#include "../message_consts.h"
 #include "../sound_consts.h"
 #include "../timer.h"
 
@@ -41,7 +42,7 @@ void ElementBombTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	if (stat->p1 == 0) {
 		stat->p1 = 9;
 		board_draw_tile(x, y);
-		// TODO DisplayMessage
+		display_message(200, NULL, NULL, msg_bomb_activated);
 		sound_queue(4, sound_bomb_activated);
 	} else {
 		ElementPushablePush(x, y, *dx, *dy);

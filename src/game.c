@@ -8,7 +8,9 @@
 #include "elements.h"
 #include "input.h"
 #include "math.h"
+#include "message_consts.h"
 #include "renderer.h"
+#include "renderer_sidebar.h"
 #include "sound_consts.h"
 #include "timer.h"
 
@@ -51,13 +53,17 @@ void board_enter(void) {
 	zoo_board_info.start_player_x = ZOO_STAT(0).x;
 	zoo_board_info.start_player_y = ZOO_STAT(0).y;
 
-	// TODO
+	if ((zoo_board_info.flags & BOARD_IS_DARK) && !(msg_flags.f1 & MSG_FLAG1_HINT_TORCH)) {
+		display_message(200, msg_torch_hint_line1, msg_torch_hint_line2, msg_torch_hint_line3);
+		msg_flags.f1 |= MSG_FLAG1_HINT_TORCH;
+	}
 
 	zoo_world_info.board_time_sec = 0;
 	game_update_sidebar_all();
 
 	zoo_game_state.game_state_element = E_PLAYER; // TODO: not here...
 
+	sidebar_hide_message();
 	center_viewport_on_player();
 	board_redraw(); // TODO: not here...
 	text_update();
@@ -251,6 +257,20 @@ void game_play_loop(bool board_changed) {
 	} while(!zoo_game_state.play_exit_requested);
 }
 
+void display_message(uint8_t time, const char* line1, const char* line2, const char* line3) {
+	uint8_t sid = get_stat_id_at(0, 0);
+	if (get_stat_id_at(0, 0) != 255) {
+		remove_stat(sid);
+		sidebar_hide_message();
+	}
+
+	add_stat(0, 0, E_MESSAGE_TIMER, 0, 1, &stat_template_default);
+	sid = time / (zoo_game_state.tick_time_duration + 1);
+	ZOO_STAT(zoo_stat_count).p2 = sid;
+	sidebar_set_message_color(0x9 + (sid % 7));
+	sidebar_show_message(line1, line2, line3);
+}
+
 uint8_t get_stat_id_at(uint8_t x, uint8_t y) {
 #ifdef GBZ80
 	x; y;
@@ -438,7 +458,6 @@ void damage_stat(uint8_t stat_id) {
 			zoo_world_info.health -= 10;
 
 			game_update_sidebar_health();
-			// TODO: DisplayMessage
 
 			tile->color = 0x70 | (zoo_element_defs[E_PLAYER].color & 0xF);
 
@@ -458,6 +477,10 @@ void damage_stat(uint8_t stat_id) {
 					text_update();
 
 					zoo_game_state.paused = true;
+				} else {
+					// This used to apply all the time, but for the GB port
+					// we're moving it here - tentatively, anyway?
+					display_message(100, NULL, NULL, msg_ouch);
 				}
 				sound_queue(4, sound_player_damage);
 			} else {

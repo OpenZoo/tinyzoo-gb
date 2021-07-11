@@ -1,5 +1,5 @@
 #pragma bank 3
-// Must be in the same bank as the "small" font.
+// Must be in the same bank as the "small" font and message_consts.
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -8,9 +8,10 @@
 #include "renderer_sidebar.h"
 #include "../res/font_small.h"
 
+extern uint8_t sidebar_tile_data_ly_switch;
 extern uint8_t sidebar_tile_data_len;
 extern uint16_t sidebar_tile_data_address;
-extern uint8_t sidebar_tile_data[64];
+__at(0xC040) static uint8_t sidebar_tile_data[96];
 extern volatile bool sidebar_tile_data_awaiting;
 
 static void sidebar_draw_char(uint8_t x, uint8_t chr, uint8_t col) {
@@ -101,4 +102,43 @@ void sidebar_draw_keys(uint8_t x_shifted, uint8_t value) BANKED {
 	if (value & 0x80) sidebar_draw_char(7, 0x0C, 3);
 
 	sidebar_copy_data(0x9000 | (x_shifted << 4), 64);
+}
+
+extern uint8_t ly_bank_switch;
+
+void sidebar_show_message(const char* line1, const char* line2, const char* line3) BANKED {
+	while (sidebar_tile_data_awaiting) {}
+	memset(sidebar_tile_data, 0, 84);
+	uint8_t slen;
+	uint8_t offset = 0;
+
+	// write text data
+	if (line1 != NULL) {
+		uint8_t slen = strlen(line1);
+		if (slen > 0) {
+			memcpy(sidebar_tile_data + offset + (10 - (slen >> 1)), line1, slen);
+			offset += 32;
+		}
+	}
+	if (line2 != NULL) {
+		uint8_t slen = strlen(line2);
+		if (slen > 0) {
+			memcpy(sidebar_tile_data + offset + (10 - (slen >> 1)), line2, slen);
+			offset += 32;
+		}
+	}
+	if (line3 != NULL) {
+		uint8_t slen = strlen(line3);
+		if (slen > 0) {
+			memcpy(sidebar_tile_data + offset + (10 - (slen >> 1)), line3, slen);
+			offset += 32;
+		}
+	}
+
+	sidebar_tile_data_ly_switch = 135 - (offset >> 2);
+	sidebar_copy_data(0x9C00 + (14 << 5) + (96 - offset), offset);
+}
+
+void sidebar_hide_message(void) BANKED {
+	ly_bank_switch = 135;
 }
