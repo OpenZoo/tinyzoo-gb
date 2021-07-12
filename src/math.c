@@ -1,11 +1,7 @@
 #include <stdlib.h>
 #include "math.h"
 
-#ifdef ENGINE_ACCURATE_RNG
-static uint32_t rand_seed;
-#else
-static uint16_t rand_seed;
-#endif
+// helper functions
 
 int8_t signum8(int8_t x) {
 	if (x < 0) {
@@ -35,7 +31,22 @@ int16_t difference16(int16_t a, int16_t b) {
 	return abs(a - b);
 }
 
-#ifdef ENGINE_ACCURATE_RNG
+// RNG
+
+// #define USE_ACCURATE_RNG
+#define USE_XORSHIFT_RNG
+
+#ifndef USE_XORSHIFT_RNG
+static uint32_t rand_seed;
+#else
+static uint16_t rand_seed;
+#endif
+
+void srand(uint16_t seed) {
+	rand_seed = seed == 0 ? 1 : seed;
+}
+
+#if defined(USE_ACCURATE_RNG)
 int16_t rand(int16_t max) {
 	rand_seed = (rand_seed * 134775813) + 1;
 	return (rand_seed >> 16) % max;
@@ -45,11 +56,8 @@ int16_t rand_mask(int16_t max) {
 	rand_seed = (rand_seed * 134775813) + 1;
 	return (rand_seed >> 16) & max;
 }
-
-void srand(uint16_t seed) {
-	rand_seed = seed;
-}
-#else
+#elif defined(USE_XORSHIFT_RNG)
+// Implementation based on John Metcalf's work
 int16_t rand(int16_t max) {
 __asm
 	ld a, (_rand_seed)
@@ -90,13 +98,17 @@ __asm
 	rra
 	xor a, l
 	ld (_rand_seed), a
+	ld e, a
 	xor a, h
 	ld (_rand_seed+1), a
+	ld d, a
+	ldhl sp, #2
+	ld a, (hl+)
+	and a, e
+	ld e, a
+	ld a, (hl)
+	and a, d
+	ld d, a
 __endasm;
-	return rand_seed & max;
-}
-
-void srand(uint16_t seed) {
-	rand_seed = seed == 0 ? 1 : seed;
 }
 #endif

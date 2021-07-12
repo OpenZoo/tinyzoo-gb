@@ -21,7 +21,7 @@
 	ld a, (hl)
 	xor a, #0x01
 	ld (hl), a
-	jp z, .timer_handler_end
+	jr z, .timer_handler_end
 
 	; increment dhsecs
 	ld hl, #(_dhsecs)
@@ -36,7 +36,7 @@
 	push af
 	ld a, #0x02
 	ld (0x2000), a
-	
+
 	call (_sound_update)
 
 	pop af

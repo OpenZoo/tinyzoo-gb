@@ -15,32 +15,31 @@ int8_t sound_current_priority;
 
 void sound_update(void) {
 __asm
-		; sound playback routine
 	push bc
 
 	; sound playback routine
 	ld a, (_sound_enabled)
 	or a, a
-	jp z, .timer_handler_no_sound
+	jr z, .timer_handler_no_sound
 	ld a, (_sound_is_playing)
 	or a, a
-	jp z, .timer_handler_sound_end
+	jr z, .timer_handler_sound_end
 
 	ld a, (_sound_duration_counter)
 	dec a
 	ld (_sound_duration_counter), a
 	; _sound_duration_counter == 0
-	jp z, .timer_handler_next_note
+	jr z, .timer_handler_next_note
 	; _sound_duration_counter < 0
 	bit 7, a
-	jp z, .timer_handler_sound_end
+	jr z, .timer_handler_sound_end
 
 .timer_handler_next_note:
 	ld a, (_sound_buffer_len)
 	ld c, a
 	ld a, (_sound_buffer_pos)
 	cp a, c
-	jp nc, .timer_handler_no_sound
+	jr nc, .timer_handler_no_sound
 
 	; init sound
 	ld a, #0x80
@@ -61,9 +60,9 @@ __asm
 
 .timer_handler_check_note:
 	sub a, #16
-	jp c, .timer_handler_check_drum
+	jr c, .timer_handler_check_drum
 	cp a, #96
-	jp nc, .timer_handler_check_drum
+	jr nc, .timer_handler_check_drum
 	add a, a 
 	ld c, a
 	ld b, #0x00
@@ -77,11 +76,11 @@ __asm
 	ldh (_NR23_REG + 0), a
 	ld a, (hl)
 	bit 7, a
-	jp z, .timer_handler_checks_done ; dummy note
+	jr z, .timer_handler_checks_done ; dummy note
 	ldh (_NR24_REG + 0), a
 	ld a, #0x22
 	ldh (_NR51_REG + 0), a
-	jp .timer_handler_checks_done
+	jr .timer_handler_checks_done
 
 .timer_handler_check_drum:
 	; TODO: drum support
@@ -97,7 +96,7 @@ __asm
 	inc a
 	inc a
 	ld (_sound_buffer_pos), a
-	jp .timer_handler_sound_end
+	jr .timer_handler_sound_end
 
 .timer_handler_no_sound:
 	xor a, a

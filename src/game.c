@@ -280,6 +280,9 @@ __asm
 	; bc - checked value
 	; d - max stat count
 	; e - counter
+	ld		a, (_zoo_stat_count)
+	inc		a
+	ld		d, a
 	ld		e, #0
 	ldhl	sp, #2
 	ld		c, (hl)
@@ -292,22 +295,19 @@ GetStatIdAtLoop:
 	ld		a, (hl+)
 	jr		nz, GetStatIdAtNotFound
 	cp		a, b
-	jr		nz, GetStatIdAtNotFound
-	ret
+	ret		z
 GetStatIdAtNotFound:
 	; hl += 14
 	ld		a, l
 	add		a, #14
 	ld		l, a
-	ld		a, h
-	adc		a, #0
-	ld		h, a
-	; e += 1
-	ld      a, (#_zoo_stat_count)
-	cp		a, e
-	jr		z, GetStatIdFinished
+	adc		a, h
+	sub		a, l
+        ld              h, a
+	; d -= 1
 	inc		e
-	jp		GetStatIdAtLoop
+	dec		d
+	jr		nz, GetStatIdAtLoop
 GetStatIdFinished:
 	ld      e, #0xff
 __endasm;

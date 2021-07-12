@@ -18,7 +18,7 @@ static uint8_t cgb_sidebar_colors[20] = {
 	0, 0, 0, 1, 0,
 	0, 0, 0, 0, 3,
 	0, 0, 0, 0, 0,
-	0, 1, 1, 2, 3
+	0, 1, 1, 2, 0
 };
 
 void sidebar_set_message_color(uint8_t color) BANKED {
