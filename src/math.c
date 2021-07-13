@@ -33,9 +33,6 @@ int16_t difference16(int16_t a, int16_t b) {
 
 // RNG
 
-// #define USE_ACCURATE_RNG
-#define USE_XORSHIFT_RNG
-
 #ifndef USE_XORSHIFT_RNG
 static uint32_t rand_seed;
 #else
@@ -74,14 +71,23 @@ __asm
 	ld a, h
 	rra
 	xor a, l
+	ld e, a
 	ld (_rand_seed), a
 	xor a, h
+	ld d, a
 	ld (_rand_seed+1), a
+	ldhl	sp,	#2
+	ld	a, (hl+)
+	ld	c, a
+	ld	b, (hl)
+	push	bc
+	push	de
+	call	__moduint
+	add	sp, #4
 __endasm;
-	return rand_seed % max;
 }
 
-int16_t rand_mask(int16_t max) {
+int16_t rand_mask(int16_t max) __preserves_regs(b, c) {
 __asm
 	ld a, (_rand_seed)
 	ld l, a
