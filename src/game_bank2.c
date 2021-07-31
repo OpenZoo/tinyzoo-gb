@@ -72,6 +72,7 @@ void world_create(void) BANKED {
 	board_create();
 	memset(&zoo_world_info, 0, sizeof(zoo_world_info));
 	zoo_world_info.health = 100;
+	memset(&zoo_world_info.flags, 255, sizeof(zoo_world_info.flags));
 	// TODO: boardchange
 }
 

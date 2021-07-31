@@ -50,9 +50,14 @@ void load_board_data(uint8_t bank, const uint8_t *data) NONBANKED {
 	zoo_tile_t rle_tile;
 	while (true) {
 		if (rle_count <= 0) {
-				rle_count = *(data++);
 				rle_tile.element = *(data++);
 				rle_tile.color = *(data++);
+				if (rle_tile.element & 0x80) {
+					rle_count = 1;
+					rle_tile.element &= 0x7F;
+				} else {
+					rle_count = *(data++);
+				}
 		}
 		ZOO_TILE_COPY(ZOO_TILE(ix, iy), rle_tile);
 		ix++;

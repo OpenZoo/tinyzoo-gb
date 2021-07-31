@@ -29,6 +29,7 @@
 #define COLOR_WHITE_ON_CHOICE 0xFE
 #define COLOR_CHOICE_ON_CHOICE 0xFD
 
+#define MAX_FLAG 10
 #define MAX_STAT 150
 #define MAX_ELEMENT 53
 #define BOARD_WIDTH 60
@@ -97,7 +98,7 @@ typedef struct {
 	uint8_t current_board;
 	uint8_t torch_ticks;
 	uint8_t energizer_ticks;
-	// TODO: Flags
+	uint8_t flags[MAX_FLAG];
 	int16_t board_time_sec;
 	int16_t board_time_hsec;
 	uint8_t board_count;
