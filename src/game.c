@@ -221,6 +221,9 @@ void game_play_loop(bool board_changed) {
 					zoo_game_state.current_tick = rand(100);
 					zoo_game_state.current_stat_ticked = zoo_stat_count + 1;
 				}
+			} else {
+				// Save power
+				wait_vbl_done();
 			}
 		} else if (zoo_game_state.current_stat_ticked <= zoo_stat_count) {
 			zoo_stat_t *stat = &ZOO_STAT(zoo_game_state.current_stat_ticked);
@@ -240,7 +243,7 @@ void game_play_loop(bool board_changed) {
 
 		if (zoo_game_state.current_stat_ticked > zoo_stat_count && !zoo_game_state.play_exit_requested) {
 			text_update();
-			
+
 			while (!timer_has_time_elapsed(&zoo_game_state.tick_time_counter, zoo_game_state.tick_time_duration)) {
 			__asm
 				halt
@@ -251,7 +254,7 @@ void game_play_loop(bool board_changed) {
 			else zoo_game_state.current_tick++;
 
 			zoo_game_state.current_stat_ticked = 0;
-			
+
 			input_update();
 		}
 	} while(!zoo_game_state.play_exit_requested);
