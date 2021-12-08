@@ -33,10 +33,10 @@ int16_t difference16(int16_t a, int16_t b) {
 
 // RNG
 
-#ifndef USE_XORSHIFT_RNG
-static uint32_t rand_seed;
-#else
+#if defined(USE_XORSHIFT_RNG)
 static uint16_t rand_seed;
+#else
+static uint32_t rand_seed;
 #endif
 
 void srand(uint16_t seed) {
@@ -55,6 +55,8 @@ int16_t rand_mask(int16_t max) {
 }
 #elif defined(USE_XORSHIFT_RNG)
 // Implementation based on John Metcalf's work
+// Permission: https://twitter.com/john_metcalf/status/1446544969506906113
+
 int16_t rand(int16_t max) {
 __asm
 	ld a, (_rand_seed)
@@ -115,6 +117,78 @@ __asm
 	ld a, (hl)
 	and a, d
 	ld d, a
+__endasm;
+}
+#elif defined(USE_YERRICK_RNG)
+// https://github.com/pinobatch/libbet/blob/5b099093a22e7241a6405244d301ca5ba08db140/src/rand.z80
+/*
+ Pseudorandom number generator
+
+ Copyright 2018, 2020 Damian Yerrick
+
+ This software is provided 'as-is', without any express or implied
+ warranty.  In no event will the authors be held liable for any damages
+ arising from the use of this software.
+
+ Permission is granted to anyone to use this software for any purpose,
+ including commercial applications, and to alter it and redistribute it
+ freely, subject to the following restrictions:
+
+ 1. The origin of this software must not be misrepresented; you must not
+    claim that you wrote the original software. If you use this software
+    in a product, an acknowledgment in the product documentation would be
+    appreciated but is not required.
+ 2. Altered source versions must be plainly marked as such, and must not be
+    misrepresented as being the original software.
+ 3. This notice may not be removed or altered from any source distribution.
+*/
+
+int16_t rand(int16_t max) {
+__asm
+	ld hl, #(_rand_seed)
+	ld a, (hl)
+	add a, #0xB3
+	ld (hl+), a
+	adc a, (hl)
+	ld (hl+), a
+	adc a, (hl)
+	ld (hl+), a
+	ld d, a
+	adc a, (hl)
+	ld (hl), a
+	ld e, a
+	ldhl	sp,	#2
+	ld	a, (hl+)
+	ld	c, a
+	ld	b, (hl)
+	push	bc
+	push	de
+	call	__moduint
+	add	sp, #4
+__endasm;
+}
+
+int16_t rand_mask(int16_t max) __preserves_regs(d, e) {
+__asm
+	ld hl, #(_rand_seed)
+	ld a, (hl)
+	add a, #0xB3
+	ld (hl+), a
+	adc a, (hl)
+	ld (hl+), a
+	adc a, (hl)
+	ld (hl+), a
+	ld c, a
+	adc a, (hl)
+	ld (hl), a
+	ld b, a
+	ldhl sp, #2
+	ld a, (hl+)
+	and a, b
+	ld b, a
+	ld a, (hl)
+	and a, c
+	ld c, a
 __endasm;
 }
 #endif

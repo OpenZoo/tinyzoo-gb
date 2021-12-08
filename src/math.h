@@ -2,7 +2,8 @@
 #define __MATH_H__
 
 // #define USE_ACCURATE_RNG
-#define USE_XORSHIFT_RNG
+// #define USE_XORSHIFT_RNG
+#define USE_YERRICK_RNG
 
 #include <stdint.h>
 #include <stdlib.h>
