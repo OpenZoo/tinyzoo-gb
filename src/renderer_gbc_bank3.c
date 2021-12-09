@@ -9,7 +9,6 @@
 #include "font_manager.h"
 
 extern uint16_t cgb_message_palette[];
-extern uint8_t cgb_update_row[];
 extern const uint16_t cgb_palette[];
 
 void gbc_vblank_isr(void);
@@ -25,6 +24,33 @@ void sidebar_set_message_color(uint8_t color) BANKED {
 	cgb_message_palette[15] = cgb_palette[color];
 }
 
+static void gbc_text_init_wram(void) {
+__asm
+	; clear banks 2, 3, 4
+	; TODO: inefficient
+	ld bc, #(_SVBK_REG)
+	ld de, #0xFF00
+	ld hl, #0xC000
+	ld a, #2
+WramClearLoop:
+	ld (bc), a
+	ld (hl), e
+	inc a
+	ld (bc), a
+	ld (hl), d
+	inc a
+	ld (bc), a
+	ld (hl), e
+	ld a, #2
+	inc hl
+	bit 5, h
+	jr z, WramClearLoop
+	; finish
+	xor a, a
+	ld (bc), a
+__endasm;
+}
+
 void gbc_text_init(void) {
 	uint8_t i;
 
@@ -36,11 +62,6 @@ void gbc_text_init(void) {
 
 	VBK_REG = 0;
 
-	cgb_update_row[0] = 0xFF;
-	cgb_update_row[1] = 0xFF;
-	cgb_update_row[2] = 0xFF;
-	cgb_update_row[3] = 0xFF;
- 
 	cgb_message_palette[0] = cgb_palette[1];
 	cgb_message_palette[1] = cgb_palette[13];
 	cgb_message_palette[2] = cgb_palette[14];
@@ -56,6 +77,8 @@ void gbc_text_init(void) {
 	cgb_message_palette[13] = cgb_palette[6];
 	cgb_message_palette[14] = cgb_palette[0];
 	cgb_message_palette[15] = cgb_palette[10];
+
+	gbc_text_init_wram();
 
 	// set bottom bar
 	uint8_t *bottom_bar_ptr = (uint8_t*) 0x9C00 + (13 << 5); 

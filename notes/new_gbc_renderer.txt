@@ -1,0 +1,47 @@
+128 color pairs x 32 rows = 4096 bytes
+
+HIRAM allocaiton:
+
+FFA0	gbc_text_draw x/y pointer lo
+FFA1	gbc_text_draw x/y pointer hi
+FFA2	gbc_text_draw char
+FFA3	gbc_text_draw color
+FFA4	gbc_text_draw palette pointer
+
+WRAM allocation:
+
+0:C000	4096	reserved for SDCC
+1:D000	4096	reserved for SDCC
+2:D000	2048	palette color data (16 color pairs x 2 colors x 2 bytes x 32 rows)
+2:D800	1024	on-map color buffer
+2:DC00	1024	on-map char buffer
+3:D000	4096	palette color map (128 color pairs x 32 rows; 0xFF = unused)
+4:D000	512	palette usage map (16 color pairs x 32 rows):
+		- usage count: 1 byte
+		  (if 0, slot is free)
+
+removing tile:
+
+- get tile color
+- locate in palette color map
+  (if 0xFF, bail)
+- decrease reference count by 1
+  (if 0, color is now free)
+- if 0: remove entry in palette color map
+
+adding tile:
+
+- get existing tile color
+- if the same, just set char and move on
+
+- get tile color
+- locate in palette color map
+  (if 0xFF, move to "adding color")
+- increase reference count by 1
+
+adding color:
+- go to data for row
+- find first color with usage count 0
+  (if not found, ???)
+- set usage count to 1
+- set palette color map entry

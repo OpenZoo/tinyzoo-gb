@@ -6,6 +6,7 @@
 
 typedef struct {
 	void (*init)(void);
+	void (*undraw)(uint8_t x, uint8_t y);
 	void (*draw)(uint8_t x, uint8_t y, uint8_t chr, uint8_t col);
 	void (*mark_redraw)(void);
 	void (*scroll)(int8_t dx, int8_t dy);
@@ -26,6 +27,7 @@ extern renderer_t active_renderer;
 
 void text_init(const renderer_t *renderer);
 
+#define text_undraw(a, b) active_renderer.undraw(a, b)
 #define text_draw(a, b, c, d) active_renderer.draw(a, b, c, d)
 #define text_mark_redraw() active_renderer.mark_redraw()
 #define text_scroll(a, b) active_renderer.scroll(a, b)

@@ -74,6 +74,10 @@ void dmg_vblank_isr(void) {
 
 void dmg_text_init(); // bank 3
 
+static void dmg_text_undraw(uint8_t x, uint8_t y) {
+
+}
+
 static void dmg_text_draw(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
 /*	x = (draw_offset_x + x) & 0x1F;
 	y = (draw_offset_y + y) & 0x1F;
@@ -129,6 +133,7 @@ static void dmg_text_update(void) {
 
 const renderer_t renderer_dmg = {
 	dmg_text_init,
+	dmg_text_undraw,
 	dmg_text_draw,
 	dmg_text_mark_redraw,
 	dmg_text_scroll,

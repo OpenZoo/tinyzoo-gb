@@ -24,6 +24,7 @@ void board_create(void) BANKED; // 2
 void world_create(void) BANKED; // 2
 void board_enter(void);
 void board_change(uint8_t id);
+void board_undraw_tile(uint8_t x, uint8_t y);
 void board_draw_tile(uint8_t x, uint8_t y);
 uint8_t get_stat_id_at(uint8_t x, uint8_t y);
 void add_stat(uint8_t tx, uint8_t ty, uint8_t element, uint8_t color, uint8_t cycle, const zoo_stat_t *template);

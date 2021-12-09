@@ -31,16 +31,9 @@ const uint16_t cgb_palette[16] = {
 };
 
 uint16_t cgb_message_palette[18];
-uint8_t cgb_update_row[4];
 
 static uint8_t draw_offset_x_end = VIEWPORT_WIDTH;
 static uint8_t draw_offset_y_end = VIEWPORT_HEIGHT;
-
-#define cgb_back_chr ((uint8_t*) 0xA000)
-#define cgb_back_col ((uint8_t*) 0xA400)
-
-static uint8_t cgb_color_buffer[16];
-static bool full_redraw;
 
 static uint16_t hblank_isr_sp;
 static uint16_t hblank_isr_pal_pos;
@@ -115,7 +108,7 @@ __asm
 .hblank_switch_window_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
 	bit 1, a				; 1 cycles
-	jp nz, .hblank_switch_window_sync		; 1.5 cycles
+	jr nz, .hblank_switch_window_sync		; 1.5 cycles
 
 	ld a, #0xC9 ; 8
 	ldh (_LCDC_REG + 0), a ; 12
@@ -183,7 +176,7 @@ __asm
 .hblank_update_palette_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
 	bit 1, a				; 1 cycles
-	jp nz, .hblank_update_palette_sync		; 1.5 cycles
+	jr nz, .hblank_update_palette_sync		; 1.5 cycles
 
 	; write 9 color pairs (18 colors)
 	; budget: 67-71 cycles
@@ -235,7 +228,7 @@ __asm
 .hblank_update_palette_window_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
 	bit 1, a				; 1 cycles
-	jp nz, .hblank_update_palette_window_sync		; 1.5 cycles
+	jr nz, .hblank_update_palette_window_sync		; 1.5 cycles
 
 	; budget: 67-71 cycles
 	ld (hl), c	; 1 cycle
@@ -275,7 +268,7 @@ void gbc_vblank_isr(void) {
 	SCY_REG = scy_shadow_reg;
 
 	hblank_isr_ip = (uint16_t) hblank_update_palette;
-	hblank_isr_pal_pos = 0xD000 | (local_doy << 6);
+	hblank_isr_pal_pos = 0xD000 | ((uint16_t)local_doy << 6);
 	LYC_REG = 7;
 	ly_bank_switch_mirror = ly_bank_switch;
 	new_lcdc_val = (ly_bank_switch < 135) ? 0xD9 : 0xC9;
@@ -284,248 +277,555 @@ void gbc_vblank_isr(void) {
 	vblank_update_palette();
 }
 
-static void text_cgb_push_char_only(uint16_t pos, uint8_t v1) {
+static void gbc_text_remove_color(uint8_t y, uint8_t col) {
 __asm
-	push bc
-	
-	ldhl sp, #6
-	ld c, (hl)
-	dec hl
-	ld a, (hl-)
-	ld l, (hl)
+	ldhl sp, #2
+	ld a, (hl+)
+
+	; de = y << 7
+	ld d, a
+	ld e, #0
+	sra d
+	rr e
+
+	; a = col
+	ld a, (hl)
+
+	; de = y << 7 | col
+ 	add a, e
+	ld e, a
+
+	; de |= 0xD000
+	ld a, d
+	or a, #0xD0
+	ld d, a
+
+	; bc = y << 7
+	ld a, d
+	and a, #0x0F
+	ld b, a
+	ld a, e
+	and a, #0x80
+	ld c, a
+
+	; bc = y << 4
+.rept 3
+	sra b
+	rr c
+.endm
+
+	; bc |= 0xD000
+	ld a, b
+	or a, #0xD0
+	ld b, a
+
+	di ; SVBK cannot be changed between interrupts
+	; set SVBK to 3
+	ld a, #0x03
+	ld (_SVBK_REG), a
+
+	; read [de]
+	ld a, (de)
+
+	; if palette color map entry unused, return
+	cp a, #0xFF
+	jr z, GbcTextRemoveColorFinish
+
+	; bc |= entry
+	; bc = 0xD000 | y << 4 | entry
+	or a, c
+	ld c, a
+
+	; set SVBK to 4
+	ld a, #0x04
+	ld (_SVBK_REG), a
+
+	; read [bc]
+	ld a, (bc)
+
+	; not allocated?
+	cp a, #0x00
+	jr z, GbcTextRemoveColorFinish
+
+	; deallocate (palette usage map)
+	dec a
+	ld (bc), a
+	jr nz, GbcTextRemoveColorFinish
+
+	; set SVBK to 3
+	ld a, #0x03
+	ld (_SVBK_REG), a
+
+	; deallocate (palette color map)
+	ld a, #0xFF
+	ld (de), a
+
+GbcTextRemoveColorFinish:
+	; clear SVBK
+	xor a, a
+	ld (_SVBK_REG), a
+	ei ; SVBK cannot be changed between interrupts
+__endasm;
+}
+
+static uint8_t gbc_text_add_color(uint8_t y, uint8_t col) {
+__asm
+	ldhl sp, #2
+	ld a, (hl+)
+
+	; de = y << 7
+	ld d, a
+	ld e, #0
+	sra d
+	rr e
+
+	; a = col
+	ld a, (hl)
+
+	; de = y << 7 | col
+	add a, e
+	ld e, a
+
+	; de |= 0xD000
+	ld a, d
+	or a, #0xD0
+	ld d, a
+
+	; bc = y << 7
+	ld a, d
+	and a, #0x0F
+	ld b, a
+	ld a, e
+	and a, #0x80
+	ld c, a
+
+	; bc = y << 4
+.rept 3
+	sra b
+	rr c
+.endm
+
+	; bc |= 0xD000
+	ld a, b
+	or a, #0xD0
+	ld b, a
+
+	di ; SVBK cannot be changed between interrupts
+	; set SVBK to 3
+	ld a, #0x03
+	ld (_SVBK_REG), a
+
+	; read [de]
+	ld a, (de)
+	cp a, #0xFF
+	jr z, GbcTextAddColorAlloc
+
+	; bc |= entry
+	; bc = 0xD000 | y << 4 | entry
+	or a, c
+	ld c, a
+
+	; set SVBK to 4
+	ld a, #0x04
+	ld (_SVBK_REG), a
+
+	; read [bc]
+	ld a, (bc)
+	jp GbcTextAddColorIncrAlloc
+
+GbcTextAddColorAlloc:
+	; set SVBK to 4
+	ld a, #0x04
+	ld (_SVBK_REG), a
+
+	ld h, #0x00
+	; color not present, allocate...
+	ld a, (bc)
+	cp a, h
+	jr z, GbcTextAddColorAllocFound
+.rept 8
+	inc bc
+	ld a, (bc)
+	cp a, h
+	jr z, GbcTextAddColorAllocFound
+.endm
+
+	; TODO: better handle the "color not found" scenario
+
+	; clear SVBK
+	xor a, a
+	ld (_SVBK_REG), a
+	ei ; SVBK cannot be changed between interrupts
+
+	; return zero
+	ld e, a
+	ret
+
+GbcTextAddColorAllocFound:
+	; set SVBK to 3
+	ld a, #0x03
+	ld (_SVBK_REG), a
+
+	; c & 0x0F = slot
+	ld a, c
+	and a, #0x0F
+	ld (de), a
+
+	; we only need to preserve (bc) from here
+	; but we need to set the colors in bank 2
+	; the goal is de = y << 6 | slot << 2
+
+	; set SVBK to 0 so we can access the y/col values again
+	xor a, a
+	ld (_SVBK_REG), a
+	ei ; SVBK cannot be changed between interrupts
+
+	ldhl sp, #2
+	ld a, (hl+)
+
+	; de = y << 6
+	ld d, a
+	ld e, #0
+	sra d
+	rr e
+	sra d
+	rr e
+
+	; de = y << 6 | slot << 2
+	ld a, c
+	and a, #0x0F
+	sla a
+	sla a
+	or a, e
+	ld e, a
+
+	; de |= 0xD000
+	ld a, d
+	or a, #0xD0
+	ld d, a
+
+	; a = color
+	ld a, (hl)
+	ld (0xFFA3), a
+
+	di ; SVBK cannot be changed between interrupts
+	; set SVBK to 2
+	ld a, #0x02
+	ld (_SVBK_REG), a
+
+	; calculate offset for bg color
+	ld hl, #_cgb_palette
+	ld a, (0xFFA3)
+	swap a
+	and a, #0x0F
+	sla a
+
+	add a, l
+	ld l, a
+	ld a, h
+	adc a, #0
 	ld h, a
 
+	; copy data
+	ld a, (hl+)
+	ld (de), a
+	inc de
+	ld a, (hl)
+	ld (de), a
+	inc de
+
+	; calculate offset for fg color
+	ld hl, #_cgb_palette
+	ld a, (0xFFA3)
+	and a, #0x0F
+	sla a
+
+	add a, l
+	ld l, a
+	ld a, h
+	adc a, #0
+	ld h, a
+
+	; copy data
+	ld a, (hl+)
+	ld (de), a
+	inc de
+	ld a, (hl)
+	ld (de), a
+
+	; set SVBK to 4
+	ld a, #0x04
+	ld (_SVBK_REG), a
+
+	; set usage count to 0
 	xor a, a
-	ldh (_VBK_REG + 0), a
-	
-SyncLoopA:
-	di
-	ldh a, (_STAT_REG + 0)
-	and a, #0x02
-	jp z, SyncLoopAEnd
-	ei
-	jp SyncLoopA
+GbcTextAddColorIncrAlloc:
+	inc a
+	ld (bc), a
 
-SyncLoopAEnd:
-	ld (hl), c
+GbcTextAddColorFinish:
+	; clear SVBK
+	xor a, a
+	ld (_SVBK_REG), a
+	ei ; SVBK cannot be changed between interrupts
 
-	ei
+	; c & 0x0F - palette entry
+	ld a, c
+	and a, #0x0F
+	ld e, a
+__endasm;
+}
 
+static void gbc_text_undraw(uint8_t x, uint8_t y) {
+__asm
+	; create X/Y pointer
+	ld hl, #(_draw_offset_x)
+	ld a, (hl+)
+	ld b, (hl)
+	ld c, a
+	; b = draw_offset_y, c = draw_offset_x
+	ldhl sp, #3
+	ld a, (hl-)
+	add a, b
+	and a, #0x1F ; a = (y + draw_offset_y) & 0x1F
+	ld e, a
+	ld d, #0x00
+.rept 5
+	sla e
+	rl d
+.endm
+	ld a, (hl)
+	add a, c
+	and a, #0x1F ; a = (x + draw_offset_x) & 0x1F
+	or a, e ; da = X/Y pointer
+	ld e, a ; de = X/Y pointer too
+
+	di ; SVBK cannot be changed between interrupts
+	; configure SVBK
+	ld a, #0x02
+	ld (_SVBK_REG), a
+
+	ld a, d
+	or a, #0xD8
+	ld d, a
+
+	; read color
+	ld a, (de)
+	ld d, a
+
+	; clear SVBK
+	xor a, a
+	ld (_SVBK_REG), a
+	ei ; SVBK cannot be changed between interrupts
+
+	ldhl sp, #3
+	ld a, (hl)
+	ld e, a
+	; de = col, y
+	push bc
+	push de
+	call _gbc_text_remove_color
+	pop de
 	pop bc
 __endasm;
 }
 
 static void gbc_text_draw(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
-	col &= 0x7F;
-	
-	x = (draw_offset_x + x) & 0x1F;
-	y = (draw_offset_y + y) & 0x1F;
-
-	ENABLE_RAM_MBC5;
-	SWITCH_RAM_MBC5(0);
-
-	uint16_t offset = (y << 5) | x;
-	cgb_back_chr[offset] = chr;
-
-	if ((col == cgb_back_col[offset]) && !full_redraw) {
-		text_cgb_push_char_only(0x9800 | offset, chr);
-	} else {
-		uint8_t y_shift = (1 << (y & 7));
-		cgb_back_col[offset] = col;
-		cgb_update_row[y >> 3] |= y_shift;
-	}
-
-	DISABLE_RAM_MBC5;
-}
-
-static volatile uint16_t asm_pass_palptr;
-static volatile uint16_t asm_tmp_pal1;
-static volatile uint16_t asm_tmp_pal2;
-
-static void text_cgb_push_color(void) {
 __asm
-	ld hl, #(_asm_tmp_pal1)
+	; create X/Y pointer
+	ld hl, #(_draw_offset_x)
+	ld a, (hl+)
 	ld b, (hl)
-	inc hl
-	ld c, (hl)
-	inc hl
-	ld d, (hl)
-	inc hl
-	ld e, (hl)
+	ld c, a
+	; b = draw_offset_y, c = draw_offset_x
+	ldhl sp, #3
+	ld a, (hl-)
+	add a, b
+	and a, #0x1F ; a = (y + draw_offset_y) & 0x1F
+	ld e, a
+	ld d, #0x00
+.rept 5
+	sla e
+	rl d
+.endm
+	ld a, (hl)
+	add a, c
+	and a, #0x1F ; a = (x + draw_offset_x) & 0x1F
+	or a, e ; da = X/Y pointer
+	ld e, a ; de = X/Y pointer too
 
-	push bc
+	; 0xFFA0 - 0xFFA3 = X/Y pointer, chr, col
+	ld (0xFFA0), a
+	ld a, d
+	ld (0xFFA1), a
+	ldhl sp, #4
+	ld a, (hl+)
+	ld (0xFFA2), a
+	ld a, (hl)
+	and a, #0x7F ; blinking not supported
+	ld (0xFFA3), a
 
-	ld hl, #(_asm_pass_palptr)
-	ld c, (hl)
-	inc hl
-	ld b, (hl)
-	ld l, c
-	ld h, b
+	; get existing tile color
+	ld b, a ; last value saved above is col
 
-	pop bc
+	ld a, d
+	or a, #0xD8
+	ld d, a
 
+	di ; SVBK cannot be changed between interrupts
+	; configure SVBK
 	ld a, #0x02
+	ld (_SVBK_REG), a
 
-	di
-	ldh (_SVBK_REG + 0), a
+	ld a, (de)
 
-	ld (hl), b
-	inc hl
-	ld (hl), c
-	inc hl
-	ld (hl), d
-	inc hl
-	ld (hl), e
+	cp a, b
+	jp z, GbcTextDrawSetChar
+
+	; color changed
+	; a = old tile color
+	; b = new tile color
+
+	ld c, a ; bc = new, old
 
 	xor a, a
-	ldh (_SVBK_REG + 0), a
-	ei
-__endasm;
-}
+	ld (_SVBK_REG), a
+	ei ; SVBK cannot be changed between interrupts
 
-static void text_cgb_push_char(uint16_t pos, uint8_t v1, uint8_t v2) {
-__asm
-	ldhl sp, #5
-	ld c, (hl)
-	dec hl
-	ld b, (hl)
-	dec hl
-	ld a, (hl-)
-	ld l, (hl)
-	ld h, a
+	ldhl sp, #3
+	ld a, (hl)
+	ld e, a
+	ld d, c ; de = old, y
+	push bc
+	push de
+	call _gbc_text_remove_color
+	pop de
+	pop bc
+	ld d, b ; de = new, y
+	push de
+	call _gbc_text_add_color
+	ld a, e
+	ld (0xFFA4), a
+	pop de
+
+	di ; SVBK cannot be changed between interrupts
+	; configure SVBK
+	ld a, #0x02
+	ld (_SVBK_REG), a
+
+	; create buffer pointer for color
+	ld a, (0xFFA0)
+	ld e, a
+	ld a, (0xFFA1)
+	or a, #0xD8
+	ld d, a
+
+	; write color
+	ld a, (0xFFA3)
+	ld (de), a
+
+	xor a, a
+	ld (_SVBK_REG), a
+	ei ; SVBK cannot be changed between interrupts
+
+	; prepare value to write to VRAM bank 1
+	ld a, (0xFFA4)
+	rr a
+	jr nc, GbcTextDrawSetColorAAA
+	or a, #0x08
+
+GbcTextDrawSetColorAAA:
+	ld b, a
+	ld a, d
+	and a, #0xBB ; 0xD8 -> 0x98
+	ld d, a
 
 	ld a, #0x01
-	ldh (_VBK_REG + 0), a
+	ld (_VBK_REG), a
+
+	ld a, b
+	ld hl, #(_STAT_REG)
+GbcTextDrawSetColorStatLoop:
+	bit 1, (hl)
+	jr nz, GbcTextDrawSetColorStatLoop
+
+	ld (de), a
+
 	xor a, a
-	
-SyncLoop:
-	di
-	ldh a, (_STAT_REG + 0)
-	and a, #0x02
-	jp z, SyncLoopEnd
-	ei
-	jp SyncLoop
+	ld (_VBK_REG), a
 
-SyncLoopEnd:
-	ld (hl), c
-	ldh (_VBK_REG + 0), a
-	ld (hl), b
+	; all registers trashed
 
-	ei
+GbcTextDrawSetChar:
+	di ; SVBK cannot be changed between interrupts
+	; configure SVBK
+	ld a, #0x02
+	ld (_SVBK_REG), a
+
+	; read char from buffer
+	ld a, (0xFFA0)
+	ld e, a
+	ld a, (0xFFA1)
+	or a, #0xDC
+	ld d, a
+	ld a, (de)
+	ld b, a
+	ld a, (0xFFA2)
+
+	cp a, b
+	jr z, GbcTextDrawFinish
+
+	ld (de), a
+	ld b, a
+
+	xor a, a
+	ld (_SVBK_REG), a
+	ei ; SVBK cannot be changed between interrupts
+
+	ld a, d
+	and a, #0xBB ; 0xDC -> 0x98
+	ld d, a
+
+	ld a, b
+	ld hl, #(_STAT_REG)
+GbcTextDrawSetCharStatLoop:
+	bit 1, (hl)
+	jr nz, GbcTextDrawSetCharStatLoop
+
+	ld (de), a
+
+GbcTextDrawFinish:
+	; clear SVBK
+	xor a, a
+	ld (_SVBK_REG), a
+	ei ; SVBK cannot be changed between interrupts
 __endasm;
-}
-
-static void text_cgb_update_row(uint8_t y) {
-	uint8_t colors_used = 0;
-
-	uint8_t i;
-	uint8_t x = draw_offset_x;
-
-	uint16_t offset = (y << 5);
-	uint16_t vram_addr = 0x9800 | offset;
-
-	// build row buffer
-	uint8_t *back_chr_offset = cgb_back_chr + offset;
-	uint8_t *back_col_offset = cgb_back_col + offset;
-
-	asm_pass_palptr = 0xD000 | (y << 6);
- 
-	for (i = draw_offset_x; i != draw_offset_x_end; i = (i + 1) & 0x1F) {
-		uint8_t col = back_col_offset[i];
-		uint8_t j = 0;
-
-		for (; j < colors_used; j++) {
-			if (cgb_color_buffer[j] == col) {
-				break;
-			}
-		}
-
-		if (j == colors_used) {
-			if (j < 9) {
-				cgb_color_buffer[j] = col;
-				asm_tmp_pal1 = cgb_palette[col >> 4];
-				asm_tmp_pal2 = cgb_palette[col & 0x0F];
-				text_cgb_push_color();
-				asm_pass_palptr += 4;
-				colors_used++;
-			} else {
-				// TODO
-				j = 0;
-			}
-		}
-		
-		uint8_t dcol = (j >> 1) | ((j & 0x01) << 3);
-		text_cgb_push_char(vram_addr | i, back_chr_offset[i], dcol);
-	}
 }
 
 void gbc_text_init(void);
 
 static void gbc_text_update(void) {
-	bool ram_enabled = false;
-
-	for (uint8_t r1 = 0; r1 < 4; r1++) {
-		uint8_t v = cgb_update_row[r1];
-		if (v != 0) {
-			if (!ram_enabled) {
-				ram_enabled = true;
-				ENABLE_RAM_MBC5;
-				SWITCH_RAM_MBC5(0);
-			}
-
-			uint8_t row = r1 << 3;
-			if (v&1) text_cgb_update_row(row);
-			if (v&2) text_cgb_update_row(row+1);
-			if (v&4) text_cgb_update_row(row+2);
-			if (v&8) text_cgb_update_row(row+3);
-			if (v&16) text_cgb_update_row(row+4);
-			if (v&32) text_cgb_update_row(row+5);
-			if (v&64) text_cgb_update_row(row+6);
-			if (v&128) text_cgb_update_row(row+7);
-			cgb_update_row[r1] = 0;
-		} 
-	}
-
-	if (ram_enabled) {
-		DISABLE_RAM_MBC5;
-	}
-
 	scx_shadow_reg = draw_offset_x << 3;
 	scy_shadow_reg = draw_offset_y << 3;
-	full_redraw = false;
 }
 
 static void gbc_text_mark_redraw(void) {
-	full_redraw = true;
+
 }
 
 static void gbc_text_scroll(int8_t dx, int8_t dy) {
+	// TODO: fix
+
 	draw_offset_x = (draw_offset_x + dx) & 0x1F;
 	draw_offset_y = (draw_offset_y + dy) & 0x1F;
 
 	draw_offset_x_end = (draw_offset_x + VIEWPORT_WIDTH) & 0x1F;
 	draw_offset_y_end = (draw_offset_y + VIEWPORT_HEIGHT) & 0x1F;
-
-	if (dx != 0) {
-DoFullRedraw:
-		full_redraw = true;
-		for (uint8_t y = draw_offset_y; y != draw_offset_y_end; y = (y + 1) & 0x1F) {
-			cgb_update_row[y >> 3] |= 1 << (y & 7);
-		}
-	} else {
-		if (dy == -1) {
-			cgb_update_row[draw_offset_y >> 3] |= 1 << (draw_offset_y & 7);
-		} else if (dy == 1) {
-			uint8_t y = (draw_offset_y_end - 1) & 0x1F;
-			cgb_update_row[y >> 3] |= 1 << (y & 7);
-		} else {
-			goto DoFullRedraw;
-		}
-	}
 }
 
 const renderer_t renderer_gbc = {
 	gbc_text_init,
+	gbc_text_undraw,
 	gbc_text_draw,
 	gbc_text_mark_redraw,
 	gbc_text_scroll,

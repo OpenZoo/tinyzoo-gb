@@ -88,6 +88,16 @@ void board_draw_char(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
 	text_draw(vx, vy, chr, col);
 }
 
+void board_undraw_tile(uint8_t x, uint8_t y) {
+	// Viewport check
+	uint8_t vx = x - viewport_x;
+	if (vx >= VIEWPORT_WIDTH) return;
+	uint8_t vy = y - viewport_y;
+	if (vy >= VIEWPORT_HEIGHT) return;
+
+	text_undraw(vx, vy);
+}
+
 void board_draw_tile(uint8_t x, uint8_t y) {
 	// Viewport check
 	uint8_t vx = x - viewport_x;

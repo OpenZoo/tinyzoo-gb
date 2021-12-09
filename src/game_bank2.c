@@ -115,6 +115,9 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 		} else if (pox == VIEWPORT_PLAYER_MIN_X-1) {
 			// move left
 			if (viewport_x > VIEWPORT_MIN_X) {
+				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
+					board_undraw_tile(viewport_x + VIEWPORT_WIDTH - 1, iy + viewport_y);
+				}
 				viewport_x--;
 				text_scroll(-1, 0);
 				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
@@ -124,6 +127,9 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 		} else if (pox == VIEWPORT_PLAYER_MAX_X+1) {
 			// move right
 			if (viewport_x < VIEWPORT_MAX_X) {
+				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
+					board_undraw_tile(viewport_x, iy + viewport_y);
+				}
 				viewport_x++;
 				text_scroll(1, 0);
 				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
