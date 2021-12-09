@@ -93,7 +93,7 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 			uint8_t ov_y = viewport_y;
 			center_viewport_on_player();
 			int8_t vd_y = viewport_y - ov_y;
-			if (viewport_x == ov_x) {
+			/* if (viewport_x == ov_x) {
 				text_scroll(0, vd_y);
 				if (vd_y < 0) {
 					for (uint8_t iy = 0; iy < (uint8_t) (-vd_y); iy++) {
@@ -108,13 +108,17 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 						}
 					}
 				}
-			} else {
-				text_mark_redraw();
+			} else */
+			{
+//				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
+//					text_free_line(iy);
+//				}
 				board_redraw();
 			}
 		} else if (pox == VIEWPORT_PLAYER_MIN_X-1) {
 			// move left
 			if (viewport_x > VIEWPORT_MIN_X) {
+				renderer_scrolling = 1;
 				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
 					board_undraw_tile(viewport_x + VIEWPORT_WIDTH - 1, iy + viewport_y);
 				}
@@ -127,6 +131,7 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 		} else if (pox == VIEWPORT_PLAYER_MAX_X+1) {
 			// move right
 			if (viewport_x < VIEWPORT_MAX_X) {
+				renderer_scrolling = 1;
 				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
 					board_undraw_tile(viewport_x, iy + viewport_y);
 				}
@@ -139,8 +144,10 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 		} else if (poy == VIEWPORT_PLAYER_MIN_Y-1) {
 			// move up
 			if (viewport_y > VIEWPORT_MIN_Y) {
+				renderer_scrolling = 1;
 				viewport_y--;
 				text_scroll(0, -1);
+				text_free_line(0);
 				for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
 					board_draw_tile(ix + viewport_x, viewport_y);
 				}
@@ -148,12 +155,16 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 		} else if (poy == VIEWPORT_PLAYER_MAX_Y+1) {
 			// move down
 			if (viewport_y < VIEWPORT_MAX_Y) {
+				renderer_scrolling = 1;
 				viewport_y++;
 				text_scroll(0, 1);
+				text_free_line(VIEWPORT_HEIGHT - 1);
 				for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
 					board_draw_tile(ix + viewport_x, viewport_y + VIEWPORT_HEIGHT - 1);
 				}
 			}
 		}
+
+		renderer_scrolling = 0;
 	}
 }

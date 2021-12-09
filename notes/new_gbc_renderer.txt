@@ -45,3 +45,23 @@ adding color:
   (if not found, ???)
 - set usage count to 1
 - set palette color map entry
+
+freeing line:
+- set 128 bytes in 3:y << 7 to 0xFF
+- set 16 bytes in 4:y << 4 to 0xFF
+
+
+scrolling x:
+- undraw old tiles
+- scroll x
+- draw new tiles
+
+scrolling y:
+- free new ylines
+- scroll y
+- draw new tiles
+
+scrolling full:
+- free all lines
+- scroll x, y
+- draw new tiles
