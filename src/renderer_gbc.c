@@ -32,9 +32,6 @@ const uint16_t cgb_palette[16] = {
 
 uint16_t cgb_message_palette[18];
 
-static uint8_t draw_offset_x_end = VIEWPORT_WIDTH;
-static uint8_t draw_offset_y_end = VIEWPORT_HEIGHT;
-
 static uint16_t hblank_isr_sp;
 static uint16_t hblank_isr_pal_pos;
 extern uint8_t ly_bank_switch;
@@ -280,7 +277,13 @@ void gbc_vblank_isr(void) {
 static void gbc_text_remove_color(uint8_t y, uint8_t col) {
 __asm
 	ldhl sp, #2
-	ld a, (hl+)
+	ld a, (hl)
+
+	ld e, a
+	ld hl, #(_draw_offset_y)
+	ld a, (hl)
+	add a, e
+	and a, #0x1F
 
 	; de = y << 7
 	ld d, a
@@ -289,6 +292,7 @@ __asm
 	rr e
 
 	; a = col
+	ldhl sp, #3
 	ld a, (hl)
 
 	; de = y << 7 | col
@@ -368,10 +372,86 @@ GbcTextRemoveColorFinish:
 __endasm;
 }
 
+static void gbc_text_free_line(uint8_t y) {
+__asm
+	ldhl sp, #2
+	ld a, (hl)
+
+	ld e, a
+	ld hl, #(_draw_offset_y)
+	ld a, (hl)
+	add a, e
+	and a, #0x1F
+
+	; de = y << 7
+	ld d, a
+	ld e, #0
+	sra d
+	rr e
+
+	; bc = y << 7
+	ld b, d
+	ld c, e
+
+	; de |= 0xD000
+	ld a, d
+	or a, #0xD0
+	ld d, a
+
+	; bc = y << 4
+.rept 3
+	sra b
+	rr c
+.endm
+
+	; bc |= 0xD000
+	ld a, b
+	or a, #0xD0
+	ld b, a
+
+	di ; SVBK cannot be changed between interrupts
+	; set SVBK to 3
+	ld a, #0x03
+	ld (_SVBK_REG), a
+
+	ld a, #0xFF
+	ld h, #0x80
+
+GbcTextFreeLineLoop1:
+	ld (de), a
+	inc de
+	dec h
+	jr nz, GbcTextFreeLineLoop1
+
+	; set SVBK to 4
+	ld a, #0x04
+	ld (_SVBK_REG), a
+
+	ld a, #0x00
+	ld h, #0x10
+
+GbcTextFreeLineLoop2:
+	ld (bc), a
+	inc bc
+	dec h
+	jr nz, GbcTextFreeLineLoop2
+
+	; clear SVBK
+	ld (_SVBK_REG), a
+	ei ; SVBK cannot be changed between interrupts
+__endasm;
+}
+
 static uint8_t gbc_text_add_color(uint8_t y, uint8_t col) {
 __asm
 	ldhl sp, #2
-	ld a, (hl+)
+	ld a, (hl)
+
+	ld e, a
+	ld hl, #(_draw_offset_y)
+	ld a, (hl)
+	add a, e
+	and a, #0x1F
 
 	; de = y << 7
 	ld d, a
@@ -380,6 +460,7 @@ __asm
 	rr e
 
 	; a = col
+	ldhl sp, #3
 	ld a, (hl)
 
 	; de = y << 7 | col
@@ -481,7 +562,13 @@ GbcTextAddColorAllocFound:
 	ei ; SVBK cannot be changed between interrupts
 
 	ldhl sp, #2
-	ld a, (hl+)
+	ld a, (hl)
+
+	ld e, a
+	ld hl, #(_draw_offset_y)
+	ld a, (hl)
+	add a, e
+	and a, #0x1F
 
 	; de = y << 6
 	ld d, a
@@ -505,6 +592,7 @@ GbcTextAddColorAllocFound:
 	ld d, a
 
 	; a = color
+	ldhl sp, #3
 	ld a, (hl)
 	ld (0xFFA3), a
 
@@ -672,6 +760,12 @@ __asm
 	or a, #0xD8
 	ld d, a
 
+	; renderer scrolling check 1 - assume color changed
+	ld hl, #(_renderer_scrolling)
+	ld a, (hl)
+	bit 0, a
+	jr nz, GbcTextDrawColorChanged
+
 	di ; SVBK cannot be changed between interrupts
 	; configure SVBK
 	ld a, #0x02
@@ -682,6 +776,7 @@ __asm
 	cp a, b
 	jp z, GbcTextDrawSetChar
 
+GbcTextDrawColorChanged:
 	; color changed
 	; a = old tile color
 	; b = new tile color
@@ -695,12 +790,20 @@ __asm
 	ldhl sp, #3
 	ld a, (hl)
 	ld e, a
+
+	; renderer scrolling check 2 - no remove
+	ld hl, #(_renderer_scrolling)
+	ld a, (hl)
+	bit 0, a
+	jr nz, GbcTextDrawNoRemove
+
 	ld d, c ; de = old, y
 	push bc
 	push de
 	call _gbc_text_remove_color
 	pop de
 	pop bc
+GbcTextDrawNoRemove:
 	ld d, b ; de = new, y
 	push de
 	call _gbc_text_add_color
@@ -809,25 +912,19 @@ static void gbc_text_update(void) {
 	scy_shadow_reg = draw_offset_y << 3;
 }
 
-static void gbc_text_mark_redraw(void) {
-
-}
 
 static void gbc_text_scroll(int8_t dx, int8_t dy) {
 	// TODO: fix
 
 	draw_offset_x = (draw_offset_x + dx) & 0x1F;
 	draw_offset_y = (draw_offset_y + dy) & 0x1F;
-
-	draw_offset_x_end = (draw_offset_x + VIEWPORT_WIDTH) & 0x1F;
-	draw_offset_y_end = (draw_offset_y + VIEWPORT_HEIGHT) & 0x1F;
 }
 
 const renderer_t renderer_gbc = {
 	gbc_text_init,
 	gbc_text_undraw,
 	gbc_text_draw,
-	gbc_text_mark_redraw,
+	gbc_text_free_line,
 	gbc_text_scroll,
 	gbc_text_update
 };

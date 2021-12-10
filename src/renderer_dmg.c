@@ -117,7 +117,7 @@ __asm
 __endasm;
 }
 
-static void dmg_text_mark_redraw(void) {
+static void dmg_text_free_line(uint8_t y) {
 
 }
 
@@ -135,7 +135,7 @@ const renderer_t renderer_dmg = {
 	dmg_text_init,
 	dmg_text_undraw,
 	dmg_text_draw,
-	dmg_text_mark_redraw,
+	dmg_text_free_line,
 	dmg_text_scroll,
 	dmg_text_update
 };

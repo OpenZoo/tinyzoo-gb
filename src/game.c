@@ -1,4 +1,4 @@
-#include <stdbool.h>
+	#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <gb/gb.h>
@@ -34,16 +34,16 @@ const int8_t neighbor_delta_y[4] = {-1, 1, 0, 0};
 const int8_t diagonal_delta_x[8] = {-1, 0, 1, 1, 1, 0, -1, -1};
 const int8_t diagonal_delta_y[8] = {1, 1, 1, 0, -1, -1, -1, 0};
 
-uint8_t viewport_x = 1;
-uint8_t viewport_y = 1;
+int8_t viewport_x = 1;
+int8_t viewport_y = 1;
 
 void center_viewport_on_player(void) {
 	int8_t vx = ZOO_STAT(0).x - VIEWPORT_CENTER_X;
 	int8_t vy = ZOO_STAT(0).y - VIEWPORT_CENTER_Y;
 	if (vx < VIEWPORT_MIN_X) vx = VIEWPORT_MIN_X;
-	if (vx >= VIEWPORT_MAX_X) vx = VIEWPORT_MAX_X;
+	else if (vx > VIEWPORT_MAX_X) vx = VIEWPORT_MAX_X;
 	if (vy < VIEWPORT_MIN_Y) vy = VIEWPORT_MIN_Y;
-	if (vy >= VIEWPORT_MAX_Y) vy = VIEWPORT_MAX_Y;
+	else if (vy > VIEWPORT_MAX_Y) vy = VIEWPORT_MAX_Y;
 
 	viewport_x = vx;
 	viewport_y = vy;
@@ -89,7 +89,6 @@ void board_draw_char(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
 }
 
 void board_undraw_tile(uint8_t x, uint8_t y) {
-	// Viewport check
 	uint8_t vx = x - viewport_x;
 	if (vx >= VIEWPORT_WIDTH) return;
 	uint8_t vy = y - viewport_y;
@@ -156,11 +155,16 @@ BoardDrawTileFinished:
 }
 
 void board_redraw(void) {
+	renderer_scrolling = 1;
+
 	for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
+		text_free_line(iy);
 		for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
 			board_draw_tile(ix + viewport_x, iy + viewport_y);
 		}
 	}
+
+	renderer_scrolling = 0;
 }
 
 void game_play_loop(bool board_changed) {

@@ -74,51 +74,8 @@ void ElementGemTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	}
 }
 
-void ElementKeyTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
-	zoo_tile_t *tile = &ZOO_TILE(x, y);
-	uint8_t key = (tile->color & 7);
-	if (key == 0) {
-		// TODO: black key
-	} else {
-		uint8_t key_shift = 1 << key;
-
-		if (zoo_world_info.keys & key_shift) {
-			// TODO
-			sound_queue(2, sound_key_failure);
-		} else {
-			zoo_world_info.keys |= key_shift;
-			tile->element = E_EMPTY;
-			game_update_sidebar_keys();
-
-			// TODO
-			sound_queue(2, sound_key_success);
-		}
-	}
-}
-
-void ElementDoorTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
-	zoo_tile_t *tile = &ZOO_TILE(x, y);
-	uint8_t key = (tile->color >> 4) & 7;
-	if (key == 0) {
-		// TODO: black door
-	} else {
-		uint8_t key_shift = 1 << key;
-
-		if (!(zoo_world_info.keys & key_shift)) {
-			// TODO
-			sound_queue(3, sound_door_failure);
-		} else {
-			tile->element = E_EMPTY;
-			board_draw_tile(x, y);
-
-			zoo_world_info.keys &= ~key_shift;
-			game_update_sidebar_keys();
-
-			// TODO
-			sound_queue(3, sound_door_success);
-		}
-	}
-}
+void ElementKeyTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy);
+void ElementDoorTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy);
 
 void ElementScrollTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);

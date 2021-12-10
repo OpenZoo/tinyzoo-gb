@@ -6,6 +6,7 @@
 
 renderer_t active_renderer;
 
+uint8_t renderer_scrolling = 0;
 uint8_t draw_offset_x = 0;
 uint8_t draw_offset_y = 0;
 uint8_t scx_shadow_reg = 0;

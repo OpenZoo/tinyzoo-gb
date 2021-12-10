@@ -31,3 +31,25 @@ const char msg_ouch[] = "Ouch!";
 const char msg_torch_hint_line1[] = "Room is dark:";
 const char msg_torch_hint_line2[] = "You need to";
 const char msg_torch_hint_line3[] = "light a torch!";
+
+const char msg_key_pickup_no[] = "You already have a";
+const char msg_key_pickup_yes[] = "You now have the";
+const char msg_key_pickup_08[] = "Black key?";
+const char msg_key_pickup_09[] = "Blue key!";
+const char msg_key_pickup_0a[] = "Green key!";
+const char msg_key_pickup_0b[] = "Cyan key!";
+const char msg_key_pickup_0c[] = "Red key!";
+const char msg_key_pickup_0d[] = "Purple key!";
+const char msg_key_pickup_0e[] = "Yellow key!";
+const char msg_key_pickup_0f[] = "White key!";
+
+const char msg_door_open_no[] = "is locked!";
+const char msg_door_open_yes[] = "is now open.";
+const char msg_door_open_08[] = "The Black door";
+const char msg_door_open_09[] = "The Blue door";
+const char msg_door_open_0a[] = "The Green door";
+const char msg_door_open_0b[] = "The Cyan door";
+const char msg_door_open_0c[] = "The Red door";
+const char msg_door_open_0d[] = "The Purple door";
+const char msg_door_open_0e[] = "The Yellow door";
+const char msg_door_open_0f[] = "The White door";

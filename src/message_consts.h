@@ -30,5 +30,25 @@ extern const char msg_ouch[];
 extern const char msg_torch_hint_line1[];
 extern const char msg_torch_hint_line2[];
 extern const char msg_torch_hint_line3[];
+extern const char msg_key_pickup_no[];
+extern const char msg_key_pickup_yes[];
+extern const char msg_key_pickup_08[];
+extern const char msg_key_pickup_09[];
+extern const char msg_key_pickup_0a[];
+extern const char msg_key_pickup_0b[];
+extern const char msg_key_pickup_0c[];
+extern const char msg_key_pickup_0d[];
+extern const char msg_key_pickup_0e[];
+extern const char msg_key_pickup_0f[];
+extern const char msg_door_open_no[];
+extern const char msg_door_open_yes[];
+extern const char msg_door_open_08[];
+extern const char msg_door_open_09[];
+extern const char msg_door_open_0a[];
+extern const char msg_door_open_0b[];
+extern const char msg_door_open_0c[];
+extern const char msg_door_open_0d[];
+extern const char msg_door_open_0e[];
+extern const char msg_door_open_0f[];
 
 #endif /* __MESSAGE_CONSTS_H__ */

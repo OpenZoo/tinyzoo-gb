@@ -8,4 +8,6 @@
 // Use RNG by Damian Yerrick. Faster.
 #define USE_YERRICK_RNG
 
+#define FEAT_BLACK_KEYS
+
 #endif /* __CONFIG_H__ */

@@ -8,7 +8,7 @@ typedef struct {
 	void (*init)(void);
 	void (*undraw)(uint8_t x, uint8_t y);
 	void (*draw)(uint8_t x, uint8_t y, uint8_t chr, uint8_t col);
-	void (*mark_redraw)(void);
+	void (*free_line)(uint8_t y);
 	void (*scroll)(int8_t dx, int8_t dy);
 	void (*update)(void);
 } renderer_t;
@@ -16,6 +16,7 @@ typedef struct {
 extern uint8_t hblank_isr_jp;
 extern uint16_t hblank_isr_ip;
 
+extern uint8_t renderer_scrolling; // if 1, do not remove colors
 extern uint8_t draw_offset_x;
 extern uint8_t draw_offset_y;
 extern uint8_t scx_shadow_reg;
@@ -29,7 +30,7 @@ void text_init(const renderer_t *renderer);
 
 #define text_undraw(a, b) active_renderer.undraw(a, b)
 #define text_draw(a, b, c, d) active_renderer.draw(a, b, c, d)
-#define text_mark_redraw() active_renderer.mark_redraw()
+#define text_free_line(a) active_renderer.free_line(a)
 #define text_scroll(a, b) active_renderer.scroll(a, b)
 #define text_update() active_renderer.update()
 

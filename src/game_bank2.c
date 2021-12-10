@@ -30,8 +30,8 @@ static const zoo_stat_t StatCreatePlayer = {
 	{0, 0}
 };
 
-extern uint8_t viewport_x;
-extern uint8_t viewport_y;
+extern int8_t viewport_x;
+extern int8_t viewport_y;
 
 void board_create(void) BANKED {
 	memset(&zoo_board_info, 0, sizeof(zoo_board_info));
@@ -82,42 +82,84 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 		board_redraw();
 	} else {
 		// move viewport?
-		int8_t pox = new_x - viewport_x;
-		int8_t poy = new_y - viewport_y;
-		int8_t dist = difference8(old_x, new_x) + difference8(old_y, new_y);
+		int8_t ovx = viewport_x;
+		int8_t ovy = viewport_y;
+		int8_t vx = viewport_x;
+		int8_t vy = viewport_y;
+		int8_t pox = new_x - vx;
+		int8_t poy = new_y - vy;
+		bool recalc_required = false;
 
-		if (dist > 1) {
-			// full viewport adjust
-			// TODO: optimize?
-			uint8_t ov_x = viewport_x;
-			uint8_t ov_y = viewport_y;
-			center_viewport_on_player();
-			int8_t vd_y = viewport_y - ov_y;
-			/* if (viewport_x == ov_x) {
-				text_scroll(0, vd_y);
-				if (vd_y < 0) {
-					for (uint8_t iy = 0; iy < (uint8_t) (-vd_y); iy++) {
-						for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
-							board_draw_tile(ix + viewport_x, iy + viewport_y);
-						}
-					}
-				} else {
-					for (uint8_t iy = 0; iy < (uint8_t) (vd_y); iy++) {
-						for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
-							board_draw_tile(ix + viewport_x, viewport_y + VIEWPORT_HEIGHT - 1 - iy);
-						}
-					}
-				}
-			} else */
-			{
-//				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
-//					text_free_line(iy);
-//				}
-				board_redraw();
+		if (pox < VIEWPORT_PLAYER_MIN_X) {
+			if ((old_x - 1) == new_x) {
+				vx--;
+				if (vx < VIEWPORT_MIN_X) vx = VIEWPORT_MIN_X;
+			} else {
+				recalc_required = true;
 			}
-		} else if (pox == VIEWPORT_PLAYER_MIN_X-1) {
-			// move left
-			if (viewport_x > VIEWPORT_MIN_X) {
+		} else if (pox > VIEWPORT_PLAYER_MAX_X) {
+			if ((old_x + 1) == new_x) {
+				vx++;
+				if (vx > VIEWPORT_MAX_X) vx = VIEWPORT_MAX_X;
+			} else {
+				recalc_required = true;
+			}
+		}
+
+		if (poy < VIEWPORT_PLAYER_MIN_Y) {
+			if ((old_y - 1) == new_y) {
+				vy--;
+				if (vy < VIEWPORT_MIN_Y) vy = VIEWPORT_MIN_Y;
+			} else {
+				recalc_required = true;
+			}
+		} else if (poy > VIEWPORT_PLAYER_MAX_Y) {
+			if ((old_y + 1) == new_y) {
+				vy++;
+				if (vy > VIEWPORT_MAX_Y) vy = VIEWPORT_MAX_Y;
+			} else {
+				recalc_required = true;
+			}
+		}
+
+		if (recalc_required) {
+			center_viewport_on_player();
+			vx = viewport_x;
+			viewport_x = ovx;
+			vy = viewport_y;
+			viewport_y = ovy;
+		}
+
+		if (ovx != vx || ovy != vy) {
+			pox = vx - ovx;
+			poy = vy - ovy;
+			uint8_t dist = abs(pox) + abs(poy);
+
+			if (dist > 1) {
+				viewport_x = vx;
+				viewport_y = vy;
+				/* if (viewport_x == ov_x) {
+					text_scroll(0, vd_y);
+					if (vd_y < 0) {
+						for (uint8_t iy = 0; iy < (uint8_t) (-vd_y); iy++) {
+							for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
+								board_draw_tile(ix + viewport_x, iy + viewport_y);
+							}
+						}
+					} else {
+						for (uint8_t iy = 0; iy < (uint8_t) (vd_y); iy++) {
+							for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
+								board_draw_tile(ix + viewport_x, viewport_y + VIEWPORT_HEIGHT - 1 - iy);
+							}
+						}
+					}
+				} else */
+				/* for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
+					text_free_line(iy);
+				} */
+				board_redraw();
+			} else if (pox == -1) {
+				// move left
 				renderer_scrolling = 1;
 				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
 					board_undraw_tile(viewport_x + VIEWPORT_WIDTH - 1, iy + viewport_y);
@@ -127,10 +169,8 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
 					board_draw_tile(viewport_x, iy + viewport_y);
 				}
-			}
-		} else if (pox == VIEWPORT_PLAYER_MAX_X+1) {
-			// move right
-			if (viewport_x < VIEWPORT_MAX_X) {
+			} else if (pox == 1) {
+				// move right
 				renderer_scrolling = 1;
 				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
 					board_undraw_tile(viewport_x, iy + viewport_y);
@@ -140,10 +180,8 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
 					board_draw_tile(viewport_x + VIEWPORT_WIDTH - 1, iy + viewport_y);
 				}
-			}
-		} else if (poy == VIEWPORT_PLAYER_MIN_Y-1) {
-			// move up
-			if (viewport_y > VIEWPORT_MIN_Y) {
+			} else if (poy == -1) {
+				// move up
 				renderer_scrolling = 1;
 				viewport_y--;
 				text_scroll(0, -1);
@@ -151,10 +189,7 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 				for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
 					board_draw_tile(ix + viewport_x, viewport_y);
 				}
-			}
-		} else if (poy == VIEWPORT_PLAYER_MAX_Y+1) {
-			// move down
-			if (viewport_y < VIEWPORT_MAX_Y) {
+			} else if (poy == 1) {
 				renderer_scrolling = 1;
 				viewport_y++;
 				text_scroll(0, 1);

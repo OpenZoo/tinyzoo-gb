@@ -25,12 +25,12 @@ void sidebar_set_message_color(uint8_t color) BANKED {
 }
 
 static void gbc_text_init_wram(void) {
-__asm
+/* __asm
 	; clear banks 2, 3, 4
 	; TODO: inefficient
 	ld bc, #(_SVBK_REG)
 	ld de, #0xFF00
-	ld hl, #0xC000
+	ld hl, #0xD000
 	ld a, #2
 WramClearLoop:
 	ld (bc), a
@@ -48,6 +48,19 @@ WramClearLoop:
 	; finish
 	xor a, a
 	ld (bc), a
+__endasm; */
+__asm
+	; clear bank 2
+	ld a, #2
+	ld (_SVBK_REG), a
+	ld hl, #0xD000
+	xor a, a
+WramClearLoop:
+	ld (hl+), a
+	bit 5, h
+	jr z, WramClearLoop
+	; finish
+	ld (_SVBK_REG), a
 __endasm;
 }
 
@@ -81,7 +94,7 @@ void gbc_text_init(void) {
 	gbc_text_init_wram();
 
 	// set bottom bar
-	uint8_t *bottom_bar_ptr = (uint8_t*) 0x9C00 + (13 << 5); 
+	uint8_t *bottom_bar_ptr = (uint8_t*) 0x9C00 + (13 << 5);
 	VBK_REG = 1;
 	memset(bottom_bar_ptr, 0b00001011, (32 * 4));
 	bottom_bar_ptr += 128;
