@@ -848,11 +848,14 @@ GbcTextDrawSetColorAAA:
 
 	ld a, b
 	ld hl, #(_STAT_REG)
+	; TODO: this di/ei pair causes minor hicolor glitching
+	di
 GbcTextDrawSetColorStatLoop:
 	bit 1, (hl)
 	jr nz, GbcTextDrawSetColorStatLoop
 
 	ld (de), a
+	ei
 
 	xor a, a
 	ld (_VBK_REG), a
@@ -891,11 +894,14 @@ GbcTextDrawSetChar:
 
 	ld a, b
 	ld hl, #(_STAT_REG)
+	; TODO: this di/ei pair causes minor hicolor glitching
+	di
 GbcTextDrawSetCharStatLoop:
 	bit 1, (hl)
 	jr nz, GbcTextDrawSetCharStatLoop
 
 	ld (de), a
+	ei
 
 GbcTextDrawFinish:
 	; clear SVBK
@@ -914,8 +920,6 @@ static void gbc_text_update(void) {
 
 
 static void gbc_text_scroll(int8_t dx, int8_t dy) {
-	// TODO: fix
-
 	draw_offset_x = (draw_offset_x + dx) & 0x1F;
 	draw_offset_y = (draw_offset_y + dy) & 0x1F;
 }

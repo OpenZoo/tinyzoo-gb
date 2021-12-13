@@ -28,8 +28,7 @@ void ElementSlimeTick(uint8_t stat_id) {
 				if (!changed_tiles) {
 					changed_tiles = true;
 					move_stat(stat_id, tx, ty);
-					ZOO_TILE(start_x, start_y).element = E_BREAKABLE;
-					ZOO_TILE(start_x, start_y).color = color_copy;
+					ZOO_TILE_CHANGE2(start_x, start_y, E_BREAKABLE, color_copy);
 					board_draw_tile(start_x, start_y);
 				} else {
 					add_stat(tx, ty, E_SLIME, color_copy, 3, &stat_template_default);
@@ -40,8 +39,7 @@ void ElementSlimeTick(uint8_t stat_id) {
 
 		if (!changed_tiles) {
 			remove_stat(stat_id);
-			ZOO_TILE(start_x, start_y).element = E_BREAKABLE;
-			ZOO_TILE(start_x, start_y).color = color_copy;
+			ZOO_TILE_CHANGE2(start_x, start_y, E_BREAKABLE, color_copy);
 			board_draw_tile(start_x, start_y);
 		}
 	}

@@ -170,8 +170,10 @@ void board_redraw(void) {
 void game_play_loop(bool board_changed) {
 	// TODO
 
-	ZOO_TILE(ZOO_STAT(0).x, ZOO_STAT(0).y).element = zoo_game_state.game_state_element;
-	ZOO_TILE(ZOO_STAT(0).x, ZOO_STAT(0).y).color = zoo_element_defs[zoo_game_state.game_state_element].color;
+	ZOO_TILE_CHANGE2(ZOO_STAT(0).x, ZOO_STAT(0).y,
+		zoo_game_state.game_state_element,
+		zoo_element_defs[zoo_game_state.game_state_element].color
+	);
 
 	if (board_changed) {
 		board_redraw();
@@ -222,8 +224,7 @@ void game_play_loop(bool board_changed) {
 						board_draw_tile(px, py);
 						ZOO_STAT(0).x = mpx;
 						ZOO_STAT(0).y = mpy;
-						ZOO_TILE(mpx, mpy).element = E_PLAYER;
-						ZOO_TILE(mpx, mpy).color = zoo_element_defs[E_PLAYER].color;
+						ZOO_TILE_CHANGE2(mpx, mpy, E_PLAYER, zoo_element_defs[E_PLAYER].color);
 						board_draw_tile(mpx, mpy);
 
 						center_viewport_on_player();
@@ -421,8 +422,7 @@ void move_stat(uint8_t stat_id, uint8_t new_x, uint8_t new_y) {
 		new_color = (old_tile.color & 0x0F) | (new_tile.color & 0x70);
 	}
 
-	ZOO_TILE(new_x, new_y).element = old_tile.element;
-	ZOO_TILE(new_x, new_y).color = new_color;
+	ZOO_TILE_CHANGE2(new_x, new_y, old_tile.element, new_color);
 	ZOO_TILE_COPY(ZOO_TILE(old_x, old_y), old_under);
 
 	stat->x = new_x;

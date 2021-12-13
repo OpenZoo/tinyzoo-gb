@@ -5,6 +5,7 @@
 #include "game.h"
 #include "math.h"
 #include "renderer.h"
+#include "sram_alloc.h"
 #include "timer.h"
 
 #include "board_manager.h"
@@ -24,6 +25,8 @@ void main(void) {
 	} else {
 		text_init(&renderer_dmg);
 	}
+
+	sram_init(false);
 
 	world_create();
 
