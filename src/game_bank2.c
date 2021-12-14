@@ -72,8 +72,9 @@ void world_create(void) BANKED {
 	board_create();
 	memset(&zoo_world_info, 0, sizeof(zoo_world_info));
 	zoo_world_info.health = 100;
-	memset(&zoo_world_info.flags, 255, sizeof(zoo_world_info.flags));
-	// TODO: boardchange
+	memset(&zoo_world_info.oop_flags, 255, sizeof(zoo_world_info.oop_flags));
+	// TODO: This will save to SRAM - we don't want this!
+	// board_change(0);
 }
 
 void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y) {

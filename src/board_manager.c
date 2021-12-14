@@ -3,6 +3,7 @@
 #include "gamevars.h"
 #include "game.h"
 #include "board_manager.h"
+#include "config.h"
 
 typedef struct {
 	void *ptr;
@@ -12,9 +13,9 @@ typedef struct {
 static uint8_t board_pointers_bank;
 static far_ptr_t *board_pointers_ptr;
 
-void load_world(uint16_t offset) NONBANKED {
+void load_world_rom(uint8_t offset) NONBANKED {
 	uint8_t prev_bank = _current_bank;
-	SWITCH_ROM_MBC5(4);
+	SWITCH_ROM_MBC5(ROM_DATA_START_BANK);
 
 	far_ptr_t *world_ptr_ptr = (far_ptr_t*) (0x4000 | (offset * 3));
 	uint8_t *data = world_ptr_ptr->ptr;
@@ -29,17 +30,17 @@ void load_world(uint16_t offset) NONBANKED {
 	SWITCH_ROM_MBC5(prev_bank);
 }
 
-void load_board(uint8_t offset) NONBANKED {
+void load_board_rom(uint8_t offset) NONBANKED {
 	uint8_t prev_bank = _current_bank;
 	SWITCH_ROM_MBC5(board_pointers_bank);
 
 	far_ptr_t *ptr = &board_pointers_ptr[offset];
-	load_board_data(ptr->bank, ptr->ptr);
+	load_board_data_rom(ptr->bank, ptr->ptr);
 
 	SWITCH_ROM_MBC5(prev_bank);
 }
 
-void load_board_data(uint8_t bank, const uint8_t *data) NONBANKED {
+void load_board_data_rom(uint8_t bank, const uint8_t *data) NONBANKED {
 	uint8_t prev_bank = _current_bank;
 	SWITCH_ROM_MBC5(bank);
 

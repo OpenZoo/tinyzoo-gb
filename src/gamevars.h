@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "config.h"
 #include "renderer.h"
 
 #define SHOT_SOURCE_PLAYER 0
@@ -18,10 +19,6 @@
 #define VIEWPORT_PLAYER_MIN_Y (VIEWPORT_CENTER_Y - VIEWPORT_PLAYER_OFFSET)
 #define VIEWPORT_PLAYER_MAX_Y (VIEWPORT_CENTER_Y + VIEWPORT_PLAYER_OFFSET)
 
-#define TORCH_DX 8
-#define TORCH_DY 5
-#define TORCH_DIST_SQR 50
-
 #define STAT_ID_NONE 255
 
 #define COLOR_SPECIAL_MIN 0xF0
@@ -29,11 +26,6 @@
 #define COLOR_WHITE_ON_CHOICE 0xFE
 #define COLOR_CHOICE_ON_CHOICE 0xFD
 
-#define MAX_FLAG 10
-#define MAX_STAT 150
-#define MAX_ELEMENT 53
-#define BOARD_WIDTH 60
-#define BOARD_HEIGHT 25
 #define MAX_DATA_OFS_SIZE (MAX_STAT * 3)
 
 typedef struct {
@@ -98,7 +90,7 @@ typedef struct {
 	uint8_t current_board;
 	uint8_t torch_ticks;
 	uint8_t energizer_ticks;
-	uint8_t flags[MAX_FLAG];
+	uint8_t oop_flags[MAX_FLAG]; // TODO: migrate to uint16_t
 	int16_t board_time_sec;
 	int16_t board_time_hsec;
 	uint8_t board_count;

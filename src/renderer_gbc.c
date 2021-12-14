@@ -664,6 +664,35 @@ GbcTextAddColorFinish:
 __endasm;
 }
 
+// Call ONLY from ASM!
+// a = value
+// (de) = VRAM address
+static void gbc_safe_vram_write(void) __preserves_regs(b, c) {
+__asm
+    ; interrupt may use lines 7, 0, 1
+	; lines <= 5 are safe
+	ld h, a
+GbcSafeVramWriteLyLoop:
+	di
+	ldh a, (_LY_REG + 0)
+	and a, #0x07
+	cp a, #0x06
+	jr c, GbcSafeVramWriteLyLoopEnd
+	ei
+	jr GbcSafeVramWriteLyLoop
+GbcSafeVramWriteLyLoopEnd:
+	ld a, h
+	ld hl, #(_STAT_REG)
+	; TODO: this di/ei pair causes minor hicolor glitching
+GbcSafeVramWriteLoop:
+	bit 1, (hl)
+	jr nz, GbcSafeVramWriteLoop
+
+	ld (de), a
+	ei
+__endasm;
+}
+
 static void gbc_text_undraw(uint8_t x, uint8_t y) {
 __asm
 	; create X/Y pointer
@@ -847,15 +876,7 @@ GbcTextDrawSetColorAAA:
 	ld (_VBK_REG), a
 
 	ld a, b
-	ld hl, #(_STAT_REG)
-	; TODO: this di/ei pair causes minor hicolor glitching
-	di
-GbcTextDrawSetColorStatLoop:
-	bit 1, (hl)
-	jr nz, GbcTextDrawSetColorStatLoop
-
-	ld (de), a
-	ei
+	call _gbc_safe_vram_write
 
 	xor a, a
 	ld (_VBK_REG), a
@@ -893,15 +914,7 @@ GbcTextDrawSetChar:
 	ld d, a
 
 	ld a, b
-	ld hl, #(_STAT_REG)
-	; TODO: this di/ei pair causes minor hicolor glitching
-	di
-GbcTextDrawSetCharStatLoop:
-	bit 1, (hl)
-	jr nz, GbcTextDrawSetCharStatLoop
-
-	ld (de), a
-	ei
+	call _gbc_safe_vram_write
 
 GbcTextDrawFinish:
 	; clear SVBK
