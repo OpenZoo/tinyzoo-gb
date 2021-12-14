@@ -274,6 +274,17 @@ void gbc_vblank_isr(void) {
 	vblank_update_palette();
 }
 
+static void gbc_sync_di(void) {
+__asm;
+GbcSyncDiLoop:
+	ldh a, (_LY_REG + 0)
+	and a, #0x07
+	cp a, #0x05
+	jr nc, GbcSyncDiLoop
+	di
+__endasm;
+}
+
 static void gbc_text_remove_color(uint8_t y, uint8_t col) {
 __asm
 	ldhl sp, #2
@@ -323,7 +334,7 @@ __asm
 	or a, #0xD0
 	ld b, a
 
-	di ; SVBK cannot be changed between interrupts
+	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; set SVBK to 3
 	ld a, #0x03
 	ld (_SVBK_REG), a
@@ -409,7 +420,7 @@ __asm
 	or a, #0xD0
 	ld b, a
 
-	di ; SVBK cannot be changed between interrupts
+	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; set SVBK to 3
 	ld a, #0x03
 	ld (_SVBK_REG), a
@@ -491,7 +502,7 @@ __asm
 	or a, #0xD0
 	ld b, a
 
-	di ; SVBK cannot be changed between interrupts
+	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; set SVBK to 3
 	ld a, #0x03
 	ld (_SVBK_REG), a
@@ -596,7 +607,7 @@ GbcTextAddColorAllocFound:
 	ld a, (hl)
 	ld (0xFFA3), a
 
-	di ; SVBK cannot be changed between interrupts
+	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; set SVBK to 2
 	ld a, #0x02
 	ld (_SVBK_REG), a
@@ -664,35 +675,6 @@ GbcTextAddColorFinish:
 __endasm;
 }
 
-// Call ONLY from ASM!
-// a = value
-// (de) = VRAM address
-static void gbc_safe_vram_write(void) __preserves_regs(b, c) {
-__asm
-    ; interrupt may use lines 7, 0, 1
-	; lines <= 5 are safe
-	ld h, a
-GbcSafeVramWriteLyLoop:
-	di
-	ldh a, (_LY_REG + 0)
-	and a, #0x07
-	cp a, #0x06
-	jr c, GbcSafeVramWriteLyLoopEnd
-	ei
-	jr GbcSafeVramWriteLyLoop
-GbcSafeVramWriteLyLoopEnd:
-	ld a, h
-	ld hl, #(_STAT_REG)
-	; TODO: this di/ei pair causes minor hicolor glitching
-GbcSafeVramWriteLoop:
-	bit 1, (hl)
-	jr nz, GbcSafeVramWriteLoop
-
-	ld (de), a
-	ei
-__endasm;
-}
-
 static void gbc_text_undraw(uint8_t x, uint8_t y) {
 __asm
 	; create X/Y pointer
@@ -717,7 +699,7 @@ __asm
 	or a, e ; da = X/Y pointer
 	ld e, a ; de = X/Y pointer too
 
-	di ; SVBK cannot be changed between interrupts
+	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; configure SVBK
 	ld a, #0x02
 	ld (_SVBK_REG), a
@@ -795,7 +777,7 @@ __asm
 	bit 0, a
 	jr nz, GbcTextDrawColorChanged
 
-	di ; SVBK cannot be changed between interrupts
+	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; configure SVBK
 	ld a, #0x02
 	ld (_SVBK_REG), a
@@ -840,7 +822,7 @@ GbcTextDrawNoRemove:
 	ld (0xFFA4), a
 	pop de
 
-	di ; SVBK cannot be changed between interrupts
+	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; configure SVBK
 	ld a, #0x02
 	ld (_SVBK_REG), a
@@ -875,8 +857,15 @@ GbcTextDrawSetColorAAA:
 	ld a, #0x01
 	ld (_VBK_REG), a
 
+	ld hl, #(_STAT_REG)
+	call _gbc_sync_di
 	ld a, b
-	call _gbc_safe_vram_write
+GbcTextDrawSetColorLoop:
+	bit 1, (hl)
+	jr nz, GbcTextDrawSetColorLoop
+
+	ld (de), a
+	ei
 
 	xor a, a
 	ld (_VBK_REG), a
@@ -884,7 +873,7 @@ GbcTextDrawSetColorAAA:
 	; all registers trashed
 
 GbcTextDrawSetChar:
-	di ; SVBK cannot be changed between interrupts
+	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; configure SVBK
 	ld a, #0x02
 	ld (_SVBK_REG), a
@@ -913,8 +902,15 @@ GbcTextDrawSetChar:
 	and a, #0xBB ; 0xDC -> 0x98
 	ld d, a
 
+	ld hl, #(_STAT_REG)
+	call _gbc_sync_di
 	ld a, b
-	call _gbc_safe_vram_write
+GbcTextDrawSetCharLoop:
+	bit 1, (hl)
+	jr nz, GbcTextDrawSetCharLoop
+
+	ld (de), a
+	ei
 
 GbcTextDrawFinish:
 	; clear SVBK
