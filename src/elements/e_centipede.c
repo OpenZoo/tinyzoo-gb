@@ -12,8 +12,6 @@
 #define STAT_ID_UNUSED_STAGE2 254
 #define STAT_ID_VALID(id) ((id) < STAT_ID_UNUSED_STAGE2)
 
-#define DISABLE_CENTIPEDES_BROKEN
-
 void ElementCentipedeHeadTick(uint8_t stat_id) {
 	uint8_t tmp;
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
@@ -23,14 +21,14 @@ void ElementCentipedeHeadTick(uint8_t stat_id) {
 	} else if (stat->y == ZOO_STAT(0).y && (rand(10) < stat->p1)) {
 		stat->step_x = signum8(ZOO_STAT(0).x - stat->x);
 		stat->step_y = 0;
-	} else if ((rand(10 * 4) < stat->p2) || (stat->step_x == 0 && stat->step_y == 0)) {
+	} else if (((rand(10) << 2) < stat->p2) || (stat->step_x == 0 && stat->step_y == 0)) {
 		calc_direction_rnd(&stat->step_x, &stat->step_y);
 	}
 	
 	uint8_t elem = ZOO_TILE(stat->x + stat->step_x, stat->y + stat->step_y).element;
 	if (!(zoo_element_defs[elem].flags & ELEMENT_WALKABLE) && (elem != E_PLAYER)) {
-		uint8_t ix = stat->step_x;
-		uint8_t iy = stat->step_y;
+		int8_t ix = stat->step_x;
+		int8_t iy = stat->step_y;
 		tmp = ((RAND2() << 1) - 1) * iy;
 		stat->step_y = ((RAND2() << 1) - 1) * ix;
 		stat->step_x = tmp;
@@ -84,10 +82,9 @@ void ElementCentipedeHeadTick(uint8_t stat_id) {
 		// Move
 		move_stat(stat_id, stat->x + stat->step_x, stat->y + stat->step_y);
 
-#ifndef DISABLE_CENTIPEDES_BROKEN
 		while (true) {
-			uint8_t ix = stat->step_x;
-			uint8_t iy = stat->step_y;
+			int8_t ix = stat->step_x;
+			int8_t iy = stat->step_y;
 			uint8_t tx = stat->x - ix;
 			uint8_t ty = stat->y - iy;
 
@@ -134,7 +131,6 @@ NewFollowerFound:
 			}
 			stat = &ZOO_STAT(stat_id);
 		}
-#endif
 	}
 }
 

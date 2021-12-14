@@ -212,12 +212,13 @@ void game_play_loop(bool board_changed) {
 			input_update();
 
 			if (input_delta_x != 0 || input_delta_y != 0) {
-				zoo_element_defs[ZOO_TILE(px + input_delta_x, py + input_delta_y).element]
-					.touch_proc(px + input_delta_x, px + input_delta_y, &input_delta_x, &input_delta_y);
-				px = ZOO_STAT(0).x;
-				py = ZOO_STAT(0).y;
 				uint8_t mpx = px + input_delta_x;
 				uint8_t mpy = py + input_delta_y;
+				zoo_element_defs[ZOO_TILE(mpx, mpy).element].touch_proc(mpx, mpy, &input_delta_x, &input_delta_y);
+				px = ZOO_STAT(0).x;
+				py = ZOO_STAT(0).y;
+				mpx = px + input_delta_x;
+				mpy = py + input_delta_y;
 				if ((mpx != 0 || mpy != 0) && (zoo_element_defs[ZOO_TILE(mpx, mpy).element].flags & ELEMENT_WALKABLE)) {
 					if (ZOO_TILE(px, py).element == E_PLAYER) {
 						move_stat(0, mpx, mpy);
@@ -278,7 +279,7 @@ void game_play_loop(bool board_changed) {
 
 void display_message(uint8_t time, const char* line1, const char* line2, const char* line3) {
 	uint8_t sid = get_stat_id_at(0, 0);
-	if (get_stat_id_at(0, 0) != 255) {
+	if (get_stat_id_at(0, 0) != STAT_ID_NONE) {
 		remove_stat(sid);
 		sidebar_hide_message();
 	}
@@ -378,19 +379,15 @@ void remove_stat(uint8_t stat_id) {
 
 	for (uint8_t i = 1; i <= zoo_stat_count; i++) {
 		zoo_stat_t *cstat = &ZOO_STAT(i);
-		if (cstat->follower < 254) {
-			if (cstat->follower > stat_id) {
-				cstat->follower--;
-			} else if (cstat->follower == stat_id) {
-				cstat->follower = 255;
-			}
+		if (cstat->follower > stat_id && cstat->follower < STAT_ID_NONE_MIN) {
+			cstat->follower--;
+		} else if (cstat->follower == stat_id) {
+			cstat->follower = STAT_ID_NONE;
 		}
-		if (cstat->leader < 254) {
-			if (cstat->leader > stat_id) {
-				cstat->leader--;
-			} else if (cstat->leader == stat_id) {
-				cstat->leader = 255;
-			}
+		if (cstat->leader > stat_id && cstat->leader < STAT_ID_NONE_MIN) {
+			cstat->leader--;
+		} else if (cstat->leader == stat_id) {
+			cstat->leader = STAT_ID_NONE;
 		}
 	}
 

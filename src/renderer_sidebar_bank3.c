@@ -72,11 +72,11 @@ void sidebar_draw_panel(uint8_t x_shifted, uint8_t chr, uint8_t col, int16_t val
 			// TODO?
 			sidebar_draw_char(offset++, '?', 3);
 		} else if (value >= 10000) {
-			sidebar_draw_char(offset++, (value / 10000), 3);
-			sidebar_draw_char(offset++, (value / 1000) % 10, 3);
+			sidebar_draw_char(offset++, (value / 10000) + 48, 3);
+			sidebar_draw_char(offset++, ((value / 1000) % 10) + 48, 3);
 			sidebar_draw_char(offset++, 'K', 3);
 		} else if (value >= 1000) {
-			sidebar_draw_char(offset++, (value / 1000), 3);
+			sidebar_draw_char(offset++, (value / 1000) + 48, 3);
 			sidebar_draw_char(offset++, 'K', 3);
 			if (value > 0) {
 				sidebar_draw_char(offset++, '+', 3);
