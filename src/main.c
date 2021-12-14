@@ -32,6 +32,7 @@ void main(void) {
 
 	load_world(0);
 	load_board(zoo_world_info.current_board);
+	zoo_game_state.paused = true; // TODO: not here...
 
 	timer_init();
 

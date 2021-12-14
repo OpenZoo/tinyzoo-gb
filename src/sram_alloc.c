@@ -96,8 +96,8 @@ bool sram_alloc(uint16_t len, sram_ptr_t *ptr) {
 		if ((entry.flags & SRAM_FLAG_USED) != 0) {
 			offset = 0;
 		} else {
-			if ((entry.size + offset) >= len) {
-				nlen = entry.size + offset;
+			nlen = entry.size + offset;
+			if (nlen >= len) {
 				// rewind to first entry location
 				sram_sub_ptr(ptr, sizeof(sram_entry_t) + offset);
 				// allocate entry of size len
@@ -114,8 +114,7 @@ bool sram_alloc(uint16_t len, sram_ptr_t *ptr) {
 				}
 				return true;
 			} else {
-				if (offset > 0) offset += sizeof(sram_entry_t);
-				offset += entry.size;
+				offset += sizeof(sram_entry_t) + entry.size;
 			}
 		}
 		sram_add_ptr(ptr, entry.size);
@@ -132,7 +131,6 @@ void sram_free(sram_ptr_t *ptr) {
 	sram_sub_ptr(ptr, sizeof(sram_entry_t));
 	entry.flags &= ~SRAM_FLAG_USED;
 	sram_write(ptr, &entry, sizeof(sram_entry_t));
-	sram_sub_ptr(ptr, sizeof(sram_entry_t));
 }
 
 static const uint8_t sram_expected_magic[4] = {'G', 'b', 'Z', 0x01};
