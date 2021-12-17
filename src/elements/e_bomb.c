@@ -18,18 +18,18 @@ uint8_t ElementBombDraw(uint8_t x, uint8_t y) {
 void ElementBombTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
 	if (stat->p1 > 0) {
-		stat->p1--;
+		uint8_t p1 = --stat->p1;
 		board_draw_tile(stat->x, stat->y);
 
-		if (stat->p1 == 1) {
+		if (p1 == 1) {
 			sound_queue(1, sound_bomb_explosion);
 			DrawPlayerSurroundings(stat->x, stat->y, 1);
-		} else if (stat->p1 == 0) {
+		} else if (p1 == 0) {
 			uint8_t old_x = stat->x;
 			uint8_t old_y = stat->y;
 			remove_stat(stat_id);
 			DrawPlayerSurroundings(old_x, old_y, 2);
-		} else if ((stat->p1 & 1) == 0) {
+		} else if ((p1 & 1) == 0) {
 			sound_queue(1, sound_bomb_tick1);
 		} else {
 			sound_queue(1, sound_bomb_tick2);
