@@ -16,8 +16,10 @@ uint8_t ElementSpinningGunDraw(uint8_t x, uint8_t y) {
 
 void ElementSpinningGunTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
+	uint8_t sx = stat->x;
+	uint8_t sy = stat->y;
 
-	board_draw_tile(stat->x, stat->y);
+	board_draw_tile(sx, sy);
 
 	int8_t dx, dy;
 	uint8_t element = (stat->p2 & 0x80) ? E_STAR : E_BULLET;
@@ -26,24 +28,24 @@ void ElementSpinningGunTick(uint8_t stat_id) {
 		if (rand(9) <= stat->p1) {
 			bool shot;
 
-			if (difference8(stat->x, ZOO_STAT(0).x) <= 2) {
-				shot = board_shoot(element, stat->x, stat->y,
-					0, signum8(ZOO_STAT(0).y - stat->y),
+			if (difference8(sx, ZOO_STAT(0).x) <= 2) {
+				shot = board_shoot(element, sx, sy,
+					0, signum8(ZOO_STAT(0).y - sy),
 					SHOT_SOURCE_ENEMY);
 			} else {
 				shot = false;
 			}
 
 			if (!shot) {
-				if (difference8(stat->y, ZOO_STAT(0).y) <= 2) {
-					shot = board_shoot(element, stat->x, stat->y,
-						signum8(ZOO_STAT(0).x - stat->x), 0,
+				if (difference8(sy, ZOO_STAT(0).y) <= 2) {
+					shot = board_shoot(element, sx, sy,
+						signum8(ZOO_STAT(0).x - sx), 0,
 						SHOT_SOURCE_ENEMY);
 				}
 			}
 		} else {
 			calc_direction_rnd(&dx, &dy);
-			board_shoot(element, stat->x, stat->y, dx, dy, SHOT_SOURCE_ENEMY);
+			board_shoot(element, sx, sy, dx, dy, SHOT_SOURCE_ENEMY);
 		}
 	}
 }

@@ -14,7 +14,7 @@ void ElementPassageTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	uint8_t col = ZOO_TILE(x, y).color;
 
 	uint8_t old_board = zoo_world_info.current_board;
-	board_change(ZOO_STAT(get_stat_id_at(x, y)).p3);
+	board_change(ZOO_STAT_AT(x, y).p3);
 
 	uint8_t new_x = 0, new_y;
 	for (uint8_t ix = 1; ix <= BOARD_WIDTH; ix++) {

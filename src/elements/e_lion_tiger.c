@@ -10,19 +10,21 @@
 
 void ElementLionTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
+	uint8_t sx = stat->x;
+	uint8_t sy = stat->y;
 	int8_t dx, dy;
 
 	if (stat->p1 < rand(10)) {
 		calc_direction_rnd(&dx, &dy);
 	} else {
-		calc_direction_seek(stat->x, stat->y, &dx, &dy);
+		calc_direction_seek(sx, sy, &dx, &dy);
 	}
 
-	uint8_t elem = ZOO_TILE(stat->x + dx, stat->y + dy).element;
+	uint8_t elem = ZOO_TILE(sx + dx, sy + dy).element;
 	if (zoo_element_defs[elem].flags & ELEMENT_WALKABLE) {
-		move_stat(stat_id, stat->x + dx, stat->y + dy);
+		move_stat(stat_id, sx + dx, sy + dy);
 	} else if (elem == E_PLAYER) {
-		board_attack(stat_id, stat->x + dx, stat->y + dy);
+		board_attack(stat_id, sx + dx, sy + dy);
 	}
 }
 

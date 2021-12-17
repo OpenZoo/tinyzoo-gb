@@ -19,15 +19,18 @@ void ElementRuffianTick(uint8_t stat_id) {
 			}
 		}
 	} else {
-		if (((stat->x == ZOO_STAT(0).x) || (stat->y == ZOO_STAT(0).y)) && (rand(9) <= stat->p1)) {	
-			calc_direction_seek(stat->x, stat->y, &stat->step_x, &stat->step_y);
+		uint8_t sx = stat->x;
+		uint8_t sy = stat->y;
+
+		if (((sx == ZOO_STAT(0).x) || (sy == ZOO_STAT(0).y)) && (rand(9) <= stat->p1)) {	
+			calc_direction_seek(sx, sy, &stat->step_x, &stat->step_y);
 		}
 
-		uint8_t elem = ZOO_TILE(stat->x + stat->step_x, stat->y + stat->step_y).element;
+		uint8_t elem = ZOO_TILE(sx + stat->step_x, sy + stat->step_y).element;
 		if (elem == E_PLAYER) {
-			board_attack(stat_id, stat->x + stat->step_x, stat->y + stat->step_y);
+			board_attack(stat_id, sx + stat->step_x, sy + stat->step_y);
 		} else if (zoo_element_defs[elem].flags & ELEMENT_WALKABLE) {
-			move_stat(stat_id, stat->x + stat->step_x, stat->y + stat->step_y);
+			move_stat(stat_id, sx + stat->step_x, sy + stat->step_y);
 			if ((stat->p2 + 8) <= rand(17)) {
 				stat->step_x = 0;
 				stat->step_y = 0;
