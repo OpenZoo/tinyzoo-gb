@@ -15,17 +15,21 @@
 void ElementCentipedeHeadTick(uint8_t stat_id) {
 	uint8_t tmp;
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
-	if (stat->x == ZOO_STAT(0).x && (rand(10) < stat->p1)) {
-		stat->step_y = signum8(ZOO_STAT(0).y - stat->y);
+
+	uint8_t head_x = stat->x;
+	uint8_t head_y = stat->y;
+
+	if (head_x == ZOO_STAT(0).x && (rand(10) < stat->p1)) {
+		stat->step_y = signum8(ZOO_STAT(0).y - head_y);
 		stat->step_x = 0;
-	} else if (stat->y == ZOO_STAT(0).y && (rand(10) < stat->p1)) {
-		stat->step_x = signum8(ZOO_STAT(0).x - stat->x);
+	} else if (head_y == ZOO_STAT(0).y && (rand(10) < stat->p1)) {
+		stat->step_x = signum8(ZOO_STAT(0).x - head_x);
 		stat->step_y = 0;
 	} else if (((rand(10) << 2) < stat->p2) || (stat->step_x == 0 && stat->step_y == 0)) {
 		calc_direction_rnd(&stat->step_x, &stat->step_y);
 	}
 	
-	uint8_t elem = ZOO_TILE(stat->x + stat->step_x, stat->y + stat->step_y).element;
+	uint8_t elem = ZOO_TILE(head_x + stat->step_x, head_y + stat->step_y).element;
 	if (!(zoo_element_defs[elem].flags & ELEMENT_WALKABLE) && (elem != E_PLAYER)) {
 		int8_t ix = stat->step_x;
 		int8_t iy = stat->step_y;
@@ -33,14 +37,14 @@ void ElementCentipedeHeadTick(uint8_t stat_id) {
 		stat->step_y = ((RAND2() << 1) - 1) * ix;
 		stat->step_x = tmp;
 		
-		elem = ZOO_TILE(stat->x + stat->step_x, stat->y + stat->step_y).element;
+		elem = ZOO_TILE(head_x + stat->step_x, head_y + stat->step_y).element;
 		if (!(zoo_element_defs[elem].flags & ELEMENT_WALKABLE) && (elem != E_PLAYER)) {
 			stat->step_x = -stat->step_x;
 			stat->step_y = -stat->step_y;
 
-			elem = ZOO_TILE(stat->x + stat->step_x, stat->y + stat->step_y).element;
+			elem = ZOO_TILE(head_x + stat->step_x, head_y + stat->step_y).element;
 			if (!(zoo_element_defs[elem].flags & ELEMENT_WALKABLE) && (elem != E_PLAYER)) {
-				elem = ZOO_TILE(stat->x - ix, stat->y - iy).element;
+				elem = ZOO_TILE(head_x - ix, head_y - iy).element;
 				if (!(zoo_element_defs[elem].flags & ELEMENT_WALKABLE) && (elem != E_PLAYER)) {
 					stat->step_x = 0;
 					stat->step_y = 0;
@@ -52,9 +56,12 @@ void ElementCentipedeHeadTick(uint8_t stat_id) {
 		}
 	}
 
-	if (stat->step_x == 0 && stat->step_y == 0) {
+	int8_t head_stepx = stat->step_x;
+	int8_t head_stepy = stat->step_y;
+
+	if (head_stepx == 0 && head_stepy == 0) {
 		// Invert centipede
-		ZOO_TILE(stat->x, stat->y).element = E_CENTIPEDE_SEGMENT;
+		ZOO_TILE(head_x, head_y).element = E_CENTIPEDE_SEGMENT;
 		stat->leader = STAT_ID_UNUSED;
 		zoo_stat_t *stat_ptr = stat;
 		while ((stat_ptr->follower > 0) && STAT_ID_VALID(stat_ptr->follower)) {
@@ -68,19 +75,19 @@ void ElementCentipedeHeadTick(uint8_t stat_id) {
 		stat_ptr->follower = stat_ptr->leader;
 		stat_ptr->leader = STAT_ID_UNUSED;
 		ZOO_TILE(stat_ptr->x, stat_ptr->y).element = E_CENTIPEDE_HEAD;
-	} else if (ZOO_TILE(stat->x + stat->step_x, stat->y + stat->step_y).element == E_PLAYER) {
+	} else if (ZOO_TILE(head_x + head_stepx, head_y + head_stepy).element == E_PLAYER) {
 		// Attack player
 		if (stat->follower > 0 && STAT_ID_VALID(stat->follower)) {
 			zoo_stat_t *stat_follower = &ZOO_STAT(stat->follower);
 			ZOO_TILE(stat_follower->x, stat_follower->y).element = E_CENTIPEDE_HEAD;
-			stat_follower->step_x = stat->step_x;
-			stat_follower->step_y = stat->step_y;
+			stat_follower->step_x = head_stepx;
+			stat_follower->step_y = head_stepy;
 			board_draw_tile(stat_follower->x, stat_follower->y);
 		}
-		board_attack(stat_id, stat->x + stat->step_x, stat->y + stat->step_y);
+		board_attack(stat_id, head_x + head_stepx, head_y + head_stepy);
 	} else {
 		// Move
-		move_stat(stat_id, stat->x + stat->step_x, stat->y + stat->step_y);
+		move_stat(stat_id, head_x + head_stepx, head_y + head_stepy);
 
 		while (true) {
 			int8_t ix = stat->step_x;

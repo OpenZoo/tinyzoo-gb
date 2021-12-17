@@ -164,12 +164,9 @@ uint8_t ElementTransporterDraw(uint8_t x, uint8_t y);
 void ElementTransporterTick(uint8_t stat_id);
 void ElementTransporterTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy);
 
-// adds 81 bytes, performance untested
-// #define UNROLL_LINE_DRAW
-
 uint8_t ElementLineDraw(uint8_t x, uint8_t y) {
 	uint8_t v = 0;
-#ifdef UNROLL_LINE_DRAW
+#ifdef OPT_UNROLL_LINE_DRAW
 	uint8_t element = ZOO_TILE(x, y - 1).element;
 	if (element == E_LINE || element == E_BOARD_EDGE) v |= 1;
 	element = ZOO_TILE(x, y + 1).element;

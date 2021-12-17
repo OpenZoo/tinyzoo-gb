@@ -19,7 +19,10 @@ uint8_t ElementPlayerDraw(uint8_t x, uint8_t y) {
 
 void ElementPlayerTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
-	zoo_tile_t *tile = &ZOO_TILE(stat->x, stat->y);
+	uint8_t sx = stat->x;
+	uint8_t sy = stat->y;
+
+	zoo_tile_t *tile = &ZOO_TILE(sx, sy);
 
 	if (zoo_world_info.energizer_ticks > 0) {
 		if ((zoo_game_state.current_tick & 1) != 0) {
@@ -28,10 +31,10 @@ void ElementPlayerTick(uint8_t stat_id) {
 			tile->color = ((zoo_game_state.current_tick % 7) << 4) + 0x1F;
 		}
 
-		board_draw_tile(stat->x, stat->y);
+		board_draw_tile(sx, sy);
 	} else if (tile->color != 0x1F) {
 		tile->color = 0x1F;
-		board_draw_tile(stat->x, stat->y);
+		board_draw_tile(sx, sy);
 	}
 
 	if (zoo_world_info.health <= 0) {
@@ -77,7 +80,7 @@ void ElementPlayerTick(uint8_t stat_id) {
 				}
 
 				if (bullet_count < zoo_board_info.max_shots) {
-					if (board_shoot(E_BULLET, stat->x, stat->y, player_dir_x, player_dir_y, SHOT_SOURCE_PLAYER)) {
+					if (board_shoot(E_BULLET, sx, sy, player_dir_x, player_dir_y, SHOT_SOURCE_PLAYER)) {
 						zoo_world_info.ammo--;
 						game_update_sidebar_ammo();
 
@@ -93,21 +96,24 @@ void ElementPlayerTick(uint8_t stat_id) {
 		player_dir_x = input_delta_x;
 		player_dir_y = input_delta_y;
 
-		zoo_element_defs[ZOO_TILE(stat->x + input_delta_x, stat->y + input_delta_y).element]
-			.touch_proc(stat->x + input_delta_x, stat->y + input_delta_y, &input_delta_x, &input_delta_y);
+		zoo_element_defs[ZOO_TILE(sx + input_delta_x, sy + input_delta_y).element]
+			.touch_proc(sx + input_delta_x, sy + input_delta_y, &input_delta_x, &input_delta_y);
 
 		if (input_delta_x != 0 || input_delta_y != 0) {
-			if (zoo_element_defs[ZOO_TILE(stat->x + input_delta_x, stat->y + input_delta_y).element].flags & ELEMENT_WALKABLE) {
-				move_stat(0, stat->x + input_delta_x, stat->y + input_delta_y);
+			if (zoo_element_defs[ZOO_TILE(sx + input_delta_x, sy + input_delta_y).element].flags & ELEMENT_WALKABLE) {
+				move_stat(0, sx + input_delta_x, sy + input_delta_y);
 			}
 		}
+
+		sx = stat->x;
+		sy = stat->y;
 	}
 	
 	// TODO
 
 	if (zoo_world_info.torch_ticks > 0) {
 		if ((--zoo_world_info.torch_ticks) <= 0) {
-			DrawPlayerSurroundings(stat->x, stat->y, 0);
+			DrawPlayerSurroundings(sx, sy, 0);
 			sound_queue(3, sound_torch_burnout);
 		}
 
@@ -124,7 +130,7 @@ void ElementPlayerTick(uint8_t stat_id) {
 			sound_queue(9, sound_energizer_finish);
 		} else if (zoo_world_info.energizer_ticks <= 0) {
 			tile->color = 0x1F;
-			board_draw_tile(stat->x, stat->y);
+			board_draw_tile(sx, sy);
 		}
 	}
 

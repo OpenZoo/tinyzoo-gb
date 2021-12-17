@@ -2,9 +2,10 @@
 
 #include <string.h>
 #include <gb/gb.h>
+#include "config.h"
 #include "timer.h"
 
-uint8_t sound_buffer[254];
+uint8_t sound_buffer[MAX_SOUND_BUFFER_SIZE];
 volatile uint8_t sound_buffer_pos;
 volatile uint8_t sound_buffer_len;
 volatile uint8_t sound_duration_counter;
@@ -145,7 +146,7 @@ void sound_queue(int8_t priority, const uint8_t *data) BANKED {
 					sound_buffer_len -= pos;
 					sound_buffer_pos = 0;
 				};
-				if ((sound_buffer_len + data_len) <= 254) {
+				if ((sound_buffer_len + data_len) <= MAX_SOUND_BUFFER_SIZE) {
 					memcpy(sound_buffer + sound_buffer_len, data, data_len);
 					sound_buffer_len += data_len;
 				}

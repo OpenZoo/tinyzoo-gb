@@ -27,8 +27,6 @@
 #define COLOR_WHITE_ON_CHOICE 0xFE
 #define COLOR_CHOICE_ON_CHOICE 0xFD
 
-#define MAX_DATA_OFS_SIZE (MAX_STAT * 3)
-
 typedef struct {
 	uint8_t element;
 	uint8_t color;
