@@ -30,6 +30,8 @@ extern const char msg_ouch[];
 extern const char msg_torch_hint_line1[];
 extern const char msg_torch_hint_line2[];
 extern const char msg_torch_hint_line3[];
+extern const char msg_game_over_line1[];
+extern const char msg_game_over_line2[];
 extern const char msg_key_pickup_no[];
 extern const char msg_key_pickup_yes[];
 extern const char msg_key_pickup_08[];

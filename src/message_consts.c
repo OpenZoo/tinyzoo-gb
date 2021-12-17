@@ -31,6 +31,8 @@ const char msg_ouch[] = "Ouch!";
 const char msg_torch_hint_line1[] = "Room is dark:";
 const char msg_torch_hint_line2[] = "You need to";
 const char msg_torch_hint_line3[] = "light a torch!";
+const char msg_game_over_line1[] = "- Game over -";
+const char msg_game_over_line2[] = "Press START";
 
 const char msg_key_pickup_no[] = "You already have a";
 const char msg_key_pickup_yes[] = "You now have the";

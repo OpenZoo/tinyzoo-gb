@@ -19,40 +19,44 @@ uint8_t ElementDuplicatorDraw(uint8_t x, uint8_t y) {
 
 void ElementDuplicatorTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
+	uint8_t sx = stat->x;
+	uint8_t sy = stat->y;
 
 	if (stat->p1 <= 4) {
 		stat->p1++;
 	} else {
 		stat->p1 = 0;
-		uint8_t src_elem = ZOO_TILE(stat->x - stat->step_x, stat->y - stat->step_y).element;
+		int8_t stepx = stat->step_x;
+		int8_t stepy = stat->step_y;
+		uint8_t src_elem = ZOO_TILE(sx - stepx, sy - stepy).element;
 		if (src_elem == E_PLAYER) {
-			uint8_t dst_elem = ZOO_TILE(stat->x + stat->step_x, stat->y + stat->step_y).element;
-			zoo_element_defs[dst_elem].touch_proc(stat->x + stat->step_x, stat->y + stat->step_y, &input_delta_x, &input_delta_y);
+			uint8_t dst_elem = ZOO_TILE(sx + stepx, sy + stepy).element;
+			zoo_element_defs[dst_elem].touch_proc(sx + stepx, sy + stepy, &input_delta_x, &input_delta_y);
 		} else {
 			if (src_elem != E_EMPTY) {
-				ElementPushablePush(stat->x - stat->step_x, stat->y - stat->step_y, -stat->step_x, -stat->step_y);
- 				src_elem = ZOO_TILE(stat->x - stat->step_x, stat->y - stat->step_y).element;
+				ElementPushablePush(sx - stepx, sy - stepy, -stepx, -stepy);
+ 				src_elem = ZOO_TILE(sx - stepx, sy - stepy).element;
  			}
 
 			if (src_elem == E_EMPTY) {
-				uint8_t source_stat_id = get_stat_id_at(stat->x + stat->step_x, stat->y + stat->step_y);
+				uint8_t source_stat_id = get_stat_id_at(sx + stepx, sy + stepy);
 				if (source_stat_id == 255) {
 					ZOO_TILE_COPY(
-						ZOO_TILE(stat->x - stat->step_x, stat->y - stat->step_y),
-						ZOO_TILE(stat->x + stat->step_x, stat->y + stat->step_y)
+						ZOO_TILE(sx - stepx, sy - stepy),
+						ZOO_TILE(sx + stepx, sy + stepy)
 					);
 				} else if (source_stat_id != 0) {
 					zoo_tile_t src_tile;
-					ZOO_TILE_ASSIGN(src_tile, stat->x + stat->step_x, stat->y + stat->step_y);
+					ZOO_TILE_ASSIGN(src_tile, sx + stepx, sy + stepy);
 					zoo_stat_t *src_stat = &ZOO_STAT(source_stat_id);
 
-					add_stat(stat->x - stat->step_x, stat->y - stat->step_y,
+					add_stat(sx - stepx, sy - stepy,
 						src_tile.element, src_tile.color,
 						src_stat->cycle, src_stat);
 				} else {
 					goto PostPlace;
 				}
-				board_draw_tile(stat->x - stat->step_x, stat->y - stat->step_y);
+				board_draw_tile(sx - stepx, sy - stepy);
 
 PostPlace:
 				sound_queue(3, sound_duplicator_success);
@@ -63,6 +67,6 @@ PostPlace:
 		stat->p1 = 0;
 	}
 	
-	board_draw_tile(stat->x, stat->y);
+	board_draw_tile(sx, sy);
 	stat->cycle = (9 - stat->p2) * 3;
 }

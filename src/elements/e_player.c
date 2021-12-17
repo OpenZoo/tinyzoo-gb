@@ -40,7 +40,7 @@ void ElementPlayerTick(uint8_t stat_id) {
 		input_shift_pressed = false;
 
 		if (get_stat_id_at(0, 0) == STAT_ID_NONE) {
-			// TODO: DisplayMessage
+			display_message(255, NULL, msg_game_over_line1, msg_game_over_line2);
 		}
 
 		zoo_game_state.tick_time_duration = 0;

@@ -55,8 +55,8 @@ void ElementTransporterMove(uint8_t x, uint8_t y, int8_t dx, int8_t dy) {
 	zoo_tile_t tile;
 	zoo_stat_t *stat = &ZOO_STAT_AT(x + dx, y + dy);
 	if ((stat->step_x == dx) && (stat->step_y == dy)) {
-		uint8_t ix = x;
-		uint8_t iy = y;
+		uint8_t ix = stat->x;
+		uint8_t iy = stat->y;
 		bool is_valid_dest = true;
 		while (1) {
 			ix += dx;

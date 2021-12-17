@@ -11,19 +11,21 @@
 void ElementSharkTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
 	int8_t dx, dy;
+	uint8_t sx = stat->x;
+	uint8_t sy = stat->y;
 
 	if (stat->p1 < rand(10)) {
 		calc_direction_rnd(&dx, &dy);
 	} else {
-		calc_direction_seek(stat->x, stat->y, &dx, &dy);
+		calc_direction_seek(sx, sy, &dx, &dy);
 	}
 
-	switch (ZOO_TILE(stat->x + dx, stat->y + dy).element) {
+	switch (ZOO_TILE(sx + dx, sy + dy).element) {
 		case E_WATER:
-			move_stat(stat_id, stat->x + dx, stat->y + dy);
+			move_stat(stat_id, sx + dx, sy + dy);
 			break;
 		case E_PLAYER:
-			board_attack(stat_id, stat->x + dx, stat->y + dy);
+			board_attack(stat_id, sx + dx, sy + dy);
 			break;
 	}
 }

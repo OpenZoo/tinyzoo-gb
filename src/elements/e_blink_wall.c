@@ -15,10 +15,13 @@ void ElementBlinkWallTick(uint8_t stat_id) {
 	}
 
 	if (stat->p3 == 1) {
-		uint8_t ix = stat->x + stat->step_x;
-		uint8_t iy = stat->y + stat->step_y;
+		int8_t stepx = stat->step_x;
+		int8_t stepy = stat->step_y;
 
-		uint8_t elem = (stat->step_x != 0) ? E_BLINK_RAY_EW : E_BLINK_RAY_NS;
+		uint8_t ix = stat->x + stepx;
+		uint8_t iy = stat->y + stepy;
+
+		uint8_t elem = (stepx != 0) ? E_BLINK_RAY_EW : E_BLINK_RAY_NS;
 		uint8_t color = ZOO_TILE(stat->x, stat->y).color;
 
 		// clear ray
@@ -30,8 +33,8 @@ void ElementBlinkWallTick(uint8_t stat_id) {
 			}
 			tile->element = E_EMPTY;
 			board_draw_tile(ix, iy);
-			ix += stat->step_x;
-			iy += stat->step_y;
+			ix += stepx;
+			iy += stepy;
 			cleared_ray = true;
 		}
 
@@ -46,7 +49,7 @@ void ElementBlinkWallTick(uint8_t stat_id) {
 				if (tile->element == E_PLAYER) {
 					uint8_t player_stat_id = get_stat_id_at(ix, iy);
 
-					if (stat->step_x != 0) {
+					if (stepx != 0) {
 						if (ZOO_TILE(ix, iy - 1).element == E_EMPTY) {
 							move_stat(player_stat_id, ix, iy - 1);
 						} else if (ZOO_TILE(ix, iy + 1).element == E_EMPTY) {
@@ -75,8 +78,8 @@ void ElementBlinkWallTick(uint8_t stat_id) {
 					goto HitBoundary;
 				}
 
-				ix += stat->step_x;
-				iy += stat->step_y;
+				ix += stepx;
+				iy += stepy;
 			}
 		}
 

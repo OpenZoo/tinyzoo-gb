@@ -98,6 +98,9 @@ bool sram_alloc(uint16_t len, sram_ptr_t *ptr) {
 		} else {
 			nlen = entry.size + offset;
 			if (nlen >= len) {
+				if ((nlen - len) <= sizeof(sram_entry_t)) {
+					len = nlen;
+				}
 				// rewind to first entry location
 				sram_sub_ptr(ptr, sizeof(sram_entry_t) + offset);
 				// allocate entry of size len
@@ -108,7 +111,7 @@ bool sram_alloc(uint16_t len, sram_ptr_t *ptr) {
 					// add new free entry
 					sram_add_ptr(ptr, len);
 					entry.flags = 0;
-					entry.size = nlen - len;
+					entry.size = nlen - len - sizeof(sram_entry_t);
 					sram_write(ptr, &entry, sizeof(sram_entry_t));
 					sram_sub_ptr(ptr, len + sizeof(sram_entry_t));
 				}

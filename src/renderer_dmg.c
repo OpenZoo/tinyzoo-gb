@@ -108,12 +108,14 @@ __asm
 	or      a, #0x98
 	ld      b, a	; bc = VRAM address
 	ldhl    sp,     #4
+	di
 .DmgTextDrawSync:
 	ldh     a, (_STAT_REG + 0)
 	bit     1, a
 	jr      nz, .DmgTextDrawSync
 	ld      a, (hl)	; a = chr
 	ld      (bc), a
+	ei
 __endasm;
 }
 
