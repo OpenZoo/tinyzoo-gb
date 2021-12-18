@@ -80,6 +80,10 @@ def print_table():
 			print("\t\t0, // tick func")
 		print("\t\t%s, // touch func" % ElementDefs[i].TouchProc)
 		print("\t\t%d, // score value" % ElementDefs[i].ScoreValue)
+		if ElementDefs[i].Cycle > -1:
+			print("\t\t%d, // cycle" % ElementDefs[i].Cycle)
+		else:
+			print("\t\t0, // cycle")
 		if i < MAX_ELEMENT:
 			print("\t},");
 		else:

@@ -5,11 +5,6 @@
 #include "board_manager.h"
 #include "config.h"
 
-typedef struct {
-	void *ptr;
-	uint8_t bank;
-} far_ptr_t;
-
 static uint8_t board_pointers_bank;
 static far_ptr_t *board_pointers_ptr;
 
@@ -74,7 +69,14 @@ void load_board_data_rom(uint8_t bank, const uint8_t *data) NONBANKED {
 	data += sizeof(zoo_board_info_t);
 
 	zoo_stat_count = *(data++);
-	memcpy(zoo_stats + 1, data, sizeof(zoo_stat_t) * (zoo_stat_count + 1));
+
+	uint16_t zoo_stat_size = sizeof(zoo_stat_t) * (zoo_stat_count + 1);
+	memcpy(zoo_stats + 1, data, zoo_stat_size);
+	data += zoo_stat_size;
+ 
+	zoo_stat_data_size = *(data++);
+	zoo_stat_data_size |= (*(data++)) << 8;
+	memcpy(zoo_stat_data, data, zoo_stat_data_size);
 
 	SWITCH_ROM_MBC5(prev_bank);
 }

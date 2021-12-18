@@ -22,13 +22,6 @@ const zoo_stat_t stat_template_default = {
 	{0, 0}
 };
 
-const uint8_t line_tiles[16] = {
-	249, 208, 210, 186,
-	181, 188, 187, 185,
-	198, 200, 201, 204,
-	205, 202, 203, 206
-};
-
 const int8_t neighbor_delta_x[4] = {0, 0, -1, 1};
 const int8_t neighbor_delta_y[4] = {-1, 1, 0, 0};
 const int8_t diagonal_delta_x[8] = {-1, 0, 1, 1, 1, 0, -1, -1};
@@ -279,16 +272,27 @@ void game_play_loop(bool board_changed) {
 
 void display_message(uint8_t time, const char* line1, const char* line2, const char* line3) {
 	uint8_t sid = get_stat_id_at(0, 0);
+	uint8_t dur;
 	if (get_stat_id_at(0, 0) != STAT_ID_NONE) {
+#ifdef BUGFIX_DIEMOVE_MESSAGE
+		if (line3 != NULL) {
+			ZOO_TILE(0, 0).element = E_MESSAGE_TIMER;
+			ZOO_STAT(sid).cycle = 1;
+			goto SetDuration;
+		}
+#endif
 		remove_stat(sid);
 		sidebar_hide_message();
 	}
 
-	add_stat(0, 0, E_MESSAGE_TIMER, 0, 1, &stat_template_default);
-	sid = time / (zoo_game_state.tick_time_duration + 1);
-	ZOO_STAT(zoo_stat_count).p2 = sid;
-	sidebar_set_message_color(0x9 + (sid % 7));
-	sidebar_show_message(line1, line2, line3);
+	if (line3 != NULL) {
+		add_stat(0, 0, E_MESSAGE_TIMER, 0, 1, &stat_template_default);
+SetDuration:
+		dur = time / (zoo_game_state.tick_time_duration + 1);
+		ZOO_STAT(sid).p2 = dur;
+		sidebar_set_message_color(0x9 + (dur % 7));
+		sidebar_show_message(line1, line2, line3);
+	}
 }
 
 uint8_t get_stat_id_at(uint8_t x, uint8_t y) {
@@ -437,71 +441,17 @@ void move_stat(uint8_t stat_id, uint8_t new_x, uint8_t new_y) {
 	}
 }
 
-bool board_shoot(uint8_t element, uint8_t x, uint8_t y, int8_t dx, int8_t dy, uint8_t source) {
-	zoo_tile_t ntile;
-	ZOO_TILE_COPY(ntile, ZOO_TILE(x + dx, y + dy));
-
-	if ((zoo_element_defs[ntile.element].flags & ELEMENT_WALKABLE) || (ntile.element == E_WATER)) {
-		add_stat(x + dx, y + dy, element, zoo_element_defs[element].color, 1, &stat_template_default);
-
-		zoo_stat_t *new_stat = &ZOO_STAT(zoo_stat_count);
-		new_stat->p1 = source;
-		new_stat->step_x = dx;
-		new_stat->step_y = dy;
-		new_stat->p2 = 100;
-
-		return true;
-	} else if ((ntile.element == E_BREAKABLE) || (
-		(zoo_element_defs[ntile.element].flags & ELEMENT_DESTRUCTIBLE)
-		&& ((ntile.element == E_PLAYER) == source)
-		&& (zoo_world_info.energizer_ticks <= 0)
-	)) {
-		board_damage_tile(x + dx, y + dy);
-		sound_queue(2, sound_damage);
-		return true;
-	} else {
-		return false;
-	}
-}
+void damage_stat_stat0(zoo_stat_t *stat, zoo_tile_t *tile);
 
 void damage_stat(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
 	zoo_tile_t *tile = &ZOO_TILE(stat->x, stat->y);
 
 	if (stat_id == 0) {
-		if (zoo_world_info.health > 0) {
-			zoo_world_info.health -= 10;
-
-			game_update_sidebar_health();
-
-			tile->color = 0x70 | (zoo_element_defs[E_PLAYER].color & 0xF);
-
-			if (zoo_world_info.health > 0) {
-				zoo_world_info.board_time_sec = 0;
-				if (zoo_board_info.flags & BOARD_REENTER_WHEN_ZAPPED) {
-					sound_queue(4, sound_player_zapped);
-
-					uint8_t old_x = stat->x;
-					uint8_t old_y = stat->y;
-					tile->element = E_EMPTY;
-					board_draw_tile(old_x, old_y);
-					stat->x = zoo_board_info.start_player_x;
-					stat->y = zoo_board_info.start_player_y;
-					center_viewport_on_player();
-					board_redraw();
-					text_update();
-
-					zoo_game_state.paused = true;
-				} else {
-					// This used to apply all the time, but for the GB port
-					// we're moving it here - tentatively, anyway?
-					display_message(100, NULL, NULL, msg_ouch);
-				}
-				sound_queue(4, sound_player_damage);
-			} else {
-				sound_queue(5, sound_player_game_over);
-			}
-		}
+		uint8_t prev_bank = _current_bank;
+		SWITCH_ROM_MBC5(2);
+		damage_stat_stat0(stat, tile);
+		SWITCH_ROM_MBC5(prev_bank);
 	} else {
 		switch (tile->element) {
 			case E_BULLET:

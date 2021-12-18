@@ -21,6 +21,14 @@ volatile bool sidebar_tile_data_awaiting = false;
 
 void sidebar_vbl_copy_data(void) {
 	if (sidebar_tile_data_awaiting) {
+		// TODO: this is a kludge...
+		if (_cpu != CGB_TYPE && sidebar_tile_data_len > 48) {
+			memcpy((uint8_t*) sidebar_tile_data_address, sidebar_tile_data, 48);
+			sidebar_tile_data_address += 48;
+			sidebar_tile_data_len -= 48;
+			memmove(sidebar_tile_data, sidebar_tile_data + 48, sidebar_tile_data_len);
+			return;
+		}
 		memcpy((uint8_t*) sidebar_tile_data_address, sidebar_tile_data, sidebar_tile_data_len);
 		if (sidebar_tile_data_ly_switch != 0) {
 			ly_bank_switch = sidebar_tile_data_ly_switch;

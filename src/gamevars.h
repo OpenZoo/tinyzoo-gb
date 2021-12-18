@@ -8,6 +8,11 @@
 #include "config.h"
 #include "renderer.h"
 
+typedef struct {
+	void *ptr;
+	uint8_t bank;
+} far_ptr_t;
+
 #define SHOT_SOURCE_PLAYER 0
 #define SHOT_SOURCE_ENEMY 1
 
@@ -40,8 +45,7 @@ typedef struct {
 	uint8_t p1, p2, p3;
 	uint8_t follower, leader;
 	zoo_tile_t under;
-	// TODO: Data
-	uint16_t data_ofs; // first byte = program ID; remaining bytes = label flags
+	uint16_t data_ofs;
 	uint16_t data_pos;
 } zoo_stat_t;
 
@@ -65,6 +69,7 @@ typedef struct {
 	zoo_element_tick_proc tick_proc;
 	zoo_element_touch_proc touch_proc;
 	uint8_t score_value;
+	uint8_t cycle;
 } zoo_element_def_t;
 
 #define BOARD_IS_DARK 0x01
@@ -89,7 +94,7 @@ typedef struct {
 	uint8_t current_board;
 	uint8_t torch_ticks;
 	uint8_t energizer_ticks;
-	uint8_t oop_flags[MAX_FLAG]; // TODO: migrate to uint16_t
+	uint8_t oop_flags[MAX_FLAG];
 	int16_t board_time_sec;
 	int16_t board_time_hsec;
 	uint8_t board_count;
@@ -128,6 +133,7 @@ extern zoo_tile_t zoo_tiles[62 * 27];
 extern zoo_tile_t *const zoo_tiles_y[27];
 extern zoo_message_flags_t msg_flags;
 extern uint8_t zoo_stat_count;
+extern uint16_t zoo_stat_data_size;
 extern uint8_t zoo_stat_data[MAX_DATA_OFS_SIZE];
 extern zoo_stat_t zoo_stats[MAX_STAT + 3];
 extern zoo_game_state_t zoo_game_state;

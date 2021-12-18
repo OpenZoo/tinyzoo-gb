@@ -10,15 +10,6 @@ typedef struct {
 	uint16_t size;
 } sram_entry_t;
 
-// This header structure is hardcoded elsewhere!
-typedef struct {
-	uint8_t magic[4];
-	uint8_t flags;
-	uint8_t world_id;
-	zoo_world_info_t world_info;
-	sram_ptr_t board_pointers[MAX_BOARD];
-} sram_header_t;
-
 #define SRAM_HEADER_FLAG_WORLD 0x01
 
 #define SRAM_FLAG_USED 0x01

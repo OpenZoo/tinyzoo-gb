@@ -8,9 +8,6 @@
 #include "config.h"
 #include "sram_alloc.h"
 
-#define SRAM_DATA_POS 4
-#define SRAM_BOARD_PTRS_POS (SRAM_DATA_POS + 2 + sizeof(zoo_world_info_t))
-
 static bool load_world_sram(uint8_t offset) {
 	sram_ptr_t ptr;
 	uint8_t result[2];
@@ -85,11 +82,14 @@ static void load_board_data_sram(sram_ptr_t *the_ptr) {
 	sram_read(&ptr, &zoo_board_info, sizeof(zoo_board_info_t));
 	zoo_stat_count = sram_read8(&ptr);
 	sram_read(&ptr, (zoo_stats + 1), sizeof(zoo_stat_t) * (zoo_stat_count + 1));
+
+	sram_read(&ptr, &zoo_stat_data_size, 2);
+	sram_read(&ptr, zoo_stat_data, zoo_stat_data_size);
 }
 
 static bool save_board_data_sram(sram_ptr_t *new_ptr) {
 	// calculate board size
-	uint16_t board_size = (zoo_stat_count + 1) * sizeof(zoo_stat_t) + 1 + sizeof(zoo_board_info_t);
+	uint16_t board_size = (zoo_stat_count + 1) * sizeof(zoo_stat_t) + 1 + sizeof(zoo_board_info_t) + 2 + zoo_stat_data_size;
 
 	// RLE encode (first pass)
 	uint8_t ix = 1;
@@ -153,6 +153,9 @@ static bool save_board_data_sram(sram_ptr_t *new_ptr) {
 	sram_write(&ptr, &zoo_board_info, sizeof(zoo_board_info_t));
 	sram_write8(&ptr, zoo_stat_count);
 	sram_write(&ptr, (zoo_stats + 1), sizeof(zoo_stat_t) * (zoo_stat_count + 1));
+
+	sram_write(&ptr, &zoo_stat_data_size, 2);
+	sram_write(&ptr, zoo_stat_data, zoo_stat_data_size);
 
 	return true;
 }

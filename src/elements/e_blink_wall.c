@@ -59,7 +59,11 @@ void ElementBlinkWallTick(uint8_t stat_id) {
 						if (ZOO_TILE(ix + 1, iy).element == E_EMPTY) {
 							move_stat(player_stat_id, ix + 1, iy);
 						} else if (ZOO_TILE(ix - 1, iy).element == E_EMPTY) {
+#ifdef BUGFIX_BLINKWALL_OFFSET
+							move_stat(player_stat_id, ix - 1, iy);
+#else
 							move_stat(player_stat_id, ix + 1, iy);
+#endif
 						}
 					}
 

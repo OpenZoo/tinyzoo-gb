@@ -5,6 +5,7 @@
 #include "../gamevars.h"
 #include "../game.h"
 #include "../math.h"
+#include "../oop.h"
 #include "../sound_consts.h"
 #include "../timer.h"
 
@@ -68,6 +69,7 @@ TryMove:
 	remove_stat(stat_id);
 	zoo_game_state.current_stat_ticked--;
 	if ((ielem == E_OBJECT) || (ielem == E_SCROLL)) {
-		// TODO: OopSend
+		uint8_t i_stat = get_stat_id_at(ix, iy);
+		oop_send(i_stat, true, OOP_LABEL_SHOT, false);
 	}
 }

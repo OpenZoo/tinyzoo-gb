@@ -9,6 +9,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 1
 		' ', // character
@@ -18,6 +19,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementBoardEdgeTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 2
 		' ', // character
@@ -27,6 +29,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementMessageTimerTick, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 3 - Monitor
 		' ', // character
@@ -36,6 +39,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementMonitorTick, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		1, // cycle
 	},
 	{ // 4 - Player
 		0x02, // character
@@ -45,6 +49,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementPlayerTick, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		1, // cycle
 	},
 	{ // 5 - Ammo
 		0x84, // character
@@ -54,6 +59,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementAmmoTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 6 - Torch
 		0x9D, // character
@@ -63,6 +69,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementTorchTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 7 - Gem
 		0x04, // character
@@ -72,6 +79,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementGemTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 8 - Key
 		0x0C, // character
@@ -81,6 +89,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementKeyTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 9 - Door
 		0x0A, // character
@@ -90,6 +99,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDoorTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 10 - Scroll
 		0xE8, // character
@@ -99,6 +109,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementScrollTick, // tick func
 		ElementScrollTouch, // touch func
 		0, // score value
+		1, // cycle
 	},
 	{ // 11 - Passage
 		0xF0, // character
@@ -108,6 +119,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementPassageTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 12 - Duplicator
 		0xFA, // character
@@ -117,6 +129,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementDuplicatorTick, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		2, // cycle
 	},
 	{ // 13 - Bomb
 		0x0B, // character
@@ -126,6 +139,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementBombTick, // tick func
 		ElementBombTouch, // touch func
 		0, // score value
+		6, // cycle
 	},
 	{ // 14 - Energizer
 		0x7F, // character
@@ -135,6 +149,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementEnergizerTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 15 - Star
 		'S', // character
@@ -144,6 +159,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementStarTick, // tick func
 		ElementDamagingTouch, // touch func
 		0, // score value
+		1, // cycle
 	},
 	{ // 16 - Clockwise
 		'/', // character
@@ -153,6 +169,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementConveyorCWTick, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		3, // cycle
 	},
 	{ // 17 - Counter
 		0x5C, // character
@@ -162,6 +179,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementConveyorCCWTick, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		2, // cycle
 	},
 	{ // 18 - Bullet
 		0xF8, // character
@@ -171,6 +189,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementBulletTick, // tick func
 		ElementDamagingTouch, // touch func
 		0, // score value
+		1, // cycle
 	},
 	{ // 19 - Water
 		0xB0, // character
@@ -180,6 +199,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementWaterTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 20 - Forest
 		0xB0, // character
@@ -189,6 +209,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementForestTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 21 - Solid
 		0xDB, // character
@@ -198,6 +219,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 22 - Normal
 		0xB2, // character
@@ -207,6 +229,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 23 - Breakable
 		0xB1, // character
@@ -216,6 +239,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 24 - Boulder
 		0xFE, // character
@@ -225,6 +249,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementPushableTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 25 - Slider (NS)
 		0x12, // character
@@ -234,6 +259,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementPushableTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 26 - Slider (EW)
 		0x1D, // character
@@ -243,6 +269,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementPushableTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 27 - Fake
 		0xB2, // character
@@ -252,6 +279,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementFakeTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 28 - Invisible
 		' ', // character
@@ -261,6 +289,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementInvisibleTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 29 - Blink wall
 		0xCE, // character
@@ -270,6 +299,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementBlinkWallTick, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		1, // cycle
 	},
 	{ // 30 - Transporter
 		0xC5, // character
@@ -279,6 +309,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementTransporterTick, // tick func
 		ElementTransporterTouch, // touch func
 		0, // score value
+		2, // cycle
 	},
 	{ // 31 - Line
 		0xCE, // character
@@ -288,6 +319,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 32 - Ricochet
 		'*', // character
@@ -297,6 +329,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 33
 		0xCD, // character
@@ -306,6 +339,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 34 - Bear
 		0x99, // character
@@ -315,6 +349,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementBearTick, // tick func
 		ElementDamagingTouch, // touch func
 		1, // score value
+		3, // cycle
 	},
 	{ // 35 - Ruffian
 		0x05, // character
@@ -324,6 +359,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementRuffianTick, // tick func
 		ElementDamagingTouch, // touch func
 		2, // score value
+		1, // cycle
 	},
 	{ // 36 - Object
 		0x02, // character
@@ -333,6 +369,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementObjectTick, // tick func
 		ElementObjectTouch, // touch func
 		0, // score value
+		3, // cycle
 	},
 	{ // 37 - Slime
 		'*', // character
@@ -342,6 +379,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementSlimeTick, // tick func
 		ElementSlimeTouch, // touch func
 		0, // score value
+		3, // cycle
 	},
 	{ // 38 - Shark
 		'^', // character
@@ -351,6 +389,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementSharkTick, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		3, // cycle
 	},
 	{ // 39 - Spinning gun
 		0x18, // character
@@ -360,6 +399,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementSpinningGunTick, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		2, // cycle
 	},
 	{ // 40 - Pusher
 		0x10, // character
@@ -369,6 +409,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementPusherTick, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		4, // cycle
 	},
 	{ // 41 - Lion
 		0xEA, // character
@@ -378,6 +419,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementLionTick, // tick func
 		ElementDamagingTouch, // touch func
 		1, // score value
+		2, // cycle
 	},
 	{ // 42 - Tiger
 		0xE3, // character
@@ -387,6 +429,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementTigerTick, // tick func
 		ElementDamagingTouch, // touch func
 		2, // score value
+		2, // cycle
 	},
 	{ // 43
 		0xBA, // character
@@ -396,6 +439,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 44 - Head
 		0xE9, // character
@@ -405,6 +449,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementCentipedeHeadTick, // tick func
 		ElementDamagingTouch, // touch func
 		1, // score value
+		2, // cycle
 	},
 	{ // 45 - Segment
 		'O', // character
@@ -414,6 +459,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		ElementCentipedeSegmentTick, // tick func
 		ElementDamagingTouch, // touch func
 		3, // score value
+		2, // cycle
 	},
 	{ // 46
 		' ', // character
@@ -423,6 +469,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 47
 		' ', // character
@@ -432,6 +479,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 48
 		' ', // character
@@ -441,6 +489,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 49
 		' ', // character
@@ -450,6 +499,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 50
 		' ', // character
@@ -459,6 +509,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 51
 		' ', // character
@@ -468,6 +519,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 52
 		' ', // character
@@ -477,6 +529,7 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	},
 	{ // 53
 		' ', // character
@@ -486,5 +539,6 @@ const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {
 		0, // tick func
 		ElementDefaultTouch, // touch func
 		0, // score value
+		0, // cycle
 	}
 };

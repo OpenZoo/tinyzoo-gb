@@ -1,3 +1,4 @@
+#include "oop.h"
 #pragma bank 1
 
 #include "elements.h"
@@ -107,7 +108,7 @@ void DrawPlayerSurroundings(uint8_t x, uint8_t y, uint8_t bomb_phase) {
 						if (zoo_element_defs[tile->element].flags & ELEMENT_TYPICALLY_TEXTED) {
 							uint8_t i_stat = get_stat_id_at(ix, iy);
 							if (i_stat > 0) {
-								// TODO OopSend
+								oop_send(i_stat, true, OOP_LABEL_BOMBED, false);
 							}
 						}
 

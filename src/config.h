@@ -12,7 +12,13 @@
 // Use RNG by Damian Yerrick. Faster.
 #define USE_YERRICK_RNG
 
-#define FEAT_BLACK_KEYS
+// #define FEAT_BLACK_KEYS // Black keys/doors compat - costs ~235 bytes (as of 18/12/2021)
+#define BUGFIX_BLINKWALL_OFFSET
+#define BUGFIX_DIEMOVE_SCROLL
+#define BUGFIX_DIEMOVE_OBJECT
+#define BUGFIX_DIEMOVE_MESSAGE
+#define BUGFIX_KOOPO_BUG
+// #define BUGFIX_PUT_RANGE
 
 // adds 81 bytes, performance untested
 // #define OPT_UNROLL_LINE_DRAW
@@ -25,8 +31,10 @@
 #define MAX_ELEMENT 53
 #define BOARD_WIDTH 60
 #define BOARD_HEIGHT 25
+#define MAX_OOP_INSTRUCTION_COUNT 32
 
-#define MAX_DATA_OFS_SIZE 750
+#define MAX_DATA_OFS_SIZE 600
 #define MAX_SOUND_BUFFER_SIZE 254
+#define MAX_TEXT_WINDOW_LINES 512
 
 #endif /* __CONFIG_H__ */

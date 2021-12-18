@@ -1,3 +1,4 @@
+#include "sound_consts.h"
 #pragma bank 2
 
 #include <stdint.h>
@@ -181,4 +182,11 @@ const uint8_t sound_passage_teleport[] = {
 	53, 1, 56, 1, 50, 1, 54, 1,
 	57, 1, 51, 1, 55, 1, 58, 1,
 	52, 1, 56, 1, 64, 1
+};
+
+const uint8_t sound_scroll_touch[] = {
+	20,
+	48, 1, 32, 1, 50, 1, 34, 1, 
+	52, 1, 36, 1, 53, 1, 37, 1, 
+	55, 1, 39, 1
 };

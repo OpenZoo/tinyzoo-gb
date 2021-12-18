@@ -21,6 +21,9 @@ void ElementDuplicatorTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
 	uint8_t sx = stat->x;
 	uint8_t sy = stat->y;
+#ifdef BUGFIX_KOOPO_BUG
+	uint8_t last_current_board = zoo_world_info.current_board;
+#endif
 
 	if (stat->p1 <= 4) {
 		stat->p1++;
@@ -64,6 +67,9 @@ PostPlace:
 				sound_queue(3, sound_duplicator_failure);
 			}
 		}
+#ifdef BUGFIX_KOOPO_BUG
+		if (last_current_board != zoo_world_info.current_board) return;
+#endif
 		stat->p1 = 0;
 	}
 	

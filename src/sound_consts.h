@@ -35,5 +35,6 @@ extern const uint8_t sound_energizer_finish[];
 extern const uint8_t sound_duplicator_success[];
 extern const uint8_t sound_duplicator_failure[];
 extern const uint8_t sound_passage_teleport[];
+extern const uint8_t sound_scroll_touch[];
 
 #endif /* __SOUND_CONSTS_H__ */

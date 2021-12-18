@@ -10,6 +10,8 @@
 #include "elements.h"
 #include "input.h"
 #include "math.h"
+#include "message_consts.h"
+#include "oop.h"
 #include "renderer.h"
 #include "sound_consts.h"
 #include "timer.h"
@@ -72,9 +74,45 @@ void world_create(void) BANKED {
 	board_create();
 	memset(&zoo_world_info, 0, sizeof(zoo_world_info));
 	zoo_world_info.health = 100;
-	memset(&zoo_world_info.oop_flags, 255, sizeof(zoo_world_info.oop_flags));
+	memset(&zoo_world_info.oop_flags, FLAG_ID_NONE, sizeof(zoo_world_info.oop_flags));
 	// TODO: This will save to SRAM - we don't want this!
 	// board_change(0);
+}
+
+void damage_stat_stat0(zoo_stat_t *stat, zoo_tile_t *tile) {
+	if (zoo_world_info.health > 0) {
+		zoo_world_info.health -= 10;
+
+		game_update_sidebar_health();
+
+		tile->color = 0x70 | (zoo_element_defs[E_PLAYER].color & 0xF);
+
+		if (zoo_world_info.health > 0) {
+			zoo_world_info.board_time_sec = 0;
+			if (zoo_board_info.flags & BOARD_REENTER_WHEN_ZAPPED) {
+				sound_queue(4, sound_player_zapped);
+
+				uint8_t old_x = stat->x;
+				uint8_t old_y = stat->y;
+				tile->element = E_EMPTY;
+				board_draw_tile(old_x, old_y);
+				stat->x = zoo_board_info.start_player_x;
+				stat->y = zoo_board_info.start_player_y;
+				center_viewport_on_player();
+				board_redraw();
+				text_update();
+
+				zoo_game_state.paused = true;
+			} else {
+				// This used to apply all the time, but for the GB port
+				// we're moving it here - tentatively, anyway?
+				display_message(100, NULL, NULL, msg_ouch);
+			}
+			sound_queue(4, sound_player_damage);
+		} else {
+			sound_queue(5, sound_player_game_over);
+		}
+	}
 }
 
 void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y) {
@@ -202,5 +240,32 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 		}
 
 		renderer_scrolling = 0;
+	}
+}
+
+bool board_shoot(uint8_t element, uint8_t x, uint8_t y, int8_t dx, int8_t dy, uint8_t source) BANKED {
+	zoo_tile_t ntile;
+	ZOO_TILE_COPY(ntile, ZOO_TILE(x + dx, y + dy));
+
+	if ((zoo_element_defs[ntile.element].flags & ELEMENT_WALKABLE) || (ntile.element == E_WATER)) {
+		add_stat(x + dx, y + dy, element, zoo_element_defs[element].color, 1, &stat_template_default);
+
+		zoo_stat_t *new_stat = &ZOO_STAT(zoo_stat_count);
+		new_stat->p1 = source;
+		new_stat->step_x = dx;
+		new_stat->step_y = dy;
+		new_stat->p2 = 100;
+
+		return true;
+	} else if ((ntile.element == E_BREAKABLE) || (
+		(zoo_element_defs[ntile.element].flags & ELEMENT_DESTRUCTIBLE)
+		&& ((ntile.element == E_PLAYER) == source)
+		&& (zoo_world_info.energizer_ticks <= 0)
+	)) {
+		board_damage_tile(x + dx, y + dy);
+		sound_queue(2, sound_damage);
+		return true;
+	} else {
+		return false;
 	}
 }

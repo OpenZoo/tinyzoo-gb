@@ -9,6 +9,7 @@ uint8_t zoo_stat_count;
 zoo_stat_t zoo_stats[MAX_STAT + 3];
 zoo_game_state_t zoo_game_state;
 uint8_t zoo_stat_data[MAX_DATA_OFS_SIZE];
+uint16_t zoo_stat_data_size;
 
 zoo_tile_t *const zoo_tiles_y[27] = {
 	zoo_tiles,
