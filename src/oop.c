@@ -38,7 +38,7 @@ void oop_send(uint8_t stat_id, bool respect_self_lock, uint8_t label_id, bool ig
 
 	uint8_t prev_bank = _current_bank;
 
-	uint8_t *data_loc = zoo_stat_data + oop_stat->data_ofs;
+	uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
 	SWITCH_ROM_MBC5(data_loc[2]);
 	uint8_t *prog_loc = *((uint8_t**) data_loc);
 	uint16_t label_offset = *((uint16_t*) (prog_loc + 3));
@@ -82,7 +82,7 @@ void oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id
 				if (target_id == OOP_TARGET_ALL || (target_id == OOP_TARGET_OTHERS && stat_id != oop_stat_id)) {
 					oop_send(stat_id, respect_self_lock, label_id, ignore_lock);
 				} else {
-					uint8_t *data_loc = zoo_stat_data + oop_stat->data_ofs;
+					uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
 					SWITCH_ROM_MBC5(data_loc[2]);
 					uint8_t *prog_loc = *((uint8_t**) data_loc);
 					if (target_id == prog_loc[0]) {
@@ -406,8 +406,34 @@ static void oop_command_die(void) {
 }
 
 static void oop_command_bind(void) {
-	// TODO
-	oop_code_loc += 1;
+	uint8_t target_id = *(oop_code_loc++);
+	uint8_t prev_bank = _current_bank;
+
+	zoo_stat_t *stat = &ZOO_STAT(0);
+	uint8_t stat_id = 0;
+	for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
+		if (stat->data_ofs != 0xFFFF) {
+			uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
+			SWITCH_ROM_MBC5(data_loc[2]);
+			uint8_t *prog_loc = *((uint8_t**) data_loc);
+			if (target_id == prog_loc[0]) {
+				// #BIND does not clone DataOfs, but rather assigns it 
+				oop_dataofs_free_if_unused(oop_stat->data_ofs);
+				oop_stat->data_ofs = stat->data_ofs;
+				oop_stat->data_pos = 0;
+
+				// update cached values
+				oop_pos = 0;
+				oop_data_loc = zoo_stat_data + oop_stat->data_ofs;
+				oop_prog_loc = prog_loc;
+				oop_code_loc = oop_prog_loc + 5 + oop_pos;
+
+				return; // we DO want to change bank here
+			}
+		}
+	}
+
+	SWITCH_ROM_MBC5(prev_bank);
 }
 
 static void oop_command_text_line(void) {

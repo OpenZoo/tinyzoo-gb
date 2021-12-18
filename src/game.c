@@ -9,6 +9,7 @@
 #include "input.h"
 #include "math.h"
 #include "message_consts.h"
+#include "oop.h"
 #include "renderer.h"
 #include "renderer_sidebar.h"
 #include "sound_consts.h"
@@ -355,9 +356,11 @@ void add_stat(uint8_t tx, uint8_t ty, uint8_t element, uint8_t color, uint8_t cy
 	dest_stat->y = ty;
 	dest_stat->cycle = cycle;
 	ZOO_TILE_COPY(dest_stat->under, ZOO_TILE(tx, ty));
-	// TODO: datapos
+	dest_stat->data_pos = 0;
 
-	// TODO: data
+	if (template->data_ofs != 0xFFFF) {
+		dest_stat->data_ofs = oop_dataofs_clone(template->data_ofs);
+	}
 
 	if (zoo_element_defs_flags[dest_stat->under.element] & ELEMENT_PLACEABLE_ON_TOP) {
 		ZOO_TILE(tx, ty).color = (color & 0x0F) | ((dest_stat->under.color) & 0x70);
@@ -373,7 +376,10 @@ void add_stat(uint8_t tx, uint8_t ty, uint8_t element, uint8_t color, uint8_t cy
 void remove_stat(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
 
-	// TODO: stat data handling
+	if (stat->data_ofs != 0xFFFF) {
+		oop_dataofs_free_if_unused(stat->data_ofs);
+	}
+
 	if (stat_id < zoo_game_state.current_stat_ticked) zoo_game_state.current_stat_ticked--;
 
 	ZOO_TILE_COPY(ZOO_TILE(stat->x, stat->y), stat->under);

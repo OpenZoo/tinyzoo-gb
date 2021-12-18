@@ -1,6 +1,6 @@
-#include "stdbool.h"
 #pragma bank 2
 
+#include <string.h>
 #include <gb/gb.h>
 #include "elements.h"
 #include "elements_utils.h"
@@ -79,5 +79,40 @@ void oop_place_tile(uint8_t x, uint8_t y, uint8_t element, uint8_t color) BANKED
 		}
 
 		board_draw_tile(x, y);
+	}
+}
+
+uint16_t oop_dataofs_clone(uint16_t loc) BANKED {
+	uint8_t len = zoo_stat_data[loc + 3] & 0x7F;
+	memcpy(zoo_stat_data + zoo_stat_data_size, zoo_stat_data + loc, len);
+	uint16_t new_pos = zoo_stat_data_size;
+	zoo_stat_data_size += len;
+	return new_pos;
+}
+
+void oop_dataofs_free_if_unused(uint16_t loc) BANKED {
+	zoo_stat_t *stat = &ZOO_STAT(0);
+	uint8_t stat_id = 0;
+	for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
+		if (stat->data_ofs == loc) {
+			return;
+		}
+	}
+	oop_dataofs_free(loc);
+}
+
+void oop_dataofs_free(uint16_t loc) BANKED {
+	uint8_t len = zoo_stat_data[loc + 3] & 0x7F;
+	memmove(zoo_stat_data + loc + len, zoo_stat_data + loc, zoo_stat_data_size - loc - len);
+	zoo_stat_data_size -= len;
+
+	zoo_stat_t *stat = &ZOO_STAT(0);
+	uint8_t stat_id = 0;
+	for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
+		if (stat->data_ofs != 0xFFFF) {
+			if (stat->data_ofs > loc) {
+				stat->data_ofs -= len;
+			}
+		}
 	}
 }
