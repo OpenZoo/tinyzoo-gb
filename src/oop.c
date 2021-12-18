@@ -36,6 +36,11 @@ void oop_send(uint8_t stat_id, bool respect_self_lock, uint8_t label_id, bool ig
 		}
 	}
 
+	if (label_id == OOP_LABEL_RESTART) {
+		stat->data_pos = 0;
+		return;
+	}
+
 	uint8_t prev_bank = _current_bank;
 
 	uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
