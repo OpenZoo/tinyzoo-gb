@@ -264,10 +264,14 @@ static void oop_command_clear(void) {
 
 static void oop_command_if(void) {
 	if (oop_check_condition()) {
-		oop_skip_command();
-	} else {
 		oop_code_loc++;
+	} else {
+		oop_skip_command();
 	}
+}
+
+static void oop_command_noop(void) {
+
 }
 
 static void oop_command_shoot(void) {
@@ -468,7 +472,7 @@ static oop_command_proc oop_procs[] = {
 	oop_command_shoot, // SHOOT
 	oop_command_shoot, // THROWSTAR
 	oop_command_give,
-	NULL,
+	oop_command_noop,
 	oop_command_endgame,
 	oop_command_idle,
 	oop_command_restart,
@@ -501,7 +505,7 @@ static uint8_t oop_ins_cost[] = {
 	1, // #SHOOT
 	1, // #THROWSTAR
 	1, // #GIVE
-	0, // unused
+	1, // no-op/replacement
 	1, // #ENDGAME
 	1, // #IDLE
 	1, // #RESTART
