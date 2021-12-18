@@ -295,6 +295,13 @@ static void oop_command_restore(void) {
 static void oop_command_send(void) {
 	uint8_t target_id = *(oop_code_loc++);
 	uint8_t label_id = *(oop_code_loc++);
+
+	// update before oop_send
+	if (oop_pos != 0xFFFF) {
+		oop_pos = oop_code_loc - (oop_prog_loc + 5);
+	}
+	oop_stat->data_pos = oop_pos;
+
 	oop_send_target(target_id, false, label_id, false);
 
 	// update after oop_send
@@ -476,9 +483,42 @@ static oop_command_proc oop_procs[] = {
 	oop_command_text_line,
 };
 
+static uint8_t oop_ins_cost[] = {
+	1, // #END
+	0, // /
+	0, // ?
+	1, // #GO
+	1, // #TRY
+	1, // #WALK
+	1, // #SET
+	1, // #CLEAR
+	1, // #IF
+	1, // #SHOOT
+	1, // #THROWSTAR
+	1, // #GIVE
+	0, // unused
+	1, // #ENDGAME
+	1, // #IDLE
+	1, // #RESTART
+	1, // #ZAP
+	1, // #RESTORE
+	1, // #LOCK
+	1, // #UNLOCK
+	1, // #SEND
+	1, // #BECOME
+	1, // #PUT
+	1, // #CHANGE
+	1, // #PLAY
+	1, // #CYCLE
+	1, // #CHAR
+	1, // #DIE
+	1, // #BIND
+	0, // text line
+};
+
 bool oop_execute(uint8_t stat_id, const char *name) {
 	uint8_t prev_bank = _current_bank;
-	uint8_t ins_count = MAX_OOP_INSTRUCTION_COUNT;
+	static uint8_t ins_count = MAX_OOP_INSTRUCTION_COUNT;
 
 	oop_stat_id = stat_id;
 	oop_stat = &ZOO_STAT(oop_stat_id);
@@ -492,8 +532,9 @@ bool oop_execute(uint8_t stat_id, const char *name) {
 	oop_stop_running = false;
 	oop_replace_element = 255;
 
-	while ((ins_count--) > 0 && !oop_stop_running) {
+	while (ins_count > 0 && !oop_stop_running) {
 		oop_cmd = *(oop_code_loc++);
+		ins_count -= oop_ins_cost[oop_cmd];
 		oop_procs[oop_cmd]();
 	}
 

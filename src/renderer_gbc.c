@@ -274,14 +274,15 @@ void gbc_vblank_isr(void) {
 	vblank_update_palette();
 }
 
-static void gbc_sync_di(void) {
+static void gbc_sync_di(void) __naked {
 __asm;
 GbcSyncDiLoop:
 	ldh a, (_LY_REG + 0)
 	and a, #0x07
-	cp a, #0x05
+	cp a, #0x06
 	jr nc, GbcSyncDiLoop
 	di
+	ret
 __endasm;
 }
 
@@ -420,17 +421,22 @@ __asm
 	or a, #0xD0
 	ld b, a
 
+	ld h, #0x10 ; steps of 0x08
+GbcTextFreeLineLoop1:
 	call _gbc_sync_di ; SVBK cannot be changed between interrupts
-	; set SVBK to 3
 	ld a, #0x03
 	ld (_SVBK_REG), a
 
 	ld a, #0xFF
-	ld h, #0x80
-
-GbcTextFreeLineLoop1:
+.rept 8
 	ld (de), a
 	inc de
+.endm
+
+	ld a, #0x00
+	ld (_SVBK_REG), a
+	ei
+
 	dec h
 	jr nz, GbcTextFreeLineLoop1
 
@@ -784,6 +790,10 @@ __asm
 
 	ld a, (de)
 
+	xor a, a
+	ld (_SVBK_REG), a
+	ei
+
 	cp a, b
 	jp z, GbcTextDrawSetChar
 
@@ -793,10 +803,6 @@ GbcTextDrawColorChanged:
 	; b = new tile color
 
 	ld c, a ; bc = new, old
-
-	xor a, a
-	ld (_SVBK_REG), a
-	ei ; SVBK cannot be changed between interrupts
 
 	ldhl sp, #3
 	ld a, (hl)
