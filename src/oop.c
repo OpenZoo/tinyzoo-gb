@@ -6,6 +6,7 @@
 #include "config.h"
 #include "math.h"
 #include "oop.h"
+#include "sram_debug.h"
 #include "timer.h"
 
 const char *oop_object_name = "Interaction";
@@ -200,7 +201,12 @@ static bool oop_check_condition(void) {
 }
 
 static inline void oop_skip_command(void) {
-	oop_code_loc += (*oop_code_loc) + 1;
+	uint8_t len = *(oop_code_loc++);
+	oop_code_loc += len;
+}
+
+static inline void oop_run_skippable_command(void) {
+	oop_code_loc++;
 }
 
 typedef void (*oop_command_proc)(void);
@@ -243,7 +249,7 @@ OopDirMoveStat:
 	if (oop_cmd == 0x01) {
 		oop_code_loc = last_code_loc;
 	} else if (oop_cmd == 0x04) {
-		oop_code_loc++;
+		oop_run_skippable_command();
 		oop_stop_running = false;
 	}
 }
@@ -264,7 +270,7 @@ static void oop_command_clear(void) {
 
 static void oop_command_if(void) {
 	if (oop_check_condition()) {
-		oop_code_loc++;
+		oop_run_skippable_command();
 	} else {
 		oop_skip_command();
 	}
@@ -346,7 +352,7 @@ static void oop_command_give(void) {
 		oop_give_procs[ptr_id]();
 		oop_skip_command();
 	} else {
-		oop_code_loc++;
+		oop_run_skippable_command();
 	}
 }
 
@@ -525,9 +531,10 @@ static uint8_t oop_ins_cost[] = {
 	0, // text line
 };
 
+static uint8_t ins_count;
+
 bool oop_execute(uint8_t stat_id, const char *name) {
 	uint8_t prev_bank = _current_bank;
-	static uint8_t ins_count = MAX_OOP_INSTRUCTION_COUNT;
 
 	oop_stat_id = stat_id;
 	oop_stat = &ZOO_STAT(oop_stat_id);
@@ -540,8 +547,11 @@ bool oop_execute(uint8_t stat_id, const char *name) {
 	oop_code_loc = oop_prog_loc + 5 + oop_pos;
 	oop_stop_running = false;
 	oop_replace_element = 255;
+	ins_count = MAX_OOP_INSTRUCTION_COUNT;
+
 
 	while (ins_count > 0 && !oop_stop_running) {
+		// sram_debug8(oop_code_loc - (oop_prog_loc + 5));
 		oop_cmd = *(oop_code_loc++);
 		ins_count -= oop_ins_cost[oop_cmd];
 		oop_procs[oop_cmd]();

@@ -1,9 +1,11 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
+#define SRAM_DEBUG
+
 #define ROM_DATA_START_BANK 4
-#define SRAM_MAX_BANK 16
 #define MAX_BOARD 101
+#define SRAM_MAX_BANK 16
 
 // Use accurate RNG. Very slow, but matches ZZT's original behaviour.
 // #define USE_ACCURATE_RNG
