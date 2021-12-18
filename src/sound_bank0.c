@@ -29,13 +29,14 @@ void sound_queue_nobank(int8_t priority, const uint8_t *data) {
 					memcpy(sound_buffer + 2, data + 3, data_len - 2);
 				}
 			} else {
+				uint8_t pos = sound_buffer_pos;
+				memmove(sound_buffer, sound_buffer + pos, sound_buffer_len - pos);
 				__critical {
-					sound_buffer_len -= sound_buffer_pos;
-					memmove(sound_buffer, sound_buffer + sound_buffer_pos, sound_buffer_len);
+					sound_buffer_len -= pos;
 					sound_buffer_pos = 0;
 				};
 				if ((sound_buffer_len + data_len) <= MAX_SOUND_BUFFER_SIZE) {
-					memcpy(sound_buffer + sound_buffer_len, data, data_len);
+					memcpy(sound_buffer + sound_buffer_len, data + 1, data_len);
 					sound_buffer_len += data_len;
 				}
 			}
