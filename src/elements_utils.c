@@ -24,7 +24,7 @@ void ElementPushablePush(uint8_t x, uint8_t y, int8_t dx, int8_t dy) {
 	zoo_tile_t tile;
 	ZOO_TILE_ASSIGN(tile, x, y);
 	if (((tile.element == E_SLIDER_NS) && (dx == 0)) || ((tile.element == E_SLIDER_EW) && (dy == 0))
-		|| (zoo_element_defs[tile.element].flags & ELEMENT_PUSHABLE)) {
+		|| (zoo_element_defs_flags[tile.element] & ELEMENT_PUSHABLE)) {
 		
 		zoo_tile_t dtile;
 		ZOO_TILE_ASSIGN(dtile, x + dx, y + dy);
@@ -38,15 +38,15 @@ void ElementPushablePush(uint8_t x, uint8_t y, int8_t dx, int8_t dy) {
 			}
 		}
 
-		if (!(zoo_element_defs[dtile.element].flags & ELEMENT_WALKABLE)
-			&& (zoo_element_defs[dtile.element].flags & ELEMENT_DESTRUCTIBLE)
+		if (!(zoo_element_defs_flags[dtile.element] & ELEMENT_WALKABLE)
+			&& (zoo_element_defs_flags[dtile.element] & ELEMENT_DESTRUCTIBLE)
 			&& (tile.element != E_PLAYER))
 		{
 			board_damage_tile(x + dx, y + dy);
 			ZOO_TILE_ASSIGN(dtile, x + dx, y + dy);
 		}
 
-		if (zoo_element_defs[dtile.element].flags & ELEMENT_WALKABLE) {
+		if (zoo_element_defs_flags[dtile.element] & ELEMENT_WALKABLE) {
 			ElementMove(x, y, x + dx, y + dy);
 		}
 	}
@@ -68,12 +68,12 @@ void ElementTransporterMove(uint8_t x, uint8_t y, int8_t dx, int8_t dy) {
 			} else if (is_valid_dest) {
 				is_valid_dest = false;
 
-				if (!(zoo_element_defs[tile.element].flags & ELEMENT_WALKABLE)) {
+				if (!(zoo_element_defs_flags[tile.element] & ELEMENT_WALKABLE)) {
 					ElementPushablePush(ix, iy, dx, dy);
 					ZOO_TILE_ASSIGN(tile, ix, iy);
 				}
 
-				if (zoo_element_defs[tile.element].flags & ELEMENT_WALKABLE) {
+				if (zoo_element_defs_flags[tile.element] & ELEMENT_WALKABLE) {
 					ElementMove(stat->x - dx, stat->y - dy, ix, iy);
 					sound_queue(3, sound_transporter_move);
 					break;
@@ -105,14 +105,14 @@ void DrawPlayerSurroundings(uint8_t x, uint8_t y, uint8_t bomb_phase) {
 				int16_t dist = (dx*dx) + (dy*dy) << 1;
 				if (dist < TORCH_DIST_SQR) {
 					if (bomb_phase == 1) {
-						if (zoo_element_defs[tile->element].flags & ELEMENT_TYPICALLY_TEXTED) {
+						if (zoo_element_defs_flags[tile->element] & ELEMENT_TYPICALLY_TEXTED) {
 							uint8_t i_stat = get_stat_id_at(ix, iy);
 							if (i_stat > 0) {
 								oop_send(i_stat, true, OOP_LABEL_BOMBED, false);
 							}
 						}
 
-						if (tile->element == E_STAR || (zoo_element_defs[tile->element].flags & ELEMENT_DESTRUCTIBLE)) {
+						if (tile->element == E_STAR || (zoo_element_defs_flags[tile->element] & ELEMENT_DESTRUCTIBLE)) {
 							board_damage_tile(ix, iy);
 						}
 

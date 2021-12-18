@@ -96,11 +96,11 @@ void ElementPlayerTick(uint8_t stat_id) {
 		player_dir_x = input_delta_x;
 		player_dir_y = input_delta_y;
 
-		zoo_element_defs[ZOO_TILE(sx + input_delta_x, sy + input_delta_y).element]
-			.touch_proc(sx + input_delta_x, sy + input_delta_y, &input_delta_x, &input_delta_y);
+		zoo_element_defs_touchprocs[ZOO_TILE(sx + input_delta_x, sy + input_delta_y).element]
+			(sx + input_delta_x, sy + input_delta_y, &input_delta_x, &input_delta_y);
 
 		if (input_delta_x != 0 || input_delta_y != 0) {
-			if (zoo_element_defs[ZOO_TILE(sx + input_delta_x, sy + input_delta_y).element].flags & ELEMENT_WALKABLE) {
+			if (zoo_element_defs_flags[ZOO_TILE(sx + input_delta_x, sy + input_delta_y).element] & ELEMENT_WALKABLE) {
 				move_stat(0, sx + input_delta_x, sy + input_delta_y);
 			}
 		}

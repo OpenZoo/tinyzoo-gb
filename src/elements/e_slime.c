@@ -24,7 +24,7 @@ void ElementSlimeTick(uint8_t stat_id) {
 			uint8_t tx = start_x + neighbor_delta_x[dir];
 			uint8_t ty = start_y + neighbor_delta_y[dir];
 
-			if (zoo_element_defs[ZOO_TILE(tx, ty).element].flags & ELEMENT_WALKABLE) {
+			if (zoo_element_defs_flags[ZOO_TILE(tx, ty).element] & ELEMENT_WALKABLE) {
 				if (!changed_tiles) {
 					changed_tiles = true;
 					move_stat(stat_id, tx, ty);

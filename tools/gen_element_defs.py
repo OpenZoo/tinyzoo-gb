@@ -1,25 +1,26 @@
 #!/usr/bin/python3
+import os, sys
 
 MAX_ELEMENT = 53
 # init ElementDefs table
 ElementDefType = type("ElementDef", (), {});
 ElementDefs = []
 
-def print_table_bool(b, n):
+def print_table_bool(b, n, fp):
 	if b:
-		print("\t\ttrue, // %s" % n)
+		print("\t\ttrue, // %s" % n, file = fp)
 	else:
-		print("\t\tfalse, // %s" % n)
+		print("\t\tfalse, // %s" % n, file = fp)
 
-def print_table_char(e_chr, n):
+def print_table_char(e_chr, n, fp):
 	if isinstance(e_chr, str):
 		e_chr = ord(e_chr[0])
 	if (e_chr >= 32 and e_chr < 127) and e_chr != 92:
-		print("\t\t'%c', // %s" % (chr(e_chr), n))
+		print("\t\t'%c', // %s" % (chr(e_chr), n), file = fp)
 	elif e_chr == 0:
-		print("\t\t'\\0', // %s" % n)
+		print("\t\t'\\0', // %s" % n, file = fp)
 	else:
-		print("\t\t0x%02X, // %s" % (e_chr, n))
+		print("\t\t0x%02X, // %s" % (e_chr, n), file = fp)
 
 def strip_chars(s):
 	s2 = ""
@@ -33,23 +34,48 @@ def strip_chars(s):
 			s2 = s2 + chr(c - 32)
 	return s2
 
-def print_table():
-	print("// Auto-generated file. Please do not edit directly.");
-	print("");
-	print("const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1] = {");
-	for i in range(0, MAX_ELEMENT + 1):
-		if len(ElementDefs[i].Name) > 0:
-			print("\t{ // %d - %s" % (i, ElementDefs[i].Name))
-		else:
-			print("\t{ // %d" % (i))
-		##
-		# Character
-		print_table_char(ElementDefs[i].Character, "character")
-		# Color
+def path_for_name(table_name):
+	return os.path.join(sys.argv[1], "element_defs_%s.inc" % table_name)
+
+def start_table(table_type, table_name, fp):
+	print("// Auto-generated file. Please do not edit directly.", file = fp);
+	print("", file = fp);
+	print("const %s zoo_element_defs_%s[MAX_ELEMENT + 1] = {" % (table_type, table_name), file = fp);
+
+def start_element(i, fp):
+	if len(ElementDefs[i].Name) > 0:
+		print("\t// %d - %s" % (i, ElementDefs[i].Name), file = fp)
+	else:
+		print("\t// %d" % (i), file = fp)
+
+def finish_element(fp):
+	pass
+
+def finish_table(fp):
+	print("};", file = fp);
+
+def write_table(table_type, table_name, emit_func):
+	with open(path_for_name(table_name), "w") as fp:
+		start_table(table_type, table_name, fp)
+		for i in range(0, MAX_ELEMENT + 1):
+			start_element(i, fp)
+			emit_func(i, fp)
+			finish_element(fp)
+		finish_table(fp)
+
+def write_all_tables():
+	def emit_character(i, fp):
+		print_table_char(ElementDefs[i].Character, "character", fp)
+	write_table("uint8_t", "character", emit_character);
+
+	def emit_color(i, fp):
 		if isinstance(ElementDefs[i].Color, str): # constant
-			print("\t\t%s, // color" % ElementDefs[i].Color)
+			print("\t\t%s, // color" % ElementDefs[i].Color, file = fp)
 		else:
-			print("\t\t0x%02X, // color" % ElementDefs[i].Color)
+			print("\t\t0x%02X, // color" % ElementDefs[i].Color, file = fp)
+	write_table("uint8_t", "color", emit_color);
+
+	def emit_flags(i, fp):
 		flags = []
 		if ElementDefs[i].Destructible:
 			flags.append("ELEMENT_DESTRUCTIBLE")
@@ -67,28 +93,39 @@ def print_table():
 			flags.append("ELEMENT_TYPICALLY_TEXTED")
 		# Bools
 		if len(flags) > 0:
-			print("\t\t%s," % " | ".join(flags))
+			print("\t\t%s," % " | ".join(flags), file = fp)
 		else:
-			print("\t\t0,")
+			print("\t\t0,", file = fp)
+	write_table("uint8_t", "flags", emit_flags);
+
+	def emit_draw_proc(i, fp):
 		if ElementDefs[i].HasDrawProc:
-			print("\t\t%s, // draw func" % ElementDefs[i].DrawProc)
+			print("\t\t%s, // draw func" % ElementDefs[i].DrawProc, file = fp)
 		else:
-			print("\t\t0, // draw func")
+			print("\t\t0, // draw func", file = fp)
+	write_table("zoo_element_draw_proc", "drawprocs", emit_draw_proc);
+
+	def emit_tick_proc(i, fp):
 		if ElementDefs[i].TickProc != "ElementDefaultTick":
-			print("\t\t%s, // tick func" % ElementDefs[i].TickProc)
+			print("\t\t%s, // tick func" % ElementDefs[i].TickProc, file = fp)
 		else:
-			print("\t\t0, // tick func")
-		print("\t\t%s, // touch func" % ElementDefs[i].TouchProc)
-		print("\t\t%d, // score value" % ElementDefs[i].ScoreValue)
+			print("\t\t0, // tick func", file = fp)
+	write_table("zoo_element_tick_proc", "tickprocs", emit_tick_proc);
+
+	def emit_touch_proc(i, fp):
+		print("\t\t%s, // touch func" % ElementDefs[i].TouchProc, file = fp)
+	write_table("zoo_element_touch_proc", "touchprocs", emit_touch_proc);
+
+	def emit_score_value(i, fp):
+		print("\t\t%d, // score value" % ElementDefs[i].ScoreValue, file = fp)
+	write_table("uint8_t", "scorevalues", emit_score_value)
+
+	def emit_cycle(i, fp):
 		if ElementDefs[i].Cycle > -1:
-			print("\t\t%d, // cycle" % ElementDefs[i].Cycle)
+			print("\t\t%d, // cycle" % ElementDefs[i].Cycle, file = fp)
 		else:
-			print("\t\t0, // cycle")
-		if i < MAX_ELEMENT:
-			print("\t},");
-		else:
-			print("\t}");
-	print("};");
+			print("\t\t0, // cycle", file = fp)
+	write_table("uint8_t", "cycles", emit_cycle)
 
 for i in range(0, MAX_ELEMENT + 1):
 	E = ElementDefType();
@@ -520,4 +557,4 @@ ElementDefs[29].DrawProc = "ElementDefaultDraw";
 ElementDefs[4].HasDrawProc = True;
 ElementDefs[4].DrawProc = "ElementPlayerDraw";
 
-print_table()
+write_all_tables()

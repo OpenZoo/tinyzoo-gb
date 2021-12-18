@@ -4,7 +4,14 @@
 #include <stdint.h>
 #include "gamevars.h"
 
-extern const zoo_element_def_t zoo_element_defs[MAX_ELEMENT + 1];
+extern const uint8_t zoo_element_defs_character[MAX_ELEMENT + 1]; // bank 0
+extern const uint8_t zoo_element_defs_color[MAX_ELEMENT + 1]; // bank 0
+extern const uint8_t zoo_element_defs_flags[MAX_ELEMENT + 1]; // bank 0
+extern const zoo_element_draw_proc zoo_element_defs_drawprocs[MAX_ELEMENT + 1]; // bank 1
+extern const zoo_element_tick_proc zoo_element_defs_tickprocs[MAX_ELEMENT + 1]; // bank 1
+extern const zoo_element_touch_proc zoo_element_defs_touchprocs[MAX_ELEMENT + 1]; // bank 1
+extern const uint8_t zoo_element_defs_scorevalues[MAX_ELEMENT + 1]; // bank 0
+extern const uint8_t zoo_element_defs_cycles[MAX_ELEMENT + 1]; // bank 2
 
 #define E_EMPTY 0
 #define E_BOARD_EDGE 1

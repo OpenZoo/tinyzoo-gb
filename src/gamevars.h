@@ -61,17 +61,6 @@ typedef uint8_t (*zoo_element_draw_proc)(uint8_t x, uint8_t y);
 typedef void (*zoo_element_tick_proc)(uint8_t stat_id);
 typedef void (*zoo_element_touch_proc)(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy);
 
-typedef struct {
-	uint8_t character;
-	uint8_t color;
-	uint8_t flags;
-	zoo_element_draw_proc draw_proc;
-	zoo_element_tick_proc tick_proc;
-	zoo_element_touch_proc touch_proc;
-	uint8_t score_value;
-	uint8_t cycle;
-} zoo_element_def_t;
-
 #define BOARD_IS_DARK 0x01
 #define BOARD_REENTER_WHEN_ZAPPED 0x02
 

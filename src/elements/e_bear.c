@@ -31,7 +31,7 @@ void ElementBearTick(uint8_t stat_id) {
 
 BearMovement:
 	elem = ZOO_TILE(stat->x + dx, stat->y + dy).element;
-	if (zoo_element_defs[elem].flags & ELEMENT_WALKABLE) {
+	if (zoo_element_defs_flags[elem] & ELEMENT_WALKABLE) {
 		move_stat(stat_id, stat->x + dx, stat->y + dy);
 	} else if (elem == E_PLAYER || elem == E_BREAKABLE) {
 		board_attack(stat_id, stat->x + dx, stat->y + dy);

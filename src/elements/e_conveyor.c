@@ -34,11 +34,11 @@ static void ElementConveyorTick(uint8_t x, uint8_t y, int8_t dir) {
 		ZOO_TILE_COPY(tiles[i], ttile);
 		if (ttile.element == E_EMPTY) {
 			can_move = true;
-		} else if (!(zoo_element_defs[ttile.element].flags & ELEMENT_PUSHABLE)) {
+		} else if (!(zoo_element_defs_flags[ttile.element] & ELEMENT_PUSHABLE)) {
 			can_move = false;
 		}
 
-		if (zoo_element_defs[ttile.element].flags & ELEMENT_TYPICALLY_STATTED) {
+		if (zoo_element_defs_flags[ttile.element] & ELEMENT_TYPICALLY_STATTED) {
 			stat_ids[i] = get_stat_id_at(tx, ty);
 		}
 	}
@@ -48,13 +48,13 @@ static void ElementConveyorTick(uint8_t x, uint8_t y, int8_t dir) {
 		ZOO_TILE_COPY(ttile, tiles[i]);
 
 		if (can_move) {
-			if (zoo_element_defs[ttile.element].flags & ELEMENT_PUSHABLE) {
+			if (zoo_element_defs_flags[ttile.element] & ELEMENT_PUSHABLE) {
 				uint8_t ix = x + diagonal_delta_x[(i - dir) & 7];
 				uint8_t iy = y + diagonal_delta_y[(i - dir) & 7];
 				tx = x + diagonal_delta_x[i];
 				ty = y + diagonal_delta_y[i];
 
-				if (zoo_element_defs[ttile.element].flags & ELEMENT_TYPICALLY_STATTED) {
+				if (zoo_element_defs_flags[ttile.element] & ELEMENT_TYPICALLY_STATTED) {
 					zoo_tile_t tmp_tile;
 					ZOO_TILE_COPY(tmp_tile, ZOO_TILE(tx, ty));
 					ZOO_TILE_COPY(ZOO_TILE(tx, ty), ttile);
@@ -68,7 +68,7 @@ static void ElementConveyorTick(uint8_t x, uint8_t y, int8_t dir) {
 					board_draw_tile(ix, iy);
 				}
 
-				if (!(zoo_element_defs[tiles[(i + dir) & 7].element].flags & ELEMENT_PUSHABLE)) {
+				if (!(zoo_element_defs_flags[tiles[(i + dir) & 7].element] & ELEMENT_PUSHABLE)) {
 					ZOO_TILE(tx, ty).element = E_EMPTY;
 					board_draw_tile(tx, ty);
 				}
@@ -77,7 +77,7 @@ static void ElementConveyorTick(uint8_t x, uint8_t y, int8_t dir) {
 			}
 		} else if (ttile.element == E_EMPTY) {
 			can_move = true;
-		} else if (!(zoo_element_defs[ttile.element].flags & ELEMENT_PUSHABLE)) {
+		} else if (!(zoo_element_defs_flags[ttile.element] & ELEMENT_PUSHABLE)) {
 			can_move = false;
 		}
 	}

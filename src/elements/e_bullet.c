@@ -19,7 +19,7 @@ TryMove:
 	iy = stat->y + stat->step_y;
 	ielem = ZOO_TILE(ix, iy).element;
 
-	if ((zoo_element_defs[ielem].flags & ELEMENT_WALKABLE) || (ielem == E_WATER)) {
+	if ((zoo_element_defs_flags[ielem] & ELEMENT_WALKABLE) || (ielem == E_WATER)) {
 		move_stat(stat_id, ix, iy);
 		return;
 	}
@@ -33,11 +33,11 @@ TryMove:
 	}
 
 	if ((ielem == E_BREAKABLE) || (
-		(zoo_element_defs[ielem].flags & ELEMENT_DESTRUCTIBLE)
+		(zoo_element_defs_flags[ielem] & ELEMENT_DESTRUCTIBLE)
 		&& ((ielem == E_PLAYER) || (stat->p1 == 0))
 	)) {
-		if (zoo_element_defs[ielem].score_value != 0) {
-			zoo_world_info.score += zoo_element_defs[ielem].score_value;
+		if (zoo_element_defs_scorevalues[ielem] != 0) {
+			zoo_world_info.score += zoo_element_defs_scorevalues[ielem];
 			game_update_sidebar_score();
 		}
 		board_attack(stat_id, ix, iy);

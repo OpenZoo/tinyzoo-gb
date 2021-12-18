@@ -27,7 +27,7 @@ void ElementObjectTick(uint8_t stat_id) {
 	}
 
 	if (stat->step_x != 0 || stat->step_y != 0) {
-		if (zoo_element_defs[ZOO_TILE(stat->x + stat->step_x, stat->y + stat->step_y).element].flags & ELEMENT_WALKABLE) {
+		if (zoo_element_defs_flags[ZOO_TILE(stat->x + stat->step_x, stat->y + stat->step_y).element] & ELEMENT_WALKABLE) {
 			move_stat(stat_id, stat->x + stat->step_x, stat->y + stat->step_y);
 		} else {
 			oop_send(stat_id, true, OOP_LABEL_THUD, false);

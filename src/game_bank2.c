@@ -85,7 +85,7 @@ void damage_stat_stat0(zoo_stat_t *stat, zoo_tile_t *tile) {
 
 		game_update_sidebar_health();
 
-		tile->color = 0x70 | (zoo_element_defs[E_PLAYER].color & 0xF);
+		tile->color = 0x70 | (zoo_element_defs_color[E_PLAYER] & 0xF);
 
 		if (zoo_world_info.health > 0) {
 			zoo_world_info.board_time_sec = 0;
@@ -247,8 +247,8 @@ bool board_shoot(uint8_t element, uint8_t x, uint8_t y, int8_t dx, int8_t dy, ui
 	zoo_tile_t ntile;
 	ZOO_TILE_COPY(ntile, ZOO_TILE(x + dx, y + dy));
 
-	if ((zoo_element_defs[ntile.element].flags & ELEMENT_WALKABLE) || (ntile.element == E_WATER)) {
-		add_stat(x + dx, y + dy, element, zoo_element_defs[element].color, 1, &stat_template_default);
+	if ((zoo_element_defs_flags[ntile.element] & ELEMENT_WALKABLE) || (ntile.element == E_WATER)) {
+		add_stat(x + dx, y + dy, element, zoo_element_defs_color[element], 1, &stat_template_default);
 
 		zoo_stat_t *new_stat = &ZOO_STAT(zoo_stat_count);
 		new_stat->p1 = source;
@@ -258,7 +258,7 @@ bool board_shoot(uint8_t element, uint8_t x, uint8_t y, int8_t dx, int8_t dy, ui
 
 		return true;
 	} else if ((ntile.element == E_BREAKABLE) || (
-		(zoo_element_defs[ntile.element].flags & ELEMENT_DESTRUCTIBLE)
+		(zoo_element_defs_flags[ntile.element] & ELEMENT_DESTRUCTIBLE)
 		&& ((ntile.element == E_PLAYER) == source)
 		&& (zoo_world_info.energizer_ticks <= 0)
 	)) {

@@ -32,12 +32,12 @@ void ElementStarTick(uint8_t stat_id) {
 			if (t_elem == E_PLAYER || t_elem == E_BREAKABLE) {
 				board_attack(stat_id, sx + stat->step_x, sy + stat->step_y);
 			} else {
-				if (!(zoo_element_defs[t_elem].flags & ELEMENT_WALKABLE)) {
+				if (!(zoo_element_defs_flags[t_elem] & ELEMENT_WALKABLE)) {
 					ElementPushablePush(sx + stat->step_x, sy + stat->step_y, stat->step_x, stat->step_y);
 					t_elem = *t_elem_ptr;
 				}
 
-				if ((zoo_element_defs[t_elem].flags & ELEMENT_WALKABLE) || (t_elem == E_WATER)) {
+				if ((zoo_element_defs_flags[t_elem] & ELEMENT_WALKABLE) || (t_elem == E_WATER)) {
 					move_stat(stat_id, sx + stat->step_x, sy + stat->step_y);
 				}
 			}

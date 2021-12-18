@@ -34,7 +34,7 @@ void ElementDuplicatorTick(uint8_t stat_id) {
 		uint8_t src_elem = ZOO_TILE(sx - stepx, sy - stepy).element;
 		if (src_elem == E_PLAYER) {
 			uint8_t dst_elem = ZOO_TILE(sx + stepx, sy + stepy).element;
-			zoo_element_defs[dst_elem].touch_proc(sx + stepx, sy + stepy, &input_delta_x, &input_delta_y);
+			zoo_element_defs_touchprocs[dst_elem](sx + stepx, sy + stepy, &input_delta_x, &input_delta_y);
 		} else {
 			if (src_elem != E_EMPTY) {
 				ElementPushablePush(sx - stepx, sy - stepy, -stepx, -stepy);

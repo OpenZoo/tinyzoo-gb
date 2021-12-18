@@ -12,6 +12,8 @@
 #include "sound_consts.h"
 #include "timer.h"
 
+#include "elements_funcdefs.h"
+
 void ElementDefaultTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 
 }
@@ -119,3 +121,7 @@ void ElementInvisibleTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	sound_queue(3, sound_invisible);
 	display_message(100, NULL, msg_invisible_touch_line1, msg_invisible_touch_line2);
 }
+
+#include "element_defs_drawprocs.inc"
+#include "element_defs_tickprocs.inc"
+#include "element_defs_touchprocs.inc"

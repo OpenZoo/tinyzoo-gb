@@ -29,7 +29,7 @@ void ElementRuffianTick(uint8_t stat_id) {
 		uint8_t elem = ZOO_TILE(sx + stat->step_x, sy + stat->step_y).element;
 		if (elem == E_PLAYER) {
 			board_attack(stat_id, sx + stat->step_x, sy + stat->step_y);
-		} else if (zoo_element_defs[elem].flags & ELEMENT_WALKABLE) {
+		} else if (zoo_element_defs_flags[elem] & ELEMENT_WALKABLE) {
 			move_stat(stat_id, sx + stat->step_x, sy + stat->step_y);
 			if ((stat->p2 + 8) <= rand(17)) {
 				stat->step_x = 0;

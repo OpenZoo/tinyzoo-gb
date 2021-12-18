@@ -21,7 +21,7 @@ void ElementLionTick(uint8_t stat_id) {
 	}
 
 	uint8_t elem = ZOO_TILE(sx + dx, sy + dy).element;
-	if (zoo_element_defs[elem].flags & ELEMENT_WALKABLE) {
+	if (zoo_element_defs_flags[elem] & ELEMENT_WALKABLE) {
 		move_stat(stat_id, sx + dx, sy + dy);
 	} else if (elem == E_PLAYER) {
 		board_attack(stat_id, sx + dx, sy + dy);

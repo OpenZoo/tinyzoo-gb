@@ -178,7 +178,7 @@ static bool oop_check_condition(void) {
 			return (abs(oop_stat->x - ZOO_STAT(0).x) + abs(oop_stat->y - ZOO_STAT(0).y)) == 1;
 		case 0x03: /* BLOCKED */
 			oop_parse_direction();
-			return !(zoo_element_defs[ZOO_TILE(oop_stat->x + oop_dir_x, oop_stat->y + oop_dir_y).element].flags & ELEMENT_WALKABLE);
+			return !(zoo_element_defs_flags[ZOO_TILE(oop_stat->x + oop_dir_x, oop_stat->y + oop_dir_y).element] & ELEMENT_WALKABLE);
 		case 0x04: /* ENERGIZED */
 			return zoo_world_info.energizer_ticks != 0;
 		case 0x05: /* ANY */
@@ -214,7 +214,7 @@ static void oop_command_direction(void) {
 	if (oop_cmd >= 0x03 || oop_dir_x != 0 || oop_dir_y != 0) {
 		uint8_t dest_x = oop_stat->x + oop_dir_x;
 		uint8_t dest_y = oop_stat->y + oop_dir_y;
-		if (!(zoo_element_defs[ZOO_TILE(dest_x, dest_y).element].flags & ELEMENT_WALKABLE)) {
+		if (!(zoo_element_defs_flags[ZOO_TILE(dest_x, dest_y).element] & ELEMENT_WALKABLE)) {
 			uint8_t prev_bank = _current_bank;
 			SWITCH_ROM_MBC5(1);
 			ElementPushablePush(dest_x, dest_y, oop_dir_x, oop_dir_y);
@@ -223,7 +223,7 @@ static void oop_command_direction(void) {
 			// minor optimization
 			goto OopDirMoveStat;
 		}
-		if (zoo_element_defs[ZOO_TILE(dest_x, dest_y).element].flags & ELEMENT_WALKABLE) {
+		if (zoo_element_defs_flags[ZOO_TILE(dest_x, dest_y).element] & ELEMENT_WALKABLE) {
 OopDirMoveStat:
 			move_stat(oop_stat_id, dest_x, dest_y);
 			if (oop_cmd == 0x04) {
@@ -367,7 +367,7 @@ static void oop_command_change(void) {
 	uint8_t ix = 0;
 	uint8_t iy = 1;
 	if (color_to == 0) {
-		color_to = zoo_element_defs[element_to].color;
+		color_to = zoo_element_defs_color[element_to];
 		if (color_to >= COLOR_SPECIAL_MIN) {
 			color_to = 0;
 		}

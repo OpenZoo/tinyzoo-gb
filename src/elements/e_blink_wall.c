@@ -42,7 +42,7 @@ void ElementBlinkWallTick(uint8_t stat_id) {
 			// spawn new ray
 			while (true) {
 				zoo_tile_t *tile = &ZOO_TILE(ix, iy);
-				if ((tile->element != E_EMPTY) && ((zoo_element_defs[tile->element].flags & ELEMENT_DESTRUCTIBLE))) {
+				if ((tile->element != E_EMPTY) && ((zoo_element_defs_flags[tile->element] & ELEMENT_DESTRUCTIBLE))) {
 					board_damage_tile(ix, iy);
 				}
 

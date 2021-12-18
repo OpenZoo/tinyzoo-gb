@@ -28,14 +28,14 @@ void ElementPusherTick(uint8_t stat_id) {
 	start_x = stat->x;
 	start_y = stat->y;
 
-	if (!(zoo_element_defs[ZOO_TILE(start_x + stat->step_x, start_y + stat->step_y).element].flags & ELEMENT_WALKABLE)) {
+	if (!(zoo_element_defs_flags[ZOO_TILE(start_x + stat->step_x, start_y + stat->step_y).element] & ELEMENT_WALKABLE)) {
 		ElementPushablePush(start_x + stat->step_x, start_y + stat->step_y, stat->step_x, stat->step_y);
 	}
 	
 	stat_id = get_stat_id_at(start_x, start_y);
 	stat = &ZOO_STAT(stat_id);
 
-	if (zoo_element_defs[ZOO_TILE(start_x + stat->step_x, start_y + stat->step_y).element].flags & ELEMENT_WALKABLE) {
+	if (zoo_element_defs_flags[ZOO_TILE(start_x + stat->step_x, start_y + stat->step_y).element] & ELEMENT_WALKABLE) {
 		move_stat(stat_id, start_x + stat->step_x, start_y + stat->step_y);
 		sound_queue(2, sound_push);
 

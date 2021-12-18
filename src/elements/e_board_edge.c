@@ -34,11 +34,11 @@ void ElementBoardEdgeTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 
 		zoo_tile_t *entry_tile = &ZOO_TILE(entry_x, entry_y);
 		if (entry_tile->element != E_PLAYER) {
-			zoo_element_defs[entry_tile->element]
-				.touch_proc(entry_x, entry_y, &input_delta_x, &input_delta_y);
+			zoo_element_defs_touchprocs[entry_tile->element]
+				(entry_x, entry_y, &input_delta_x, &input_delta_y);
 		}
 
-		if ((zoo_element_defs[entry_tile->element].flags & ELEMENT_WALKABLE) || (entry_tile->element == E_PLAYER)) {
+		if ((zoo_element_defs_flags[entry_tile->element] & ELEMENT_WALKABLE) || (entry_tile->element == E_PLAYER)) {
 			if (entry_tile->element != E_PLAYER) {
 				move_stat(0, entry_x, entry_y);
 			}

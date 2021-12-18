@@ -30,7 +30,7 @@ void ElementCentipedeHeadTick(uint8_t stat_id) {
 	}
 	
 	uint8_t elem = ZOO_TILE(head_x + stat->step_x, head_y + stat->step_y).element;
-	if (!(zoo_element_defs[elem].flags & ELEMENT_WALKABLE) && (elem != E_PLAYER)) {
+	if (!(zoo_element_defs_flags[elem] & ELEMENT_WALKABLE) && (elem != E_PLAYER)) {
 		int8_t ix = stat->step_x;
 		int8_t iy = stat->step_y;
 		tmp = ((RAND2() << 1) - 1) * iy;
@@ -38,14 +38,14 @@ void ElementCentipedeHeadTick(uint8_t stat_id) {
 		stat->step_x = tmp;
 		
 		elem = ZOO_TILE(head_x + stat->step_x, head_y + stat->step_y).element;
-		if (!(zoo_element_defs[elem].flags & ELEMENT_WALKABLE) && (elem != E_PLAYER)) {
+		if (!(zoo_element_defs_flags[elem] & ELEMENT_WALKABLE) && (elem != E_PLAYER)) {
 			stat->step_x = -stat->step_x;
 			stat->step_y = -stat->step_y;
 
 			elem = ZOO_TILE(head_x + stat->step_x, head_y + stat->step_y).element;
-			if (!(zoo_element_defs[elem].flags & ELEMENT_WALKABLE) && (elem != E_PLAYER)) {
+			if (!(zoo_element_defs_flags[elem] & ELEMENT_WALKABLE) && (elem != E_PLAYER)) {
 				elem = ZOO_TILE(head_x - ix, head_y - iy).element;
-				if (!(zoo_element_defs[elem].flags & ELEMENT_WALKABLE) && (elem != E_PLAYER)) {
+				if (!(zoo_element_defs_flags[elem] & ELEMENT_WALKABLE) && (elem != E_PLAYER)) {
 					stat->step_x = 0;
 					stat->step_y = 0;
 				} else {

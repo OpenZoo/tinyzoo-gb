@@ -10,8 +10,10 @@
 #include "math.h"
 #include "oop.h"
 
+#include "element_defs_cycles.inc"
+
 static uint8_t get_color_for_tile_match(uint8_t element, uint8_t color) {
-	uint8_t def_color = zoo_element_defs[element].color;
+	uint8_t def_color = zoo_element_defs_color[element];
 	if (def_color < COLOR_SPECIAL_MIN) {
 		return def_color & 0x07;
 	} else if (def_color == COLOR_WHITE_ON_CHOICE) {
@@ -47,7 +49,7 @@ void oop_place_tile(uint8_t x, uint8_t y, uint8_t element, uint8_t color) BANKED
 
 	if (src_tile->element != E_PLAYER) {
 		uint8_t new_color = color;
-		uint8_t def_color = zoo_element_defs[element].color;
+		uint8_t def_color = zoo_element_defs_color[element];
 		if (def_color < COLOR_SPECIAL_MIN) {
 			new_color = def_color;
 		} else {
@@ -68,8 +70,8 @@ void oop_place_tile(uint8_t x, uint8_t y, uint8_t element, uint8_t color) BANKED
 			src_tile->color = new_color;
 		} else {
 			board_damage_tile(x, y);
-			if (zoo_element_defs[element].flags & ELEMENT_TYPICALLY_STATTED) {
-				add_stat(x, y, element, new_color, zoo_element_defs[element].cycle, &stat_template_default);
+			if (zoo_element_defs_flags[element] & ELEMENT_TYPICALLY_STATTED) {
+				add_stat(x, y, element, new_color, zoo_element_defs_cycles[element], &stat_template_default);
 			} else {
 				src_tile->element = element;
 				src_tile->color = new_color;

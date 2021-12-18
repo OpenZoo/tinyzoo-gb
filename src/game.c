@@ -106,8 +106,7 @@ void board_draw_tile(uint8_t x, uint8_t y) {
 
 	// Darkness check
 	if ((zoo_board_info.flags & BOARD_IS_DARK)) {
-		const zoo_element_def_t *def = zoo_element_defs + tile.element;
-		if (!(def->flags & ELEMENT_VISIBLE_IN_DARK)) {
+		if (!(zoo_element_defs_flags[tile.element] & ELEMENT_VISIBLE_IN_DARK)) {
 			if (zoo_world_info.torch_ticks > 0) {
 				int16_t dx = ZOO_STAT(0).x - x;
 				int16_t dy = ZOO_STAT(0).y - y;
@@ -125,12 +124,11 @@ NotDark:
 	if (tile.element == E_EMPTY) {
 		text_draw(vx, vy, ' ', 0x0F);
 	} else if (tile.element < E_TEXT_MIN) {
-		const zoo_element_def_t *def = zoo_element_defs + tile.element;
 		uint8_t ch;
-		if (def->draw_proc != 0) {
-			ch = def->draw_proc(x, y);
+		if (zoo_element_defs_drawprocs[tile.element] != 0) {
+			ch = zoo_element_defs_drawprocs[tile.element](x, y);
 		} else {
-			ch = def->character;
+			ch = zoo_element_defs_character[tile.element];
 		}
 
 		text_draw(vx, vy, ch, tile.color);
@@ -166,7 +164,7 @@ void game_play_loop(bool board_changed) {
 
 	ZOO_TILE_CHANGE2(ZOO_STAT(0).x, ZOO_STAT(0).y,
 		zoo_game_state.game_state_element,
-		zoo_element_defs[zoo_game_state.game_state_element].color
+		zoo_element_defs_color[zoo_game_state.game_state_element]
 	);
 
 	if (board_changed) {
@@ -207,19 +205,19 @@ void game_play_loop(bool board_changed) {
 			if (input_delta_x != 0 || input_delta_y != 0) {
 				uint8_t mpx = px + input_delta_x;
 				uint8_t mpy = py + input_delta_y;
-				zoo_element_defs[ZOO_TILE(mpx, mpy).element].touch_proc(mpx, mpy, &input_delta_x, &input_delta_y);
+				zoo_element_defs_touchprocs[ZOO_TILE(mpx, mpy).element](mpx, mpy, &input_delta_x, &input_delta_y);
 				px = ZOO_STAT(0).x;
 				py = ZOO_STAT(0).y;
 				mpx = px + input_delta_x;
 				mpy = py + input_delta_y;
-				if ((mpx != 0 || mpy != 0) && (zoo_element_defs[ZOO_TILE(mpx, mpy).element].flags & ELEMENT_WALKABLE)) {
+				if ((mpx != 0 || mpy != 0) && (zoo_element_defs_flags[ZOO_TILE(mpx, mpy).element] & ELEMENT_WALKABLE)) {
 					if (ZOO_TILE(px, py).element == E_PLAYER) {
 						move_stat(0, mpx, mpy);
 					} else {
 						board_draw_tile(px, py);
 						ZOO_STAT(0).x = mpx;
 						ZOO_STAT(0).y = mpy;
-						ZOO_TILE_CHANGE2(mpx, mpy, E_PLAYER, zoo_element_defs[E_PLAYER].color);
+						ZOO_TILE_CHANGE2(mpx, mpy, E_PLAYER, zoo_element_defs_color[E_PLAYER]);
 						board_draw_tile(mpx, mpy);
 
 						center_viewport_on_player();
@@ -238,12 +236,12 @@ void game_play_loop(bool board_changed) {
 		} else if (zoo_game_state.current_stat_ticked <= zoo_stat_count) {
 			zoo_stat_t *stat = &ZOO_STAT(zoo_game_state.current_stat_ticked);
 			/* if (stat->x <= (BOARD_WIDTH + 1) && stat->y <= (BOARD_HEIGHT + 1)) */ {
-				const zoo_element_def_t *element = &zoo_element_defs[ZOO_TILE(stat->x, stat->y).element];
+				uint8_t element = ZOO_TILE(stat->x, stat->y).element;
 
-				if (element->tick_proc != 0 && stat->cycle != 0) {
+				if (zoo_element_defs_tickprocs[element] != 0 && stat->cycle != 0) {
 					// if (stat->cycle == 1 || ((zoo_game_state.current_tick % stat->cycle) == (zoo_game_state.current_stat_ticked % stat->cycle))) {
 					if (stat->cycle == 1 || (((int16_t) zoo_game_state.current_tick - zoo_game_state.current_stat_ticked) % stat->cycle) == 0) {
-						element->tick_proc(zoo_game_state.current_stat_ticked);
+						zoo_element_defs_tickprocs[element](zoo_game_state.current_stat_ticked);
 					}
 				}
 			}
@@ -361,7 +359,7 @@ void add_stat(uint8_t tx, uint8_t ty, uint8_t element, uint8_t color, uint8_t cy
 
 	// TODO: data
 
-	if (zoo_element_defs[dest_stat->under.element].flags & ELEMENT_PLACEABLE_ON_TOP) {
+	if (zoo_element_defs_flags[dest_stat->under.element] & ELEMENT_PLACEABLE_ON_TOP) {
 		ZOO_TILE(tx, ty).color = (color & 0x0F) | ((dest_stat->under.color) & 0x70);
 	} else {
 		ZOO_TILE(tx, ty).color = color;
@@ -479,7 +477,7 @@ void board_damage_tile(uint8_t x, uint8_t y) {
 
 void board_attack(uint8_t stat_id, uint8_t x, uint8_t y) {
 	if (stat_id == 0 && zoo_world_info.energizer_ticks > 0) {
-		zoo_world_info.score += zoo_element_defs[ZOO_TILE(x, y).element].score_value;
+		zoo_world_info.score += zoo_element_defs_scorevalues[ZOO_TILE(x, y).element];
 		game_update_sidebar_score();
 	} else {
 		damage_stat(stat_id);
@@ -491,7 +489,7 @@ void board_attack(uint8_t stat_id, uint8_t x, uint8_t y) {
 
 	if ((ZOO_TILE(x, y).element == E_PLAYER) && zoo_world_info.energizer_ticks > 0) {
 		zoo_stat_t *attacker_stat = &ZOO_STAT(stat_id);
-		zoo_world_info.score += zoo_element_defs[ZOO_TILE(attacker_stat->x, attacker_stat->y).element].score_value;
+		zoo_world_info.score += zoo_element_defs_scorevalues[ZOO_TILE(attacker_stat->x, attacker_stat->y).element];
 		game_update_sidebar_score();
 	} else {
 		board_damage_tile(x, y);
