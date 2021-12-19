@@ -6,6 +6,7 @@
 #include "math.h"
 #include "renderer.h"
 #include "sram_alloc.h"
+#include "sram_debug.h"
 #include "timer.h"
 
 #include "board_manager.h"

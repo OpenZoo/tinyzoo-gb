@@ -3,17 +3,45 @@
 
 // helper functions
 
-int8_t signum8(int8_t x) {
-	if (x < 0) {
-		return -1;
-	} else if (x > 0) {
-		return 1;
-	} else {
-		return 0;
-	}
+#ifdef GBZ80
+int8_t signum8(int8_t x) __naked __preserves_regs(b, c, d) {
+	x;
+__asm
+	ldhl sp, #2
+	ld e, (hl)
+	bit 7, e
+	jr nz, Signum8ReturnMinusOne ; x < 0
+	xor a, a
+	cp a, e ; x == 0?
+	ret z
+	ld e, #0x01 ; x > 0
+	ret
+Signum8ReturnMinusOne:
+	ld e, #0xFF
+	ret
+__endasm;
 }
 
-int8_t signum16(int16_t x) {
+int8_t difference8(int8_t a, int8_t b) __naked __preserves_regs(b, c, d) {
+	a, b;
+__asm
+	ldhl sp, #2
+	ld a, (hl+)
+	ld e, (hl)
+	cp a, e
+	jr nc, Diff8NoSwap
+
+	ld e, a
+	ld a, (hl)
+
+Diff8NoSwap:
+	sub a, e
+	ld e, a
+	ret
+__endasm;
+}
+#else
+int8_t signum8(int8_t x) {
 	if (x < 0) {
 		return -1;
 	} else if (x > 0) {
@@ -26,10 +54,21 @@ int8_t signum16(int16_t x) {
 int8_t difference8(int8_t a, int8_t b) {
 	return abs(a - b);
 }
+#endif
+
+/* int8_t signum16(int16_t x) {
+	if (x < 0) {
+		return -1;
+	} else if (x > 0) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
 
 int16_t difference16(int16_t a, int16_t b) {
 	return abs(a - b);
-}
+} */
 
 // RNG
 
@@ -58,6 +97,7 @@ int16_t rand_mask(int16_t max) {
 // Permission: https://twitter.com/john_metcalf/status/1446544969506906113
 
 int16_t rand(int16_t max) {
+	max;
 __asm
 	ld a, (_rand_seed)
 	ld l, a
@@ -90,6 +130,7 @@ __endasm;
 }
 
 int16_t rand_mask(int16_t max) __preserves_regs(b, c) {
+	max;
 __asm
 	ld a, (_rand_seed)
 	ld l, a
@@ -144,6 +185,7 @@ __endasm;
 */
 
 int16_t rand(int16_t max) {
+	max;
 __asm
 	ld hl, #(_rand_seed)
 	ld a, (hl)
@@ -169,6 +211,7 @@ __endasm;
 }
 
 int16_t rand_mask(int16_t max) __preserves_regs(d, e) {
+	max;
 __asm
 	ld hl, #(_rand_seed)
 	ld a, (hl)
