@@ -148,16 +148,16 @@ void oop_handle_txtwind(void) BANKED {
 		init_display_message(200, true);
 		switch (txtwind_lines) {
 			case 1:
-				sidebar_show_message_nobank_nostrlen(NULL, 3, NULL, 3,
+				sidebar_show_message(NULL, 3, NULL, 3,
 					(const char*) (*((uint16_t**) (sram_ptr_data))) + 2, sram_ptr_data[2]);
 				break;
 			case 2:
-				sidebar_show_message_nobank_nostrlen(NULL, 3,
+				sidebar_show_message(NULL, 3,
 					(const char*) (*((uint16_t**) (sram_ptr_data))) + 2, sram_ptr_data[2],
 					(const char*) (*((uint16_t**) (sram_ptr_data + 3))) + 2, sram_ptr_data[5]);
 				break;
 			default:
-				sidebar_show_message_nobank_nostrlen(
+				sidebar_show_message(
 					(const char*) (*((uint16_t**) (sram_ptr_data))) + 2, sram_ptr_data[2],
 					(const char*) (*((uint16_t**) (sram_ptr_data + 3))) + 2, sram_ptr_data[5],
 					(const char*) (*((uint16_t**) (sram_ptr_data + 6))) + 2, sram_ptr_data[8]);

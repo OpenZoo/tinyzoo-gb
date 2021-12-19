@@ -8,7 +8,7 @@
 #include "elements.h"
 #include "input.h"
 #include "math.h"
-#include "message_consts.h"
+#include "../res/message_consts.h"
 #include "oop.h"
 #include "renderer.h"
 #include "renderer_sidebar.h"
@@ -298,7 +298,7 @@ SetDuration:
 void display_message(uint8_t time, const char* line1, const char* line2, const char* line3) {
 	init_display_message(time, line3 != NULL);
 	if (line3 != NULL) {
-		sidebar_show_message(line1, line2, line3);
+		sidebar_show_message(line1, 3, line2, 3, line3, 3);
 	}
 }
 

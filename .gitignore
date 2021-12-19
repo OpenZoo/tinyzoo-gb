@@ -1,0 +1,4 @@
+obj/*
+res/*.bin
+res/*.c
+res/*.h

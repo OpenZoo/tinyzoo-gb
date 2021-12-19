@@ -20,9 +20,9 @@ void sidebar_copy_data(uint16_t address, uint8_t len) {
 	sidebar_tile_data_awaiting = true;
 }
 
-extern uint8_t sb_offset;
+static uint8_t sb_offset;
 
-static void sidebar_show_line_nostrlen(const char *line1) {
+static void sidebar_show_line(const char *line1) {
 	if (line1 != NULL) {
 		uint8_t slen = *(line1++);
 		if (slen > 0) {
@@ -32,7 +32,7 @@ static void sidebar_show_line_nostrlen(const char *line1) {
 	}
 }
 
-void sidebar_show_message_nobank_nostrlen(const char* line1, uint8_t bank1, const char* line2, uint8_t bank2, const char* line3, uint8_t bank3) {
+void sidebar_show_message(const char* line1, uint8_t bank1, const char* line2, uint8_t bank2, const char* line3, uint8_t bank3) {
 	while (sidebar_tile_data_awaiting) {}
 	memset(sidebar_tile_data, 0, 84);
 	sb_offset = 0;
@@ -40,11 +40,11 @@ void sidebar_show_message_nobank_nostrlen(const char* line1, uint8_t bank1, cons
 	// write text data
 	uint8_t prev_bank = _current_bank;
 	SWITCH_ROM_MBC5(bank1);
-	sidebar_show_line_nostrlen(line1);
+	sidebar_show_line(line1);
 	SWITCH_ROM_MBC5(bank2);
-	sidebar_show_line_nostrlen(line2);
+	sidebar_show_line(line2);
 	SWITCH_ROM_MBC5(bank3);
-	sidebar_show_line_nostrlen(line3);
+	sidebar_show_line(line3);
 	SWITCH_ROM_MBC5(prev_bank);
 
 	sidebar_tile_data_ly_switch = 135 - (sb_offset >> 2);

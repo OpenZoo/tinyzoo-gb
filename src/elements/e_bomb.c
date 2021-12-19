@@ -5,7 +5,7 @@
 #include "../gamevars.h"
 #include "../game.h"
 #include "../math.h"
-#include "../message_consts.h"
+#include "../../res/message_consts.h"
 #include "../sound_consts.h"
 #include "../timer.h"
 
