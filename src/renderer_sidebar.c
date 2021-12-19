@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <gb/gb.h>
+#include "gamevars.h"
 #include "renderer_sidebar.h"
 #include "sram_debug.h"
 
@@ -33,7 +34,7 @@ static void sidebar_show_line(const char *line1) {
 }
 
 void sidebar_show_message(const char* line1, uint8_t bank1, const char* line2, uint8_t bank2, const char* line3, uint8_t bank3) {
-	while (sidebar_tile_data_awaiting) {}
+	ZOO_BUSYLOOP(sidebar_tile_data_awaiting);
 	memset(sidebar_tile_data, 0, 84);
 	sb_offset = 0;
 

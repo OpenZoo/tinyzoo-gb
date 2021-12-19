@@ -1,9 +1,9 @@
-#include "gamevars.h"
-#include "sram_alloc.h"
 #pragma bank 2
 
 #include <gb/gb.h>
 #include "config.h"
+#include "gamevars.h"
+#include "sram_alloc.h"
 #include "txtwind.h"
 
 uint16_t txtwind_lines;

@@ -4,6 +4,7 @@
 #include "../elements_utils.h"
 #include "../gamevars.h"
 #include "../game.h"
+#include "../game_transition.h"
 #include "../math.h"
 #include "../sound_consts.h"
 #include "../timer.h"
@@ -12,8 +13,10 @@ static const zoo_tile_t empty_tile = {E_EMPTY, 0};
 
 void ElementPassageTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	uint8_t col = ZOO_TILE(x, y).color;
-
 	uint8_t old_board = zoo_world_info.current_board;
+
+	game_transition_board_change_start();
+	sound_queue(4, sound_passage_teleport); // gbzoo: moved from near board_enter() to here
 	board_change(ZOO_STAT_AT(x, y).p3);
 
 	uint8_t new_x = 0, new_y;
@@ -35,8 +38,7 @@ void ElementPassageTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	}
 
 	zoo_game_state.paused = true;
-	sound_queue(4, sound_passage_teleport);
-	// TODO TransitionDrawBoardChange
+	game_transition_board_change_end();
 	board_enter();
 
 	*dx = 0;

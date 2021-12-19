@@ -55,7 +55,7 @@ __asm
 __endasm;
 }
 
-void sidebar_vbl_copy_data(void);
+void global_vblank_isr(void);
 
 void dmg_vblank_isr(void) {
 	LCDC_REG = 0b11010001;
@@ -69,7 +69,7 @@ void dmg_vblank_isr(void) {
 
 	SCX_REG = scx_shadow_reg;
 	SCY_REG = scy_shadow_reg;
-	sidebar_vbl_copy_data();
+	global_vblank_isr();
 }
 
 void dmg_text_init(); // bank 3

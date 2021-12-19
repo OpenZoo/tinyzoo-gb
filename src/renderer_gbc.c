@@ -255,7 +255,7 @@ __asm
 __endasm;
 }
 
-void sidebar_vbl_copy_data(void);
+void global_vblank_isr(void);
 
 void gbc_vblank_isr(void) {
 	uint8_t local_doy = scy_shadow_reg >> 3;
@@ -270,7 +270,7 @@ void gbc_vblank_isr(void) {
 	ly_bank_switch_mirror = ly_bank_switch;
 	new_lcdc_val = (ly_bank_switch < 135) ? 0xD9 : 0xC9;
 
-	sidebar_vbl_copy_data();
+	global_vblank_isr();
 	vblank_update_palette();
 }
 

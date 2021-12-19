@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <gb/gb.h>
+#include "game_transition.h"
 #include "renderer.h"
 
 renderer_t active_renderer;
@@ -19,7 +20,7 @@ uint16_t sidebar_tile_data_address;
 __at(0xC040) static uint8_t sidebar_tile_data[96];
 volatile bool sidebar_tile_data_awaiting = false;
 
-void sidebar_vbl_copy_data(void) {
+static inline void sidebar_vbl_copy_data(void) {
 	if (sidebar_tile_data_awaiting) {
 		// TODO: this is a kludge...
 		if (_cpu != CGB_TYPE && sidebar_tile_data_len > 48) {
@@ -36,6 +37,11 @@ void sidebar_vbl_copy_data(void) {
 		}
 		sidebar_tile_data_awaiting = false;
 	}
+}
+
+void global_vblank_isr(void) {
+	sidebar_vbl_copy_data();
+	game_transition_step();
 }
 
 void text_init(const renderer_t *renderer) {

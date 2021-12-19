@@ -4,6 +4,7 @@
 #include "../elements_utils.h"
 #include "../gamevars.h"
 #include "../game.h"
+#include "../game_transition.h"
 #include "../input.h"
 #include "../math.h"
 #include "../sound_consts.h"
@@ -39,11 +40,10 @@ void ElementBoardEdgeTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 		}
 
 		if ((zoo_element_defs_flags[entry_tile->element] & ELEMENT_WALKABLE) || (entry_tile->element == E_PLAYER)) {
+			game_transition_board_change_end();
 			if (entry_tile->element != E_PLAYER) {
 				move_stat(0, entry_x, entry_y);
 			}
-
-			// TODO: TransitionDrawBoardChange
 
 			*dx = 0;
 			*dy = 0;

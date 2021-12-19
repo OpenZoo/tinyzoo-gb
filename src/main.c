@@ -38,6 +38,8 @@ void main(void) {
 	timer_init();
 
 	board_enter();
+	board_redraw();
+	text_update();
 
 	game_play_loop(true);
 

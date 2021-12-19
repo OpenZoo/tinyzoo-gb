@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <gb/gb.h>
+#include "gamevars.h"
 #include "renderer_sidebar.h"
 #include "../res/font_small.h"
 
@@ -43,7 +44,7 @@ void sidebar_draw_panel(uint8_t x_shifted, uint8_t chr, uint8_t col, int16_t val
 	uint8_t text[5];
 	uint8_t text_pos = 5;
 
-	while (sidebar_tile_data_awaiting) {}
+	ZOO_BUSYLOOP(sidebar_tile_data_awaiting);
 
 	memset(&sidebar_tile_data, 0, sizeof(sidebar_tile_data));
 	sidebar_draw_char(0, chr, col);
