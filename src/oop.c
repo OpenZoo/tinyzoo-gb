@@ -25,21 +25,24 @@ static bool oop_stop_running;
 static uint8_t oop_replace_element;
 static uint8_t oop_replace_color;
 
-void oop_send(uint8_t stat_id, bool respect_self_lock, uint8_t label_id, bool ignore_lock) {
+void oop_banked_noop_why(void) BANKED;
+
+static uint16_t find_label_loc;
+
+#define SET_ZAP_NONE 255
+#define SET_ZAP_FALSE 0
+#define SET_ZAP_TRUE 1
+#define SET_ZAP_FALSE_IF_FIND_STRING_VISIBLE 2
+
+bool oop_find_label_in_stat(uint8_t stat_id, uint8_t label_id, bool zapped, uint8_t set_zap) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
 	if (stat->data_ofs == 0xFFFF) {
-		return;
-	}
-
-	if (stat->p2 != 0 && !ignore_lock) {
-		if (respect_self_lock || stat_id != oop_stat_id) {
-			return;
-		}
+		return false;
 	}
 
 	if (label_id == OOP_LABEL_RESTART) {
-		stat->data_pos = 0;
-		return;
+		find_label_loc = 0;
+		return true;
 	}
 
 	uint8_t prev_bank = _current_bank;
@@ -49,7 +52,7 @@ void oop_send(uint8_t stat_id, bool respect_self_lock, uint8_t label_id, bool ig
 	uint8_t *prog_loc = *((uint8_t**) data_loc);
 	uint16_t label_offset = *((uint16_t*) (prog_loc + 3));
 	if (label_offset == 0) {
-		goto SendReturn;
+		goto FindLabelReturn;
 	}
 
 	uint8_t *label_loc = prog_loc + label_offset;
@@ -58,10 +61,22 @@ void oop_send(uint8_t stat_id, bool respect_self_lock, uint8_t label_id, bool ig
 		uint8_t label_id_at_loc = *(label_loc++);
 		if (label_id_at_loc == label_id) {
 			uint8_t *data_zap_loc = data_loc + 4 + (i >> 3);
-			if (((*data_zap_loc) & (1 << (i & 7))) == 0) {
-				// label not zapped, jump
-				stat->data_pos = *((uint16_t*) label_loc);
-				goto SendReturn;
+			find_label_loc = (*((uint16_t*) label_loc));
+			uint8_t zap_mask = (1 << (i & 7));
+			bool find_label_zapped = ((*data_zap_loc) & zap_mask) != 0;
+			if (find_label_zapped == zapped) {
+				if (set_zap == SET_ZAP_FALSE) {
+					(*data_zap_loc) &= ~zap_mask;
+				} else if (set_zap == SET_ZAP_TRUE) {
+					(*data_zap_loc) |= zap_mask;
+				} else if (set_zap == SET_ZAP_FALSE_IF_FIND_STRING_VISIBLE) {
+					if (find_label_loc & 0x8000) {
+						(*data_zap_loc) &= ~zap_mask;
+					}
+				}
+
+				SWITCH_ROM_MBC5(prev_bank);
+				return true;
 			}
 		}
 
@@ -69,16 +84,29 @@ void oop_send(uint8_t stat_id, bool respect_self_lock, uint8_t label_id, bool ig
 		label_loc += 2;
 	}
 
-SendReturn:
+FindLabelReturn:
 	SWITCH_ROM_MBC5(prev_bank);
+	return false;
 }
 
-void oop_banked_noop_why(void) BANKED;
+void oop_send(uint8_t stat_id, bool respect_self_lock, uint8_t label_id, bool ignore_lock) {
+	if (oop_find_label_in_stat(stat_id, label_id, false, SET_ZAP_NONE)) {
+		zoo_stat_t *stat = &ZOO_STAT(stat_id);
+
+		if (stat->p2 != 0 && !ignore_lock) {
+			if (respect_self_lock || stat_id != oop_stat_id) {
+				return;
+			}
+		}
+
+		stat->data_pos = find_label_loc & 0x7FFF;
+	}
+}
 
 void oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id, bool ignore_lock) {
 	if (target_id == 255) {
 		return;
-	} else if (target_id == OOP_TARGET_SELF) {
+	} else if (target_id == OOP_TARGET_SELF || target_id == OOP_TARGET_EMPTY) {
 		oop_send(oop_stat_id, respect_self_lock, label_id, ignore_lock);
 	} else {
 		uint8_t prev_bank = _current_bank;
@@ -96,6 +124,55 @@ void oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id
 					oop_banked_noop_why(); // TODO: Fix weird compiler issue?
 					if (target_id == prog_loc[0]) {
 						oop_send(stat_id, respect_self_lock, label_id, ignore_lock);			
+					}
+				}
+			}
+		}
+
+		SWITCH_ROM_MBC5(prev_bank);
+	}
+}
+
+typedef void (*oop_zap_proc)(uint8_t, uint8_t, bool);
+
+void oop_zap(uint8_t stat_id, uint8_t label_id, bool target_empty) {
+	oop_find_label_in_stat(stat_id, label_id, false, SET_ZAP_TRUE);
+}
+
+void oop_restore(uint8_t stat_id, uint8_t label_id, bool target_empty) {
+	// TODO: Optimize inner loop?
+	if (oop_find_label_in_stat(stat_id, label_id, true, SET_ZAP_FALSE)) {
+		if (target_empty) {
+			while (oop_find_label_in_stat(stat_id, label_id, true, SET_ZAP_FALSE_IF_FIND_STRING_VISIBLE)) {
+				// pass
+			}
+		}
+	}
+}
+
+void oop_zap_target(uint8_t target_id, uint8_t label_id, oop_zap_proc zap_proc) {
+	if (target_id == 255) {
+		return;
+	} else if (target_id == OOP_TARGET_SELF) {
+		zap_proc(oop_stat_id, label_id, false);
+	} else if (target_id == OOP_TARGET_EMPTY) {
+		zap_proc(oop_stat_id, label_id, true);
+	} else {
+		uint8_t prev_bank = _current_bank;
+
+		zoo_stat_t *stat = &ZOO_STAT(0);
+		uint8_t stat_id = 0;
+		for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
+			if (stat->data_ofs != 0xFFFF) {
+				if (target_id == OOP_TARGET_ALL || (target_id == OOP_TARGET_OTHERS && stat_id != oop_stat_id)) {
+					zap_proc(stat_id, label_id, false);
+				} else {
+					uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
+					SWITCH_ROM_MBC5(data_loc[2]);
+					uint8_t *prog_loc = *((uint8_t**) data_loc);
+					oop_banked_noop_why(); // TODO: Fix weird compiler issue?
+					if (target_id == prog_loc[0]) {
+						zap_proc(stat_id, label_id, false);
 					}
 				}
 			}
@@ -304,13 +381,15 @@ static void oop_command_restart(void) {
 }
 
 static void oop_command_zap(void) {
-	// TODO
-	oop_code_loc += 2;
+	uint8_t target_id = *(oop_code_loc++);
+	uint8_t label_id = *(oop_code_loc++);
+	oop_zap_target(target_id, label_id, oop_zap);
 }
 
 static void oop_command_restore(void) {
-	// TODO
-	oop_code_loc += 2;
+	uint8_t target_id = *(oop_code_loc++);
+	uint8_t label_id = *(oop_code_loc++);
+	oop_zap_target(target_id, label_id, oop_restore);
 }
 
 static void oop_command_send(void) {
