@@ -506,8 +506,13 @@ static void oop_command_char(void) {
 }
 
 static void oop_command_die(void) {
+#ifdef BUGFIX_DIE_UNDER
+	oop_replace_element = oop_stat->under.element;
+	oop_replace_color = oop_stat->under.color;
+#else
 	oop_replace_element = E_EMPTY;
 	oop_replace_color = 0x0F;
+#endif
 	oop_stop_running = true;
 }
 

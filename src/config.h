@@ -14,6 +14,7 @@
 
 // #define FEAT_BLACK_KEYS // Black keys/doors compat - costs ~235 bytes (as of 18/12/2021)
 #define BUGFIX_BLINKWALL_OFFSET
+// #define BUGFIX_DIE_UNDER
 #define BUGFIX_DIEMOVE_SCROLL
 #define BUGFIX_DIEMOVE_OBJECT
 #define BUGFIX_DIEMOVE_MESSAGE
