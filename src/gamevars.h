@@ -133,10 +133,10 @@ extern zoo_stat_t zoo_stats[MAX_STAT + 3];
 extern zoo_game_state_t zoo_game_state;
 #endif
 
-#define ZOO_TILE(x, y) zoo_tiles_y[(y)][(x)]
+#define ZOO_TILE(x, y) zoo_tiles_y[(uint8_t)(y)][(uint8_t)(x)]
 #define ZOO_TILE_COPY(v, w) *((uint16_t*) &(v)) = *((uint16_t*) &(w))
-#define ZOO_TILE_ASSIGN(v, x, y) *((uint16_t*) &(v)) = *((uint16_t*) &ZOO_TILE((x), (y)))
-#define ZOO_TILE_CHANGE2(x, y, el, col) ((uint16_t*) zoo_tiles_y[(y)])[(x)] = ((uint16_t) ((el) | ((col) << 8)))
+#define ZOO_TILE_ASSIGN(v, x, y) *((uint16_t*) &(v)) = *((uint16_t*) &ZOO_TILE((uint8_t)(x), (uint8_t)(y)))
+#define ZOO_TILE_CHANGE2(x, y, el, col) ((uint16_t*) zoo_tiles_y[(uint8_t)(y)])[(uint8_t)(x)] = ((uint16_t) ((el) | ((col) << 8)))
 #define ZOO_STAT(id) zoo_stats[(uint8_t) ((id) + 1)]
 #define ZOO_STAT_AT(x, y) zoo_stats[get_stat_id_at((x), (y)) + 1]
 
