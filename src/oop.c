@@ -9,8 +9,8 @@
 #include "sram_debug.h"
 #include "timer.h"
 
-const char *oop_object_name = "Interaction";
-const char *oop_scroll_name = "Scroll";
+const char oop_object_name[] = "Interaction";
+const char oop_scroll_name[] = "Scroll";
 
 static uint8_t oop_stat_id = 255;
 static uint16_t oop_pos;
@@ -57,8 +57,8 @@ void oop_send(uint8_t stat_id, bool respect_self_lock, uint8_t label_id, bool ig
 	for (uint8_t i = 0; i < label_count; i++) {
 		uint8_t label_id_at_loc = *(label_loc++);
 		if (label_id_at_loc == label_id) {
-			uint8_t *data_zap_loc = data_loc + 4 + (label_count >> 3);
-			if (((*data_zap_loc) & (1 << (label_count & 7))) == 0) {
+			uint8_t *data_zap_loc = data_loc + 4 + (i >> 3);
+			if (((*data_zap_loc) & (1 << (i & 7))) == 0) {
 				// label not zapped, jump
 				stat->data_pos = *((uint16_t*) label_loc);
 				goto SendReturn;
@@ -72,6 +72,8 @@ void oop_send(uint8_t stat_id, bool respect_self_lock, uint8_t label_id, bool ig
 SendReturn:
 	SWITCH_ROM_MBC5(prev_bank);
 }
+
+void oop_banked_noop_why(void) BANKED;
 
 void oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id, bool ignore_lock) {
 	if (target_id == 255) {
@@ -91,6 +93,7 @@ void oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id
 					uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
 					SWITCH_ROM_MBC5(data_loc[2]);
 					uint8_t *prog_loc = *((uint8_t**) data_loc);
+					oop_banked_noop_why(); // TODO: Fix weird compiler issue?
 					if (target_id == prog_loc[0]) {
 						oop_send(stat_id, respect_self_lock, label_id, ignore_lock);			
 					}
@@ -184,7 +187,9 @@ static bool oop_check_condition(void) {
 			return (abs(oop_stat->x - ZOO_STAT(0).x) + abs(oop_stat->y - ZOO_STAT(0).y)) == 1;
 		case 0x03: /* BLOCKED */
 			oop_parse_direction();
-			return !(zoo_element_defs_flags[ZOO_TILE(oop_stat->x + oop_dir_x, oop_stat->y + oop_dir_y).element] & ELEMENT_WALKABLE);
+			x = oop_stat->x + oop_dir_x;
+			y = oop_stat->y + oop_dir_y;
+			return !(zoo_element_defs_flags[ZOO_TILE(x, y).element] & ELEMENT_WALKABLE);
 		case 0x04: /* ENERGIZED */
 			return zoo_world_info.energizer_ticks != 0;
 		case 0x05: /* ANY */
@@ -438,6 +443,7 @@ static void oop_command_bind(void) {
 			uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
 			SWITCH_ROM_MBC5(data_loc[2]);
 			uint8_t *prog_loc = *((uint8_t**) data_loc);
+			oop_banked_noop_why(); // TODO: Fix weird compiler issue?
 			if (target_id == prog_loc[0]) {
 				// #BIND does not clone DataOfs, but rather assigns it 
 				oop_dataofs_free_if_unused(oop_stat->data_ofs);
@@ -549,9 +555,17 @@ bool oop_execute(uint8_t stat_id, const char *name) {
 	oop_replace_element = 255;
 	ins_count = MAX_OOP_INSTRUCTION_COUNT;
 
+#ifdef SRAM_DEBUG_OOP_EXECUTE
+	sram_debug8('O');
+	sram_debug8(oop_stat_id);
+	sram_debug8('E');
+#endif
 
 	while (ins_count > 0 && !oop_stop_running) {
-		// sram_debug8(oop_code_loc - (oop_prog_loc + 5));
+#ifdef SRAM_DEBUG_OOP_EXECUTE
+		sram_debug8(oop_code_loc - (oop_prog_loc + 5));
+#endif
+
 		oop_cmd = *(oop_code_loc++);
 		ins_count -= oop_ins_cost[oop_cmd];
 		oop_procs[oop_cmd]();

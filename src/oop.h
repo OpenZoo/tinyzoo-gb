@@ -36,8 +36,8 @@ void oop_dataofs_free_if_unused(uint16_t loc) BANKED;
 void oop_dataofs_free(uint16_t loc) BANKED;
 
 // oop.c (bank 0)
-extern const char *oop_object_name;
-extern const char *oop_scroll_name;
+extern const char oop_object_name[];
+extern const char oop_scroll_name[];
 void oop_send(uint8_t stat_id, bool respect_self_lock, uint8_t label_id, bool ignore_lock);
 void oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id, bool ignore_lock);
 bool oop_execute(uint8_t stat_id, const char *name);

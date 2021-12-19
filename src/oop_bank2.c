@@ -12,6 +12,10 @@
 
 #include "element_defs_cycles.inc"
 
+void oop_banked_noop_why(void) BANKED {
+	
+}
+
 static uint8_t get_color_for_tile_match(uint8_t element, uint8_t color) {
 	uint8_t def_color = zoo_element_defs_color[element];
 	if (def_color < COLOR_SPECIAL_MIN) {

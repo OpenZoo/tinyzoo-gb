@@ -1,8 +1,6 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#define SRAM_DEBUG
-
 #define ROM_DATA_START_BANK 4
 #define MAX_BOARD 101
 #define SRAM_MAX_BANK 16
@@ -38,5 +36,10 @@
 #define MAX_DATA_OFS_SIZE 600
 #define MAX_SOUND_BUFFER_SIZE 254
 #define MAX_TEXT_WINDOW_LINES 512
+
+#define SRAM_DEBUG
+#ifdef SRAM_DEBUG
+#define SRAM_DEBUG_OOP_EXECUTE
+#endif
 
 #endif /* __CONFIG_H__ */
