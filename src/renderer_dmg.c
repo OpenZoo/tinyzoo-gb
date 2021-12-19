@@ -119,6 +119,10 @@ __asm
 __endasm;
 }
 
+static void dmg_text_sync_hblank_safe(void) {
+
+}
+
 static void dmg_text_free_line(uint8_t y) {
 
 }
@@ -135,6 +139,7 @@ static void dmg_text_update(void) {
 
 const renderer_t renderer_dmg = {
 	dmg_text_init,
+	dmg_text_sync_hblank_safe,
 	dmg_text_undraw,
 	dmg_text_draw,
 	dmg_text_free_line,

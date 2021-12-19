@@ -1,6 +1,7 @@
 #include <string.h>
 #include <gb/gb.h>
 #include "config.h"
+#include "renderer.h"
 #include "timer.h"
 
 extern uint8_t sound_buffer[MAX_SOUND_BUFFER_SIZE];
@@ -18,6 +19,7 @@ void sound_queue_nobank(int8_t priority, const uint8_t *data) {
 			uint8_t data_len = data[0];
 			if (priority >= 0 || !sound_is_playing) {
 				sound_current_priority = priority;
+				text_sync_hblank_safe();
 				__critical {
 					sound_duration_counter = 1;
 					sound_buffer_len = data_len;
@@ -31,6 +33,7 @@ void sound_queue_nobank(int8_t priority, const uint8_t *data) {
 			} else {
 				uint8_t pos = sound_buffer_pos;
 				memmove(sound_buffer, sound_buffer + pos, sound_buffer_len - pos);
+				text_sync_hblank_safe();
 				__critical {
 					sound_buffer_len -= pos;
 					sound_buffer_pos = 0;

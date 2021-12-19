@@ -274,14 +274,28 @@ void gbc_vblank_isr(void) {
 	vblank_update_palette();
 }
 
-static void gbc_sync_di(void) __naked {
+static void gbc_sync_di(void) __naked __preserves_regs(d, e, h, l) {
 __asm;
 GbcSyncDiLoop:
 	ldh a, (_LY_REG + 0)
 	and a, #0x07
 	cp a, #0x06
 	jr nc, GbcSyncDiLoop
+GbcSyncDiDone:
 	di
+	ret
+__endasm;
+}
+
+// Lower tolerance due to potential C overhead
+static void gbc_text_sync_hblank_safe(void) __naked {
+__asm;
+GbcHSSyncDiLoop:
+    ; LY in range?
+	ldh a, (_LY_REG + 0)
+	and a, #0x07
+	cp a, #0x04
+	jr nc, GbcHSSyncDiLoop
 	ret
 __endasm;
 }
@@ -941,6 +955,7 @@ static void gbc_text_scroll(int8_t dx, int8_t dy) {
 
 const renderer_t renderer_gbc = {
 	gbc_text_init,
+	gbc_text_sync_hblank_safe,
 	gbc_text_undraw,
 	gbc_text_draw,
 	gbc_text_free_line,

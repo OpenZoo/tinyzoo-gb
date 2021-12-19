@@ -6,6 +6,7 @@
 
 typedef struct {
 	void (*init)(void);
+	void (*sync_hblank_safe)(void);
 	void (*undraw)(uint8_t x, uint8_t y);
 	void (*draw)(uint8_t x, uint8_t y, uint8_t chr, uint8_t col);
 	void (*free_line)(uint8_t y);
@@ -28,6 +29,7 @@ extern renderer_t active_renderer;
 
 void text_init(const renderer_t *renderer);
 
+#define text_sync_hblank_safe() active_renderer.sync_hblank_safe()
 #define text_undraw(a, b) active_renderer.undraw(a, b)
 #define text_draw(a, b, c, d) active_renderer.draw(a, b, c, d)
 #define text_free_line(a) active_renderer.free_line(a)
