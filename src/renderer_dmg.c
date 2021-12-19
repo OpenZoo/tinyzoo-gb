@@ -7,12 +7,12 @@
 
 extern uint8_t ly_bank_switch;
 
-void dmg_hblank_switch_window_pre(void) {
+void dmg_hblank_switch_window_pre(void) __naked {
 __asm
 .hblank_switch_window_pre_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
 	bit 1, a				; 1 cycles
-	jp nz, .hblank_switch_window_pre_sync		; 1.5 cycles
+	jr nz, .hblank_switch_window_pre_sync		; 1.5 cycles
 
 	ld a, #0xD9 ; 8
 	ldh (_LCDC_REG + 0), a ; 12
@@ -35,12 +35,12 @@ __asm
 __endasm;
 }
 
-void dmg_hblank_switch_window(void) {
+void dmg_hblank_switch_window(void) __naked {
 __asm
 .hblank_switch_window_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
 	bit 1, a				; 1 cycles
-	jp nz, .hblank_switch_window_sync		; 1.5 cycles
+	jr nz, .hblank_switch_window_sync		; 1.5 cycles
 
 	ld a, #0xC9 ; 8
 	ldh (_LCDC_REG + 0), a ; 12

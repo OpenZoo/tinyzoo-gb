@@ -100,7 +100,7 @@ __asm
 __endasm;
 }
 
-static void gbc_hblank_switch_window(void) {
+static void gbc_hblank_switch_window(void) __naked {
 __asm
 .hblank_switch_window_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
@@ -115,7 +115,7 @@ __asm
 __endasm;
 }
 
-static void hblank_update_palette(void) {
+static void hblank_update_palette(void) __naked {
 __asm
 	push hl
 	push bc
@@ -149,7 +149,7 @@ __asm
 	ld b, a
 	ldh a, (_LYC_REG + 0)
 	cp a, b
-	jp nc, .hblank_update_palette_window
+	jr nc, .hblank_update_palette_window
 	add a, #0x08
 	ldh (_LYC_REG + 0), a
 
@@ -250,7 +250,7 @@ __asm
 	ld a, #>(_gbc_hblank_switch_window)
 	ld (_hblank_isr_ip+1), a
 
-	jp .hblank_update_palette_restore
+	jr .hblank_update_palette_restore
 
 __endasm;
 }
@@ -809,7 +809,7 @@ __asm
 	ei
 
 	cp a, b
-	jp z, GbcTextDrawSetChar
+	jr z, GbcTextDrawSetChar
 
 GbcTextDrawColorChanged:
 	; color changed
