@@ -199,7 +199,8 @@ static bool oop_check_condition(void) {
 			y = 1;
 			return find_tile_on_board(&x, &y, i, j);
 		case 0x06: /* FLAG */
-			return world_get_flag_pos(*(oop_code_loc++)) != FLAG_ID_NONE;
+			i = *(oop_code_loc++);
+			return i != FLAG_ID_NONE && world_get_flag_pos(i) != FLAG_ID_NONE;
 	}
 
 	return false;
@@ -544,6 +545,10 @@ bool oop_execute(uint8_t stat_id, const char *name) {
 
 	oop_stat_id = stat_id;
 	oop_stat = &ZOO_STAT(oop_stat_id);
+	if (oop_stat->data_ofs == 0xFFFF) {
+		return false;
+	}
+
 	oop_pos = oop_stat->data_pos;
 	oop_data_loc = zoo_stat_data + oop_stat->data_ofs;
 
