@@ -7,7 +7,6 @@
 #include "../res/game_transition_table.inc"
 
 // must be a divisor of the table size
-#define GAME_TRANSITION_STEP 1
 
 static uint16_t transition_pos = 0xFFFF;
 static uint8_t transition_color;
@@ -28,23 +27,64 @@ __endasm;
 void game_transition_step(void) {
 	if (transition_pos >= (TRANSITION_TABLE_20_17_ENTRY_COUNT * 2)) return;
 
-	uint8_t len = GAME_TRANSITION_STEP;
+	uint8_t len;
 	const uint8_t *arr = transition_table_20_17 + transition_pos;
 
 	if (transition_color == 0xFF) {
-		while ((len--) > 0) {
+		{
 			uint8_t x = *(arr++);
 			uint8_t y = *(arr++);
 			board_draw_tile(viewport_x + x, viewport_y + y);
 		}
+		{
+			uint8_t x = *(arr++);
+			uint8_t y = *(arr++);
+			board_draw_tile(viewport_x + x, viewport_y + y);
+		}
+		{
+			uint8_t x = *(arr++);
+			uint8_t y = *(arr++);
+			board_draw_tile(viewport_x + x, viewport_y + y);
+		}
+		{
+			uint8_t x = *(arr++);
+			uint8_t y = *(arr++);
+			board_draw_tile(viewport_x + x, viewport_y + y);
+		}
+		{
+			uint8_t x = *(arr++);
+			uint8_t y = *(arr++);
+			board_draw_tile(viewport_x + x, viewport_y + y);
+		}
+		transition_pos += 10;
 	} else {
-		while ((len--) > 0) {
+		{
 			uint8_t x = *(arr++);
 			uint8_t y = *(arr++);
 			text_draw(x, y, 178, transition_color);
 		}
+		{
+			uint8_t x = *(arr++);
+			uint8_t y = *(arr++);
+			text_draw(x, y, 178, transition_color);
+		}
+		{
+			uint8_t x = *(arr++);
+			uint8_t y = *(arr++);
+			text_draw(x, y, 178, transition_color);
+		}
+		{
+			uint8_t x = *(arr++);
+			uint8_t y = *(arr++);
+			text_draw(x, y, 178, transition_color);
+		}
+		{
+			uint8_t x = *(arr++);
+			uint8_t y = *(arr++);
+			text_draw(x, y, 178, transition_color);
+		}
+		transition_pos += 10;
 	}
-	transition_pos += GAME_TRANSITION_STEP * 2;
 }
 
 bool game_transition_running(void) {

@@ -44,23 +44,27 @@ void center_viewport_on_player(void) {
 	viewport_y = vy;
 }
 
-void board_enter(void) {
+void board_enter_stage1(void) {
 	zoo_board_info.start_player_x = ZOO_STAT(0).x;
 	zoo_board_info.start_player_y = ZOO_STAT(0).y;
 
+	zoo_world_info.board_time_sec = 0;
+	zoo_game_state.game_state_element = E_PLAYER; // TODO: not here...
+
+	center_viewport_on_player();
+	text_update();
+}
+
+void board_enter_stage2(void) {
+	sidebar_hide_message();
+	game_update_sidebar_all();
+}
+
+void board_enter_stage3(void) {
 	if ((zoo_board_info.flags & BOARD_IS_DARK) && !(msg_flags.f1 & MSG_FLAG1_HINT_TORCH)) {
 		display_message(200, msg_torch_hint_line1, msg_torch_hint_line2, msg_torch_hint_line3);
 		msg_flags.f1 |= MSG_FLAG1_HINT_TORCH;
 	}
-
-	zoo_world_info.board_time_sec = 0;
-	game_update_sidebar_all();
-
-	zoo_game_state.game_state_element = E_PLAYER; // TODO: not here...
-
-	sidebar_hide_message();
-	center_viewport_on_player();
-	text_update();
 }
 
 void board_change(uint8_t id) {
@@ -411,6 +415,8 @@ void remove_stat(uint8_t stat_id) {
 
 void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y);
 
+bool move_stat_enable_scroll = true;
+
 void move_stat(uint8_t stat_id, uint8_t new_x, uint8_t new_y) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
 	uint8_t old_x = stat->x;
@@ -443,7 +449,7 @@ void move_stat(uint8_t stat_id, uint8_t new_x, uint8_t new_y) {
 	board_draw_tile(new_x, new_y);
 	board_draw_tile(old_x, old_y);
 
-	if (stat_id == 0) {
+	if (stat_id == 0 && move_stat_enable_scroll) {
 		uint8_t prev_bank = _current_bank;
 		SWITCH_ROM_MBC5(2);
 		move_stat_scroll_stat0(old_x, old_y, new_x, new_y);

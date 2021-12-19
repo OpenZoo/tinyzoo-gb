@@ -37,9 +37,9 @@ void main(void) {
 
 	timer_init();
 
-	board_enter();
-	board_redraw();
-	text_update();
+	board_enter_stage1();
+	board_enter_stage2();
+	board_enter_stage3();
 
 	game_play_loop(true);
 

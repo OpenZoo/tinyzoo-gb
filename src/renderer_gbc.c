@@ -270,12 +270,15 @@ void gbc_vblank_isr(void) {
 	ly_bank_switch_mirror = ly_bank_switch;
 	new_lcdc_val = (ly_bank_switch < 135) ? 0xD9 : 0xC9;
 
-	global_vblank_isr();
 	vblank_update_palette();
+	global_vblank_isr();
 }
 
 static void gbc_sync_di(void) __naked __preserves_regs(d, e, h, l) {
 __asm;
+	ldh a, (_LY_REG + 0)
+	cp a, #135
+	jr nc, GbcSyncDiDone
 GbcSyncDiLoop:
 	ldh a, (_LY_REG + 0)
 	and a, #0x07

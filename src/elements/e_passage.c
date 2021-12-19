@@ -16,6 +16,7 @@ void ElementPassageTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	uint8_t old_board = zoo_world_info.current_board;
 
 	game_transition_board_change_start();
+	sidebar_hide_message();
 	sound_queue(4, sound_passage_teleport); // gbzoo: moved from near board_enter() to here
 	board_change(ZOO_STAT_AT(x, y).p3);
 
@@ -38,9 +39,13 @@ void ElementPassageTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	}
 
 	zoo_game_state.paused = true;
+	board_enter_stage1();
 	game_transition_board_change_end();
-	board_enter();
+	board_enter_stage2();
 
 	*dx = 0;
 	*dy = 0;
+
+	ZOO_BUSYLOOP(game_transition_running());
+	board_enter_stage3();
 }

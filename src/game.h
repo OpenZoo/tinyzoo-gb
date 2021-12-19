@@ -21,7 +21,9 @@ extern const int8_t diagonal_delta_y[8];
 void center_viewport_on_player(void);
 void board_redraw(void);
 
-void board_enter(void);
+void board_enter_stage1(void); // before transition
+void board_enter_stage2(void); // during transition
+void board_enter_stage3(void); // after transition
 void board_change(uint8_t id);
 void board_undraw_tile(uint8_t x, uint8_t y);
 void board_draw_tile(uint8_t x, uint8_t y);
