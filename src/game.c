@@ -271,16 +271,12 @@ void game_play_loop(bool board_changed) {
 	} while(!zoo_game_state.play_exit_requested);
 }
 
-void display_message(uint8_t time, const char* line1, const char* line2, const char* line3) {
-	display_message_nobank(time, line1, 3, line2, 3, line3, 3);
-}
-
-void display_message_nobank(uint8_t time, const char* line1, uint8_t bank1, const char* line2, uint8_t bank2, const char* line3, uint8_t bank3) {
+void init_display_message(uint8_t time, bool visible) {
 	uint8_t sid = get_stat_id_at(0, 0);
 	uint8_t dur;
 	if (sid != STAT_ID_NONE) {
 #ifdef BUGFIX_DIEMOVE_MESSAGE
-		if (line3 != NULL) {
+		if (visible) {
 			ZOO_TILE(0, 0).element = E_MESSAGE_TIMER;
 			ZOO_STAT(sid).cycle = 1;
 			goto SetDuration;
@@ -290,13 +286,19 @@ void display_message_nobank(uint8_t time, const char* line1, uint8_t bank1, cons
 		sidebar_hide_message();
 	}
 
-	if (line3 != NULL) {
+	if (visible) {
 		add_stat(0, 0, E_MESSAGE_TIMER, 0, 1, &stat_template_default);
 SetDuration:
 		dur = time / (zoo_game_state.tick_time_duration + 1);
 		ZOO_STAT(sid).p2 = dur;
 		sidebar_set_message_color(0x9 + (dur % 7));
-		sidebar_show_message_nobank(line1, bank1, line2, bank2, line3, bank3);
+	}
+}
+
+void display_message(uint8_t time, const char* line1, const char* line2, const char* line3) {
+	init_display_message(time, line3 != NULL);
+	if (line3 != NULL) {
+		sidebar_show_message(line1, line2, line3);
 	}
 }
 

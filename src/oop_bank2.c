@@ -1,4 +1,5 @@
 #include "sram_debug.h"
+#include "renderer_sidebar.h"
 #pragma bank 2
 
 #include <string.h>
@@ -144,21 +145,22 @@ void oop_handle_txtwind(void) BANKED {
 		// TODO: This doesn't handle 1-liners prefixed with $ or !.
 		// Let's hope they don't actually occur much?
 
+		init_display_message(200, true);
 		switch (txtwind_lines) {
 			case 1:
-				display_message_nobank(200, NULL, 3, NULL, 3,
-					(const char*) (*((uint16_t**) (sram_ptr_data))) + 3, sram_ptr_data[2]);
+				sidebar_show_message_nobank_nostrlen(NULL, 3, NULL, 3,
+					(const char*) (*((uint16_t**) (sram_ptr_data))) + 2, sram_ptr_data[2]);
 				break;
 			case 2:
-				display_message_nobank(200, NULL, 3,
-					(const char*) (*((uint16_t**) (sram_ptr_data))) + 3, sram_ptr_data[2],
-					(const char*) (*((uint16_t**) (sram_ptr_data + 3))) + 3, sram_ptr_data[5]);
+				sidebar_show_message_nobank_nostrlen(NULL, 3,
+					(const char*) (*((uint16_t**) (sram_ptr_data))) + 2, sram_ptr_data[2],
+					(const char*) (*((uint16_t**) (sram_ptr_data + 3))) + 2, sram_ptr_data[5]);
 				break;
 			default:
-				display_message_nobank(200,
-					(const char*) (*((uint16_t**) (sram_ptr_data))) + 3, sram_ptr_data[2],
-					(const char*) (*((uint16_t**) (sram_ptr_data + 3))) + 3, sram_ptr_data[5],
-					(const char*) (*((uint16_t**) (sram_ptr_data + 6))) + 3, sram_ptr_data[8]);
+				sidebar_show_message_nobank_nostrlen(
+					(const char*) (*((uint16_t**) (sram_ptr_data))) + 2, sram_ptr_data[2],
+					(const char*) (*((uint16_t**) (sram_ptr_data + 3))) + 2, sram_ptr_data[5],
+					(const char*) (*((uint16_t**) (sram_ptr_data + 6))) + 2, sram_ptr_data[8]);
 				break;
 		}
 	}
