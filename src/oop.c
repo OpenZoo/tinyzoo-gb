@@ -15,7 +15,6 @@ const char oop_scroll_name[] = "Scroll";
 static uint8_t oop_stat_id = 255;
 static uint16_t oop_pos;
 static zoo_stat_t *oop_stat;
-static uint8_t *oop_data_loc;
 static uint8_t *oop_prog_loc;
 static uint8_t *oop_code_loc;
 static uint8_t oop_cmd;
@@ -532,7 +531,6 @@ static void oop_command_bind(void) {
 
 				// update cached values
 				oop_pos = 0;
-				oop_data_loc = zoo_stat_data + oop_stat->data_ofs;
 				oop_prog_loc = prog_loc;
 				oop_code_loc = oop_prog_loc + 5 + oop_pos;
 
@@ -629,7 +627,7 @@ bool oop_execute(uint8_t stat_id, const char *name) {
 	}
 
 	oop_pos = oop_stat->data_pos;
-	oop_data_loc = zoo_stat_data + oop_stat->data_ofs;
+	uint8_t *oop_data_loc = zoo_stat_data + oop_stat->data_ofs;
 
 	SWITCH_ROM_MBC5(oop_data_loc[2]);
 

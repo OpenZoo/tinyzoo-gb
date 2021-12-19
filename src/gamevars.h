@@ -115,10 +115,15 @@ typedef struct {
 	uint8_t tick_time_duration;
 } zoo_game_state_t;
 
+#ifdef OPT_BOARD_EDGE_IMMUTABLE
+extern zoo_tile_t zoo_tiles[62 * 26];
+#else
+extern zoo_tile_t zoo_tiles[62 * 27];
+#endif
+
 #ifndef __GAMEVARS_INTERNAL__
 extern zoo_board_info_t zoo_board_info;
 extern zoo_world_info_t zoo_world_info;
-extern zoo_tile_t zoo_tiles[62 * 27];
 extern zoo_tile_t *const zoo_tiles_y[27];
 extern zoo_message_flags_t msg_flags;
 extern uint8_t zoo_stat_count;

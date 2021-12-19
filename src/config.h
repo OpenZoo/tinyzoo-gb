@@ -23,6 +23,10 @@
 // adds 81 bytes, performance untested
 // #define OPT_UNROLL_LINE_DRAW
 
+// saves 124 (!!!) bytes of RAM; however, loses 124 bytes of bank0 ROM
+// this makes some parts of the board edge immutable
+#define OPT_BOARD_EDGE_IMMUTABLE
+
 #define TORCH_DX 8
 #define TORCH_DY 5
 #define TORCH_DIST_SQR 50

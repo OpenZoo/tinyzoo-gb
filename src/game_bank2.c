@@ -37,7 +37,7 @@ extern int8_t viewport_y;
 
 void board_create(void) BANKED {
 	memset(&zoo_board_info, 0, sizeof(zoo_board_info));
-	memset(zoo_tiles, 0, sizeof(zoo_tile_t) * 64 * 27);
+	memset(zoo_tiles, 0, sizeof(zoo_tiles));
 	
 	zoo_board_info.max_shots = 255;
 
@@ -45,9 +45,11 @@ void board_create(void) BANKED {
 		ZOO_TILE(0, iy).element = E_BOARD_EDGE;
 		ZOO_TILE(BOARD_WIDTH + 1, iy).element = E_BOARD_EDGE;
 	}
-	for (uint8_t ix = 0; ix <= BOARD_WIDTH; ix++) {
+	for (uint8_t ix = 1; ix <= BOARD_WIDTH; ix++) {
 		ZOO_TILE(ix, 0).element = E_BOARD_EDGE;
+#ifndef OPT_BOARD_EDGE_IMMUTABLE
 		ZOO_TILE(ix, BOARD_HEIGHT + 1).element = E_BOARD_EDGE;
+#endif
 	}
 	for (uint8_t iy = 1; iy <= BOARD_HEIGHT; iy++) {
 		ZOO_TILE_COPY(ZOO_TILE(1, iy), TileNormal);
