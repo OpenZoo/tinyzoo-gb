@@ -63,8 +63,6 @@ void ElementBoardEdgeTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 			board_enter_stage2();
 			board_redraw();
 			board_enter_stage3();
-			// game_transition_board_change_end();
-			// ZOO_BUSYLOOP(game_transition_running());
 		} else {
 			board_change(prev_board_id);
 		}

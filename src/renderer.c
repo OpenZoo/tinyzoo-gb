@@ -41,7 +41,9 @@ static inline void sidebar_vbl_copy_data(void) {
 
 void global_vblank_isr(void) {
 	sidebar_vbl_copy_data();
+#ifdef FEAT_BOARD_TRANSITIONS
 	game_transition_step();
+#endif
 }
 
 void text_init(const renderer_t *renderer) {

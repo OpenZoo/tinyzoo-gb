@@ -4,6 +4,8 @@
 #include "config.h"
 #include "game_transition.h"
 
+#ifdef FEAT_BOARD_TRANSITIONS
+
 #include "../res/game_transition_table.inc"
 
 // must be a divisor of the table size
@@ -90,6 +92,8 @@ void game_transition_step(void) {
 bool game_transition_running(void) {
 	return transition_pos < (TRANSITION_TABLE_20_17_ENTRY_COUNT * 2);
 }
+
+#endif
 
 /* void game_transition_tick_to_end(void) BANKED {
 	while (transition_pos != TRANSITION_TABLE_20_17_ENTRY_COUNT) {

@@ -277,7 +277,7 @@ void gbc_vblank_isr(void) {
 static void gbc_sync_di(void) __naked __preserves_regs(d, e, h, l) {
 __asm;
 	ldh a, (_LY_REG + 0)
-	cp a, #135
+	cp a, #137
 	jr nc, GbcSyncDiDone
 GbcSyncDiLoop:
 	ldh a, (_LY_REG + 0)

@@ -13,6 +13,7 @@
 #define USE_YERRICK_RNG
 
 // #define FEAT_BLACK_KEYS // Black keys/doors compat - costs ~235 bytes (as of 18/12/2021)
+#define FEAT_BOARD_TRANSITIONS
 #define BUGFIX_BLINKWALL_OFFSET
 // #define BUGFIX_DIE_UNDER
 #define BUGFIX_DIEMOVE_SCROLL
