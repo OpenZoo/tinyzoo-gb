@@ -11,7 +11,7 @@
 extern uint8_t sidebar_tile_data_ly_switch;
 extern uint8_t sidebar_tile_data_len;
 extern uint16_t sidebar_tile_data_address;
-__at(0xC040) static uint8_t sidebar_tile_data[96];
+extern uint8_t sidebar_tile_data[96];
 extern volatile bool sidebar_tile_data_awaiting;
 
 static void sidebar_draw_char(uint8_t x, uint8_t chr, uint8_t col) {
@@ -21,23 +21,22 @@ static void sidebar_draw_char(uint8_t x, uint8_t chr, uint8_t col) {
 
 	uint8_t *tile_data = sidebar_tile_data + ((x << 3) & 0xF0);
 
-	for (i = 0; i < 8; i++) {
-		uint8_t f = font_data[i];
-		if (col & 1) {
-			tile_data[i << 1] |= (f & mask);
+	if (col == 3) {
+		for (i = 0; i < 8; i++) {
+			uint8_t f = font_data[i] & mask;
+			*(tile_data++) |= f;
+			*(tile_data++) |= f;
 		}
-		if (col & 2) {
-			tile_data[(i << 1) | 1] |= (f & mask);
+	} else {
+		if (col == 2) tile_data++;
+		for (i = 0; i < 8; i++) {
+			*(tile_data++) = font_data[i] & mask;
+			tile_data++;
 		}
 	}
 }
 
-
-static void sidebar_copy_data(uint16_t address, uint8_t len) {
-	sidebar_tile_data_address = address;
-	sidebar_tile_data_len = len;
-	sidebar_tile_data_awaiting = true;
-}
+void sidebar_copy_data(uint16_t address, uint8_t len);
 
 // TODO: Fall back gracefully on DMG
 void sidebar_draw_panel(uint8_t x_shifted, uint8_t chr, uint8_t col, int16_t value, bool wide) BANKED {
@@ -104,41 +103,6 @@ void sidebar_draw_keys(uint8_t x_shifted, uint8_t value) BANKED {
 	sidebar_copy_data(0x9000 | (x_shifted << 4), 64);
 }
 
-extern uint8_t ly_bank_switch;
-
 void sidebar_show_message(const char* line1, const char* line2, const char* line3) BANKED {
-	while (sidebar_tile_data_awaiting) {}
-	memset(sidebar_tile_data, 0, 84);
-	uint8_t slen;
-	uint8_t offset = 0;
-
-	// write text data
-	if (line1 != NULL) {
-		uint8_t slen = strlen(line1);
-		if (slen > 0) {
-			memcpy(sidebar_tile_data + offset + (10 - (slen >> 1)), line1, slen);
-			offset += 32;
-		}
-	}
-	if (line2 != NULL) {
-		uint8_t slen = strlen(line2);
-		if (slen > 0) {
-			memcpy(sidebar_tile_data + offset + (10 - (slen >> 1)), line2, slen);
-			offset += 32;
-		}
-	}
-	if (line3 != NULL) {
-		uint8_t slen = strlen(line3);
-		if (slen > 0) {
-			memcpy(sidebar_tile_data + offset + (10 - (slen >> 1)), line3, slen);
-			offset += 32;
-		}
-	}
-
-	sidebar_tile_data_ly_switch = 135 - (offset >> 2);
-	sidebar_copy_data(0x9C00 + (14 << 5) + (96 - offset), offset);
-}
-
-void sidebar_hide_message(void) BANKED {
-	ly_bank_switch = 135;
+	sidebar_show_message_nobank(line1, line2, line3);
 }

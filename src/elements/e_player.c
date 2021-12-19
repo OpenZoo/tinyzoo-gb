@@ -13,8 +13,7 @@
 static int8_t player_dir_x, player_dir_y;
 
 uint8_t ElementPlayerDraw(uint8_t x, uint8_t y) {
-	return ((zoo_world_info.energizer_ticks > 0) && (zoo_world_info.energizer_ticks & 1))
-		? 0x01 : 0x02;
+	return (zoo_world_info.energizer_ticks & 1) ? 0x01 : 0x02;
 }
 
 void ElementPlayerTick(uint8_t stat_id) {

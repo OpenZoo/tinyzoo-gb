@@ -102,9 +102,6 @@ void board_draw_tile(uint8_t x, uint8_t y) {
 	zoo_tile_t tile;
 	ZOO_TILE_ASSIGN(tile, x, y);
 
-	uint8_t prev_bank = _current_bank;
-	SWITCH_ROM_MBC5(1);
-
 	// Darkness check
 	if ((zoo_board_info.flags & BOARD_IS_DARK)) {
 		if (!(zoo_element_defs_flags[tile.element] & ELEMENT_VISIBLE_IN_DARK)) {
@@ -117,34 +114,38 @@ void board_draw_tile(uint8_t x, uint8_t y) {
 				}
 			}
 			text_draw(vx, vy, 176, 0x07);
-			goto BoardDrawTileFinished;
+			return;
 		}
 	}
 
 NotDark:
 	if (tile.element == E_EMPTY) {
 		text_draw(vx, vy, ' ', 0x0F);
-	} else if (tile.element < E_TEXT_MIN) {
-		uint8_t ch;
-		if (zoo_element_defs_drawprocs[tile.element] != 0) {
-			ch = zoo_element_defs_drawprocs[tile.element](x, y);
-		} else {
-			ch = zoo_element_defs_character[tile.element];
-		}
-
-		text_draw(vx, vy, ch, tile.color);
 	} else {
-		uint8_t color;
-		if (tile.element == E_TEXT_WHITE) {
-			color = 0x0F;
-		} else {
-			color = 0x0F | ((tile.element - E_TEXT_MIN + 1) << 4);
-		}
-		text_draw(vx, vy, tile.color, color);
-	}
+		if (tile.element < E_TEXT_MIN) {
+			uint8_t ch;
+			uint8_t prev_bank = _current_bank;
+			SWITCH_ROM_MBC5(1);
 
-BoardDrawTileFinished:
-	SWITCH_ROM_MBC5(prev_bank);
+			if (zoo_element_defs_drawprocs[tile.element] != 0) {
+				ch = zoo_element_defs_drawprocs[tile.element](x, y);
+			} else {
+				ch = zoo_element_defs_character[tile.element];
+			}
+
+			SWITCH_ROM_MBC5(prev_bank);
+
+			text_draw(vx, vy, ch, tile.color);
+		} else {
+			uint8_t color;
+			if (tile.element == E_TEXT_WHITE) {
+				color = 0x0F;
+			} else {
+				color = 0x0F | ((tile.element - E_TEXT_MIN + 1) << 4);
+			}
+			text_draw(vx, vy, tile.color, color);
+		}
+	}
 }
 
 void board_redraw(void) {
@@ -161,7 +162,7 @@ void board_redraw(void) {
 }
 
 void game_play_loop(bool board_changed) {
-	// TODO
+	game_update_sidebar_all();
 
 	ZOO_TILE_CHANGE2(ZOO_STAT(0).x, ZOO_STAT(0).y,
 		zoo_game_state.game_state_element,
@@ -272,7 +273,7 @@ void game_play_loop(bool board_changed) {
 void display_message(uint8_t time, const char* line1, const char* line2, const char* line3) {
 	uint8_t sid = get_stat_id_at(0, 0);
 	uint8_t dur;
-	if (get_stat_id_at(0, 0) != STAT_ID_NONE) {
+	if (sid != STAT_ID_NONE) {
 #ifdef BUGFIX_DIEMOVE_MESSAGE
 		if (line3 != NULL) {
 			ZOO_TILE(0, 0).element = E_MESSAGE_TIMER;

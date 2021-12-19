@@ -10,6 +10,8 @@
 #include "../sound_consts.h"
 #include "../timer.h"
 
+// TODO: These are being initialized cross-bank, which causes them to be
+// initialized at runtime - using up 32 bytes (!) of RAM. FIXME
 static const char *msg_key_pickup_tbl[] = {
 	msg_key_pickup_08,
 	msg_key_pickup_09,
