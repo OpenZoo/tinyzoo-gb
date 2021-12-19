@@ -37,6 +37,7 @@ void calc_direction_seek(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy);
 void game_play_loop(bool board_changed);
 
 void display_message(uint8_t time, const char* line1, const char* line2, const char* line3);
+void display_message_nobank(uint8_t time, const char* line1, uint8_t bank1, const char* line2, uint8_t bank2, const char* line3, uint8_t bank3);
 
 // game_sidebar.c (bank 0)
 

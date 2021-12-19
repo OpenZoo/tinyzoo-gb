@@ -1,5 +1,7 @@
 #pragma bank 2
 
+#define SRAM_ALLOC_INTERNAL
+
 #include <string.h>
 #include "config.h"
 #include "gamevars.h"
@@ -58,7 +60,8 @@ void sram_write8(sram_ptr_t *ptr, uint8_t value) {
 	sram_inc_ptr(ptr);
 }
 
-void sram_read(sram_ptr_t *ptr, void *data, uint16_t len) {
+void sram_read(sram_ptr_t *ptr, uint8_t *data, uint16_t len) {
+#if 1
 	while (len > 0) {
 		uint16_t len_to_read = 0x2000 - ptr->position;
 		if (len_to_read > len) {
@@ -70,9 +73,15 @@ void sram_read(sram_ptr_t *ptr, void *data, uint16_t len) {
 		data += len_to_read;
 		len -= len_to_read;
 	}
+#else
+	while ((len--) > 0) {
+		*(data++) = sram_read8(ptr);
+	}
+#endif
 }
 
-void sram_write(sram_ptr_t *ptr, const void *data, uint16_t len) {
+void sram_write(sram_ptr_t *ptr, const uint8_t *data, uint16_t len) {
+#if 1
 	while (len > 0) {
 		uint16_t len_to_read = 0x2000 - ptr->position;
 		if (len_to_read > len) {
@@ -84,6 +93,11 @@ void sram_write(sram_ptr_t *ptr, const void *data, uint16_t len) {
 		data += len_to_read;
 		len -= len_to_read;
 	}
+#else
+	while ((len--) > 0) {
+		sram_write8(ptr, *(data++));
+	}
+#endif
 }
 
 bool sram_alloc(uint16_t len, sram_ptr_t *ptr) {
@@ -95,7 +109,7 @@ bool sram_alloc(uint16_t len, sram_ptr_t *ptr) {
 	ptr->position = sizeof(sram_header_t);
 
 	while (ptr->bank < SRAM_MAX_BANK) {
-		sram_read(ptr, &entry, sizeof(sram_entry_t));
+		sram_read(ptr, (uint8_t*) &entry, sizeof(sram_entry_t));
 		if ((entry.flags & SRAM_FLAG_USED) != 0) {
 			offset = 0;
 		} else {
@@ -109,13 +123,13 @@ bool sram_alloc(uint16_t len, sram_ptr_t *ptr) {
 				// allocate entry of size len
 				entry.flags = SRAM_FLAG_USED;
 				entry.size = len;
-				sram_write(ptr, &entry, sizeof(sram_entry_t));
+				sram_write(ptr, (const uint8_t*) &entry, sizeof(sram_entry_t));
 				if (nlen > len) {
 					// add new free entry
 					sram_add_ptr(ptr, len);
 					entry.flags = 0;
 					entry.size = nlen - len - sizeof(sram_entry_t);
-					sram_write(ptr, &entry, sizeof(sram_entry_t));
+					sram_write(ptr, (const uint8_t*) &entry, sizeof(sram_entry_t));
 					sram_sub_ptr(ptr, len + sizeof(sram_entry_t));
 				}
 				return true;
@@ -133,10 +147,10 @@ bool sram_alloc(uint16_t len, sram_ptr_t *ptr) {
 void sram_free(sram_ptr_t *ptr) {
 	sram_entry_t entry;
 	sram_sub_ptr(ptr, sizeof(sram_entry_t));
-	sram_read(ptr, &entry, sizeof(sram_entry_t));
+	sram_read(ptr, (uint8_t*) &entry, sizeof(sram_entry_t));
 	sram_sub_ptr(ptr, sizeof(sram_entry_t));
 	entry.flags &= ~SRAM_FLAG_USED;
-	sram_write(ptr, &entry, sizeof(sram_entry_t));
+	sram_write(ptr, (const uint8_t*) &entry, sizeof(sram_entry_t));
 }
 
 static const uint8_t sram_expected_magic[4] = {'G', 'b', 'Z', 0x01};
@@ -151,7 +165,7 @@ void sram_init(bool force) BANKED {
 
 	ENABLE_RAM_MBC5;
 
-	sram_read(&ptr, &magic, 4);
+	sram_read(&ptr, magic, 4);
 	if (magic[0] != sram_expected_magic[0]
 		|| magic[1] != sram_expected_magic[1]
 		|| magic[2] != sram_expected_magic[2]
@@ -170,13 +184,13 @@ void sram_init(bool force) BANKED {
 
 		entry.flags = 0;
 		entry.size = (16384 - sizeof(sram_entry_t) - sizeof(sram_header_t));
-		sram_write(&ptr, &entry, sizeof(sram_entry_t));
+		sram_write(&ptr, (const uint8_t*) &entry, sizeof(sram_entry_t));
 		sram_add_ptr(&ptr, entry.size);
 
 		entry.size += sizeof(sram_header_t);
 
 		while (ptr.bank < SRAM_MAX_BANK) {
-			sram_write(&ptr, &entry, sizeof(sram_entry_t));
+			sram_write(&ptr, (const uint8_t*) &entry, sizeof(sram_entry_t));
 			sram_add_ptr(&ptr, entry.size);
 		}
 	}

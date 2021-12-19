@@ -102,7 +102,3 @@ void sidebar_draw_keys(uint8_t x_shifted, uint8_t value) BANKED {
 
 	sidebar_copy_data(0x9000 | (x_shifted << 4), 64);
 }
-
-void sidebar_show_message(const char* line1, const char* line2, const char* line3) BANKED {
-	sidebar_show_message_nobank(line1, line2, line3);
-}

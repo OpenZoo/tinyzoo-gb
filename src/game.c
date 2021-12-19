@@ -1,4 +1,4 @@
-	#include <stdbool.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <gb/gb.h>
@@ -13,6 +13,7 @@
 #include "renderer.h"
 #include "renderer_sidebar.h"
 #include "sound_consts.h"
+#include "sram_debug.h"
 #include "timer.h"
 
 const zoo_stat_t stat_template_default = {
@@ -271,6 +272,10 @@ void game_play_loop(bool board_changed) {
 }
 
 void display_message(uint8_t time, const char* line1, const char* line2, const char* line3) {
+	display_message_nobank(time, line1, 3, line2, 3, line3, 3);
+}
+
+void display_message_nobank(uint8_t time, const char* line1, uint8_t bank1, const char* line2, uint8_t bank2, const char* line3, uint8_t bank3) {
 	uint8_t sid = get_stat_id_at(0, 0);
 	uint8_t dur;
 	if (sid != STAT_ID_NONE) {
@@ -291,7 +296,7 @@ SetDuration:
 		dur = time / (zoo_game_state.tick_time_duration + 1);
 		ZOO_STAT(sid).p2 = dur;
 		sidebar_set_message_color(0x9 + (dur % 7));
-		sidebar_show_message(line1, line2, line3);
+		sidebar_show_message_nobank(line1, bank1, line2, bank2, line3, bank3);
 	}
 }
 

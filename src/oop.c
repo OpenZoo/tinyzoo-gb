@@ -6,8 +6,10 @@
 #include "config.h"
 #include "math.h"
 #include "oop.h"
+#include "sram_alloc.h"
 #include "sram_debug.h"
 #include "timer.h"
+#include "txtwind.h"
 
 const char oop_object_name[] = "Interaction";
 const char oop_scroll_name[] = "Scroll";
@@ -547,11 +549,30 @@ static void oop_command_bind(void) {
 	SWITCH_ROM_MBC5(prev_bank);
 }
 
+uint16_t oop_window_zzt_lines;
+
 static void oop_command_text_line(void) {
-	// TODO
 	uint8_t zzt_line_count = *(oop_code_loc++);
 	uint8_t line_count = *(oop_code_loc++);
-	oop_code_loc += (line_count * 3);
+	if (zzt_line_count == 0) {
+		if (oop_window_zzt_lines == 0) {
+			// skip empty line
+			oop_code_loc += (line_count * 3);
+			return;
+		} else {
+			zzt_line_count = 1;
+		}
+	}
+	if (oop_window_zzt_lines == 0) {
+		// init text window
+		txtwind_init();
+	}
+	oop_window_zzt_lines += zzt_line_count;
+
+	while ((line_count--) > 0) {
+		txtwind_append(*((uint16_t*) oop_code_loc), oop_code_loc[2]);
+		oop_code_loc += 3;
+	}
 }
 
 static oop_command_proc oop_procs[] = {
@@ -622,6 +643,8 @@ static uint8_t oop_ins_cost[] = {
 
 static uint8_t ins_count;
 
+void oop_handle_txtwind(void) BANKED;
+
 bool oop_execute(uint8_t stat_id, const char *name) {
 	uint8_t prev_bank = _current_bank;
 
@@ -641,6 +664,7 @@ bool oop_execute(uint8_t stat_id, const char *name) {
 	oop_stop_running = false;
 	oop_replace_element = 255;
 	ins_count = MAX_OOP_INSTRUCTION_COUNT;
+	oop_window_zzt_lines = 0;
 
 #ifdef SRAM_DEBUG_OOP_EXECUTE
 	sram_debug8('O');
@@ -665,6 +689,10 @@ bool oop_execute(uint8_t stat_id, const char *name) {
 	oop_stat->data_pos = oop_pos;
 
 	SWITCH_ROM_MBC5(prev_bank);
+
+	if (oop_window_zzt_lines != 0) {
+		oop_handle_txtwind();
+	}
 
 	if (oop_replace_element != 255) {
 		uint8_t ix = oop_stat->x;

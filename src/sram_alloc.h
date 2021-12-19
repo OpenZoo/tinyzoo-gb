@@ -32,8 +32,13 @@ void sram_sub_ptr(sram_ptr_t *ptr, uint16_t val);
 uint8_t sram_read8(sram_ptr_t *ptr);
 void sram_write8(sram_ptr_t *ptr, uint8_t value);
 
+#ifdef SRAM_ALLOC_INTERNAL
+void sram_read(sram_ptr_t *ptr, uint8_t *data, uint16_t len);
+void sram_write(sram_ptr_t *ptr, const uint8_t *data, uint16_t len);
+#else
 void sram_read(sram_ptr_t *ptr, void *data, uint16_t len);
 void sram_write(sram_ptr_t *ptr, const void *data, uint16_t len);
+#endif
 
 bool sram_alloc(uint16_t len, sram_ptr_t *ptr);
 void sram_free(sram_ptr_t *ptr);
