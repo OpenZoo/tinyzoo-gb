@@ -29,6 +29,8 @@
 // this makes some parts of the board edge immutable
 #define OPT_BOARD_EDGE_IMMUTABLE
 
+#define MAX_SCROLL_DISTANCE_BEFORE_REDRAW 15
+
 #define TORCH_DX 8
 #define TORCH_DY 5
 #define TORCH_DIST_SQR 50
