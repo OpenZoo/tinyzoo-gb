@@ -49,7 +49,7 @@ void global_vblank_isr(void) {
 }
 
 void text_init(uint8_t mode, const renderer_t *renderer) {
-	LCDC_REG = 0x00;
+	IE_REG &= ~LCD_IFLAG;
 	hblank_isr_jp = 0xC3;
 	draw_offset_x = 0;
 	draw_offset_y = 0;

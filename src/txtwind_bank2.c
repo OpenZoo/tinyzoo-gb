@@ -103,6 +103,7 @@ bool txtwind_run(void) BANKED {
 	int16_t pos = -8;
 	bool result = false;
 
+	wait_vbl_done();
 	text_reinit(RENDER_MODE_TXTWIND);
 	draw_offset_y = pos & 31;
 	text_update();
@@ -143,14 +144,15 @@ bool txtwind_run(void) BANKED {
 			break;
 		}
 
+		draw_offset_y = pos & 31;
+		text_update();
 		wait_vbl_done();
 
 		VBK_REG = 0;
 		if (old_pos != -9 && old_pos != (txtwind_lines - 8)) {
-			fill_bkg_rect(0, (draw_offset_y + 8) & 31, 1, 1, 32);
-			fill_bkg_rect(19, (draw_offset_y + 8) & 31, 1, 1, 32);
+			fill_bkg_rect(0, (old_pos + 8) & 31, 1, 1, 32);
+			fill_bkg_rect(19, (old_pos + 8) & 31, 1, 1, 32);
 		}
-		draw_offset_y = pos & 31;
 		old_pos = pos;
 		if (pos != -9 && pos != (txtwind_lines - 8)) {
 			if (renderer_id == RENDER_ID_GBC) {
@@ -162,9 +164,9 @@ bool txtwind_run(void) BANKED {
 			fill_bkg_rect(0, (draw_offset_y + 8) & 31, 1, 1, 175);
 			fill_bkg_rect(19, (draw_offset_y + 8) & 31, 1, 1, 174);
 		}
-		text_update();
 	}
 
+	wait_vbl_done();
 	text_reinit(RENDER_MODE_PLAYFIELD);
 	board_redraw();
 	game_update_sidebar_all();

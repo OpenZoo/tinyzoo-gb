@@ -14,6 +14,9 @@
 #include "board_manager.h"
 
 void init_main(void) BANKED {
+	wait_vbl_done();
+	LCDC_REG = 0x00;
+
 	srand(1);
 
 	sound_init();

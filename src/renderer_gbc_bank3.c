@@ -91,8 +91,6 @@ void gbc_text_init(uint8_t mode) {
 		cgb_message_palette[13] = cgb_palette[6];
 		cgb_message_palette[14] = cgb_palette[0];
 		cgb_message_palette[15] = cgb_palette[10];
-
-		renderer_id = RENDER_ID_GBC;
 	}
 
 	renderer_mode = mode;
@@ -114,8 +112,12 @@ void gbc_text_init(uint8_t mode) {
 	}
 
 	wait_vbl_done();
-	gbc_vblank_isr();
-	add_VBL(gbc_vblank_isr);
+	if (renderer_id != RENDER_ID_GBC) {
+		gbc_vblank_isr();
+		add_VBL(gbc_vblank_isr);
+
+		renderer_id = RENDER_ID_GBC;
+	}
 
 	if (mode == RENDER_MODE_PLAYFIELD) {
 		STAT_REG = 0b01000000;

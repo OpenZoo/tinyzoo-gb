@@ -10,16 +10,19 @@
 void dmg_vblank_isr(void);
 
 void dmg_text_init(uint8_t mode) {
-	if (renderer_id != RENDER_ID_DMG) {
-		font_8x8_install(0, 3);
-		renderer_id = RENDER_ID_DMG;
-	}
-
 	renderer_mode = mode;
 
+	if (renderer_id != RENDER_ID_DMG) {
+		font_8x8_install(0, 3);
+	}
+
 	wait_vbl_done();
-	dmg_vblank_isr();
-	add_VBL(dmg_vblank_isr);
+	if (renderer_id != RENDER_ID_DMG) {
+		dmg_vblank_isr();
+		add_VBL(dmg_vblank_isr);
+
+		renderer_id = RENDER_ID_DMG;
+	}
 
 	if (mode == RENDER_MODE_PLAYFIELD) {
 		// set bottom bar
