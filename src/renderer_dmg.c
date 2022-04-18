@@ -78,7 +78,7 @@ static void dmg_text_undraw(uint8_t x, uint8_t y) {
 
 }
 
-static void dmg_text_draw(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) OLDCALL {
+static void dmg_text_draw(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
 /*	x = (draw_offset_x + x) & 0x1F;
 	y = (draw_offset_y + y) & 0x1F;
 	
@@ -86,16 +86,16 @@ static void dmg_text_draw(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) OLDCAL
 	while (STAT_REG & 0x02);
 	*tptr = chr; */
 __asm
+	; a = x, e = y, stack = chr, col
+	ld	c, a
 	ld      a, (#_draw_offset_x)
-	ldhl    sp,     #2
-	add     a, (hl)
+	add     a, c
 	and     a, #0x1f
 	ld		c, a	; c = (draw_offset_x + x) & 0x1F
 	ld      a, (#_draw_offset_y)
-	inc		hl
-	add     a, (hl)
+	add     a, e
 	add		a, a
-	add		a, a 
+	add		a, a
 	add		a, a ; a <<= 3
 	ld		l, a
 	ld      h, #0x00 ; hl = (draw_offset_y + y) & 0x1F
@@ -107,7 +107,7 @@ __asm
 	ld      a, h
 	or      a, #0x98
 	ld      b, a	; bc = VRAM address
-	ldhl    sp,     #4
+	ldhl    sp,     #2
 	di
 .DmgTextDrawSync:
 	ldh     a, (_STAT_REG + 0)
@@ -117,11 +117,6 @@ __asm
 	ld      (bc), a
 	ei
 __endasm;
-}
-
-// TODO (SDCC 4.2 upgrade) - remove
-static void dmg_text_draw_wrap(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
-	dmg_text_draw(x, y, chr, col);
 }
 
 static void dmg_text_sync_hblank_safe(void) {
@@ -146,7 +141,7 @@ const renderer_t renderer_dmg = {
 	dmg_text_init,
 	dmg_text_sync_hblank_safe,
 	dmg_text_undraw,
-	dmg_text_draw_wrap,
+	dmg_text_draw,
 	dmg_text_free_line,
 	dmg_text_scroll,
 	dmg_text_update
