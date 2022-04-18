@@ -1,9 +1,8 @@
-#include "sram_debug.h"
-#include "renderer_sidebar.h"
 #pragma bank 2
 
 #include <string.h>
 #include <gb/gb.h>
+#include <gbdk/emu_debug.h>
 #include "elements.h"
 #include "elements_utils.h"
 #include "game.h"
@@ -11,6 +10,7 @@
 #include "config.h"
 #include "math.h"
 #include "oop.h"
+#include "renderer_sidebar.h"
 #include "sram_alloc.h"
 #include "sram_debug.h"
 #include "txtwind.h"
@@ -46,7 +46,10 @@ bool find_tile_on_board(uint8_t *x, uint8_t *y, uint8_t element, uint8_t color) 
 
 		ZOO_TILE_ASSIGN(tile, (*x), (*y));
 		if (tile.element == element) {
-			if (tile.color == 0 || get_color_for_tile_match(tile.element, tile.color) == color) {
+			if (color == 0) {
+				return true;
+			}
+			if (get_color_for_tile_match(tile.element, tile.color) == color) {
 				return true;
 			}
 		}
@@ -128,10 +131,13 @@ void oop_dataofs_free(uint16_t loc) BANKED {
 
 extern uint16_t oop_window_zzt_lines;
 
+#define TWL_OFS (TXTWIND_LINE_HEADER_LEN - 1)
+
 bool oop_handle_txtwind(void) BANKED {
 	if (oop_window_zzt_lines > 1) {
 		return txtwind_run();
 	} else if (oop_window_zzt_lines == 1) {
+
 		uint8_t sram_ptr_data[9];
 		sram_ptr_t sram_ptr;
 
@@ -148,18 +154,18 @@ bool oop_handle_txtwind(void) BANKED {
 		switch (txtwind_lines) {
 			case 1:
 				sidebar_show_message(NULL, 3, NULL, 3,
-					(const char*) (*((uint16_t**) (sram_ptr_data))) + 2, sram_ptr_data[2]);
+					(const char*) (*((uint16_t**) (sram_ptr_data))) + TWL_OFS, sram_ptr_data[2]);
 				break;
 			case 2:
 				sidebar_show_message(NULL, 3,
-					(const char*) (*((uint16_t**) (sram_ptr_data))) + 2, sram_ptr_data[2],
-					(const char*) (*((uint16_t**) (sram_ptr_data + 3))) + 2, sram_ptr_data[5]);
+					(const char*) (*((uint16_t**) (sram_ptr_data))) + TWL_OFS, sram_ptr_data[2],
+					(const char*) (*((uint16_t**) (sram_ptr_data + 3))) + TWL_OFS, sram_ptr_data[5]);
 				break;
 			default:
 				sidebar_show_message(
-					(const char*) (*((uint16_t**) (sram_ptr_data))) + 2, sram_ptr_data[2],
-					(const char*) (*((uint16_t**) (sram_ptr_data + 3))) + 2, sram_ptr_data[5],
-					(const char*) (*((uint16_t**) (sram_ptr_data + 6))) + 2, sram_ptr_data[8]);
+					(const char*) (*((uint16_t**) (sram_ptr_data))) + TWL_OFS, sram_ptr_data[2],
+					(const char*) (*((uint16_t**) (sram_ptr_data + 3))) + TWL_OFS, sram_ptr_data[5],
+					(const char*) (*((uint16_t**) (sram_ptr_data + 6))) + TWL_OFS, sram_ptr_data[8]);
 				break;
 		}
 	}

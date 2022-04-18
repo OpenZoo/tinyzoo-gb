@@ -448,8 +448,9 @@ static void oop_command_give(void) {
 	int16_t *ptr = oop_give_ptrs[ptr_id];
 	int16_t val = *((int16_t*) oop_code_loc);
 	oop_code_loc += 2;
-	if ((*ptr + val) >= 0) {
-		*ptr += val;
+	val += *ptr;
+	if (val >= 0) {
+		*ptr = val;
 		oop_give_procs[ptr_id]();
 		oop_skip_command();
 	} else {

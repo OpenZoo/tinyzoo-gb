@@ -66,7 +66,7 @@ void sram_read(sram_ptr_t *ptr, uint8_t *data, uint16_t len) {
 		uint16_t len_to_read = 0x2000 - ptr->position;
 		if (len_to_read > len) {
 			len_to_read = len;
-		}	
+		}
 		SWITCH_RAM_MBC5(ptr->bank);
 		memcpy(data, ((uint8_t*) 0xA000) + ptr->position, len_to_read);
 		sram_add_ptr(ptr, len_to_read);
@@ -86,7 +86,7 @@ void sram_write(sram_ptr_t *ptr, const uint8_t *data, uint16_t len) {
 		uint16_t len_to_read = 0x2000 - ptr->position;
 		if (len_to_read > len) {
 			len_to_read = len;
-		}	
+		}
 		SWITCH_RAM_MBC5(ptr->bank);
 		memcpy(((uint8_t*) 0xA000) + ptr->position, data, len_to_read);
 		sram_add_ptr(ptr, len_to_read);
