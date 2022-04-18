@@ -32,7 +32,7 @@ void world_set_flag(uint8_t flag_id);
 void world_clear_flag(uint8_t flag_id);
 
 // oop_bank2.c (bank 2)
-bool find_tile_on_board(uint8_t *x, uint8_t *y, uint8_t element, uint8_t color) BANKED;
+bool find_tile_on_board(uint8_t *x, uint8_t *y, uint8_t element, uint8_t color) BANKED OLDCALL;
 void oop_place_tile(uint8_t x, uint8_t y, uint8_t element, uint8_t color) BANKED;
 uint16_t oop_dataofs_clone(uint16_t loc) BANKED;
 void oop_dataofs_free_if_unused(uint16_t loc) BANKED;
