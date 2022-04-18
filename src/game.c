@@ -75,6 +75,7 @@ void board_change(uint8_t id) {
 	save_board(zoo_world_info.current_board);
 	load_board(id);
 	zoo_world_info.current_board = id;
+	save_world(zoo_game_state.world_id);
 }
 
 void board_draw_char(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {

@@ -32,7 +32,8 @@ void init_main(void) BANKED {
 
 	world_create();
 
-	load_world(0);
+	zoo_game_state.world_id = 0;
+	load_world(zoo_game_state.world_id);
 	load_board(zoo_world_info.current_board);
 	zoo_game_state.paused = true; // TODO: not here...
 

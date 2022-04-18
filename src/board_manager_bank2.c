@@ -221,3 +221,15 @@ bool save_board(uint8_t offset) BANKED OLDCALL {
 
 	return result;
 }
+
+bool save_world(uint8_t offset) BANKED OLDCALL {
+	ENABLE_RAM_MBC5;
+
+	sram_toggle_write();
+	save_world_sram(offset, false);
+	sram_toggle_write();
+
+	DISABLE_RAM_MBC5;
+
+	return true; // TODO
+}

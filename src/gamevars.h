@@ -106,6 +106,7 @@ typedef struct {
 } zoo_message_flags_t;
 
 typedef struct {
+	uint8_t world_id;
 	bool paused;
 	bool play_exit_requested;
 	uint16_t tick_time_counter;

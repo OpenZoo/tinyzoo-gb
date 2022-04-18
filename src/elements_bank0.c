@@ -9,7 +9,6 @@
 
 #include "elements_funcdefs.h"
 
-#include "element_defs_character.inc"
 #include "element_defs_color.inc"
 #include "element_defs_flags.inc"
 #include "element_defs_scorevalues.inc"

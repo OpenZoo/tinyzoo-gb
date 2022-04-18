@@ -103,7 +103,7 @@ uint16_t oop_dataofs_clone(uint16_t loc) BANKED OLDCALL {
 	return new_pos;
 }
 
-void oop_dataofs_free_if_unused(uint16_t loc) BANKED {
+void oop_dataofs_free_if_unused(uint16_t loc) BANKED OLDCALL {
 	zoo_stat_t *stat = &ZOO_STAT(0);
 	uint8_t stat_id = 0;
 	for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
@@ -114,7 +114,7 @@ void oop_dataofs_free_if_unused(uint16_t loc) BANKED {
 	oop_dataofs_free(loc);
 }
 
-void oop_dataofs_free(uint16_t loc) BANKED {
+void oop_dataofs_free(uint16_t loc) BANKED OLDCALL {
 	uint8_t len = zoo_stat_data[loc + 3] & 0x7F;
 	memmove(zoo_stat_data + loc + len, zoo_stat_data + loc, zoo_stat_data_size - loc - len);
 	zoo_stat_data_size -= len;
