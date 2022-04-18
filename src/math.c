@@ -5,7 +5,7 @@
 
 #ifdef GBZ80
 // TODO (SDCC 4.2 upgrade): Can this be optimized?
-int8_t signum8(int8_t x) NAKED PRESERVES_REGS(b, c, d) {
+int8_t signum8(int8_t x) NAKED PRESERVES_REGS(b, c, d, h, l) {
 	x;
 __asm
 	ld e, a
@@ -22,14 +22,16 @@ Signum8ReturnMinusOne:
 __endasm;
 }
 
-int8_t difference8(int8_t a, int8_t b) NAKED PRESERVES_REGS(b, c, d) {
+int8_t difference8(int8_t a, int8_t b) NAKED PRESERVES_REGS(b, c, h, l) {
 	a, b;
 __asm
 	cp a, e
 	jr nc, Diff8NoSwap
 
-	ld e, a
-	ld a, (hl)
+	ld d, a
+	ld a, e
+	sub a, d
+	ret
 
 Diff8NoSwap:
 	sub a, e
