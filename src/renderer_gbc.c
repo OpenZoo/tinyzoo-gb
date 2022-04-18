@@ -30,7 +30,18 @@ const uint16_t cgb_palette[16] = {
 	RGB(COL_LVL_3, COL_LVL_3, COL_LVL_3)
 };
 
-uint16_t cgb_message_palette[18];
+const uint16_t cgb_txtwind_palette[8] = {
+	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
+	RGB(COL_LVL_3, COL_LVL_3, COL_LVL_1),
+	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
+	RGB(COL_LVL_3, COL_LVL_3, COL_LVL_3),
+	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
+	RGB(COL_LVL_3, COL_LVL_1, COL_LVL_3),
+	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
+	RGB(COL_LVL_1, COL_LVL_3, COL_LVL_1)
+};
+
+uint16_t cgb_message_palette[16];
 
 static uint16_t hblank_isr_sp;
 static uint16_t hblank_isr_pal_pos;
@@ -38,10 +49,45 @@ extern uint8_t ly_bank_switch;
 static uint8_t new_lcdc_val;
 static uint8_t ly_bank_switch_mirror;
 
+static void load_palette(const uint16_t *pal) {
+__asm
+	; backup sp
+	ld (_hblank_isr_sp), sp
+
+	ld h, d
+	ld l, e
+
+	; prepare palette register
+	ld a, #0x80
+	ldh (_BCPS_REG + 0), a
+
+	di
+
+	; set sp for stack copy; hl = BCPD
+	ld sp, hl
+	ld hl, #(_BCPD_REG)
+
+	; write 9 color pairs (18 colors)
+.rept 18
+	pop bc
+	ld (hl), c
+	ld (hl), b
+.endm
+
+	; restore SP
+	ld hl, #(_hblank_isr_sp)
+	ld c, (hl)
+	inc hl
+	ld h, (hl)
+	ld l, c
+	ld sp, hl
+
+	ei
+__endasm;
+}
+
 static void vblank_update_palette(void) {
 __asm
-	push bc
-
 	; backup sp
 	ld (_hblank_isr_sp), sp
 
@@ -65,13 +111,15 @@ __asm
 
 	pop hl
 
-	; switch work banks
-	ld a, #0x02
-	ldh (_SVBK_REG + 0), a
-
 	; prepare palette register
 	ld a, #0x80
 	ldh (_BCPS_REG + 0), a
+
+	di
+
+	; switch work banks
+	ld a, #0x02
+	ldh (_SVBK_REG + 0), a
 
 	; set sp for stack copy; hl = BCPD
 	ld sp, hl
@@ -96,7 +144,7 @@ __asm
 	ld l, c
 	ld sp, hl
 
-	pop bc
+	ei
 __endasm;
 }
 
@@ -264,13 +312,18 @@ void gbc_vblank_isr(void) {
 	SCX_REG = scx_shadow_reg;
 	SCY_REG = scy_shadow_reg;
 
-	hblank_isr_ip = (uint16_t) hblank_update_palette;
-	hblank_isr_pal_pos = 0xD000 | ((uint16_t)local_doy << 6);
-	LYC_REG = 7;
-	ly_bank_switch_mirror = ly_bank_switch;
-	new_lcdc_val = (ly_bank_switch < 135) ? 0xD9 : 0xC9;
+	if (renderer_mode == RENDER_MODE_PLAYFIELD) {
+		hblank_isr_ip = (uint16_t) hblank_update_palette;
+		hblank_isr_pal_pos = 0xD000 | ((uint16_t)local_doy << 6);
+		LYC_REG = 7;
+		ly_bank_switch_mirror = ly_bank_switch;
+		new_lcdc_val = (ly_bank_switch < 135) ? 0xD9 : 0xC9;
 
-	vblank_update_palette();
+		vblank_update_palette();
+	} else if (renderer_mode == RENDER_MODE_TXTWIND) {
+		load_palette(cgb_txtwind_palette);
+	}
+
 	global_vblank_isr();
 }
 
@@ -950,13 +1003,12 @@ static void gbc_text_draw_wrap(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
 	gbc_text_draw(x, y, chr, col);
 }
 
-void gbc_text_init(void);
+void gbc_text_init(uint8_t mode);
 
 static void gbc_text_update(void) {
 	scx_shadow_reg = draw_offset_x << 3;
 	scy_shadow_reg = draw_offset_y << 3;
 }
-
 
 static void gbc_text_scroll(int8_t dx, int8_t dy) {
 	draw_offset_x = (draw_offset_x + dx) & 0x1F;

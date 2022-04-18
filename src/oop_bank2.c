@@ -129,10 +129,9 @@ void oop_dataofs_free(uint16_t loc) BANKED {
 extern uint16_t oop_window_zzt_lines;
 
 void oop_handle_txtwind(void) BANKED {
-	// TODO
-	/* if (oop_window_zzt_lines > 1) {
-		
-	} else if (oop_window_zzt_lines == 1) */ {
+	if (oop_window_zzt_lines > 1) {
+		txtwind_draw();
+	} else if (oop_window_zzt_lines == 1) {
 		uint8_t sram_ptr_data[9];
 		sram_ptr_t sram_ptr;
 

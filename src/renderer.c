@@ -7,6 +7,8 @@
 
 renderer_t active_renderer;
 
+uint8_t renderer_id = 255;
+uint8_t renderer_mode = 0;
 uint8_t renderer_scrolling = 0;
 uint8_t draw_offset_x = 0;
 uint8_t draw_offset_y = 0;
@@ -46,9 +48,11 @@ void global_vblank_isr(void) {
 #endif
 }
 
-void text_init(const renderer_t *renderer) {
+void text_init(uint8_t mode, const renderer_t *renderer) {
 	LCDC_REG = 0x00;
 	hblank_isr_jp = 0xC3;
+	draw_offset_x = 0;
+	draw_offset_y = 0;
 
 	// not using sprites here
 	_shadow_OAM_base = 0;
@@ -62,8 +66,10 @@ void text_init(const renderer_t *renderer) {
 	uint8_t prev_bank = _current_bank;
 	SWITCH_ROM_MBC5(3);
 
-	memcpy(&active_renderer, renderer, sizeof(renderer_t));
-	active_renderer.init();
+	if (renderer != NULL) {
+		memcpy(&active_renderer, renderer, sizeof(renderer_t));
+	}
+	active_renderer.init(mode);
 
 	SWITCH_ROM_MBC5(prev_bank);
 }

@@ -43,8 +43,6 @@ void display_message(uint8_t time, const char* line1, const char* line2, const c
 
 // game_sidebar.c (bank 0)
 
-void game_redraw_sidebar_all(void);
-
 void game_update_sidebar_all(void);
 void game_update_sidebar_health(void);
 void game_update_sidebar_ammo(void);

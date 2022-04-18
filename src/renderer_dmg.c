@@ -60,11 +60,13 @@ void global_vblank_isr(void);
 void dmg_vblank_isr(void) {
 	LCDC_REG = 0b11010001;
 	BGP_REG = 0b11100100;
-	LYC_REG = ly_bank_switch;
-	if (ly_bank_switch < 135) {
-		hblank_isr_ip = (uint16_t) dmg_hblank_switch_window_pre;
-	} else {
-		hblank_isr_ip = (uint16_t) dmg_hblank_switch_window;
+	if (renderer_mode == RENDER_MODE_PLAYFIELD) {
+		LYC_REG = ly_bank_switch;
+		if (ly_bank_switch < 135) {
+			hblank_isr_ip = (uint16_t) dmg_hblank_switch_window_pre;
+		} else {
+			hblank_isr_ip = (uint16_t) dmg_hblank_switch_window;
+		}
 	}
 
 	SCX_REG = scx_shadow_reg;
@@ -72,7 +74,7 @@ void dmg_vblank_isr(void) {
 	global_vblank_isr();
 }
 
-void dmg_text_init(); // bank 3
+void dmg_text_init(uint8_t mode); // bank 3
 
 static void dmg_text_undraw(uint8_t x, uint8_t y) {
 

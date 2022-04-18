@@ -22,9 +22,9 @@ void main(void) {
 
 	if (_cpu == CGB_TYPE) {
 		cpu_fast();
-		text_init(&renderer_gbc);
+		text_init(RENDER_MODE_PLAYFIELD, &renderer_gbc);
 	} else {
-		text_init(&renderer_dmg);
+		text_init(RENDER_MODE_PLAYFIELD, &renderer_dmg);
 	}
 
 	sram_init(false);
