@@ -17,7 +17,7 @@ uint8_t ly_bank_switch;
 uint8_t sidebar_tile_data_ly_switch;
 uint8_t sidebar_tile_data_len;
 uint16_t sidebar_tile_data_address;
-__at(0xC040) static uint8_t sidebar_tile_data[96];
+AT(0xC040) static uint8_t sidebar_tile_data[96];
 volatile bool sidebar_tile_data_awaiting = false;
 
 static inline void sidebar_vbl_copy_data(void) {

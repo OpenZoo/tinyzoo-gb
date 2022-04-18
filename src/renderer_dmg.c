@@ -7,7 +7,7 @@
 
 extern uint8_t ly_bank_switch;
 
-void dmg_hblank_switch_window_pre(void) __naked {
+void dmg_hblank_switch_window_pre(void) NAKED {
 __asm
 .hblank_switch_window_pre_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
@@ -35,7 +35,7 @@ __asm
 __endasm;
 }
 
-void dmg_hblank_switch_window(void) __naked {
+void dmg_hblank_switch_window(void) NAKED {
 __asm
 .hblank_switch_window_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles

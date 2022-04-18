@@ -6,7 +6,7 @@
 #include "renderer_sidebar.h"
 #include "sram_debug.h"
 
-__at(0xC040) uint8_t sidebar_tile_data[96];
+AT(0xC040) uint8_t sidebar_tile_data[96];
 
 extern uint8_t sidebar_tile_data_ly_switch;
 extern uint8_t sidebar_tile_data_len;

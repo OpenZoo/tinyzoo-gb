@@ -18,8 +18,8 @@
 )(x)
 */
 
-int8_t signum8(int8_t x) __preserves_regs(b, c, d);
-int8_t difference8(int8_t a, int8_t b) __preserves_regs(b, c, d);
+int8_t signum8(int8_t x) PRESERVES_REGS(b, c, d);
+int8_t difference8(int8_t a, int8_t b) PRESERVES_REGS(b, c, d);
 
 /*
 int8_t signum16(int16_t x);
@@ -28,7 +28,7 @@ int16_t difference16(int16_t a, int16_t b);
 
 #if defined(USE_XORSHIFT_RNG)
 int16_t rand(int16_t max);
-int16_t rand_mask(int16_t max) __preserves_regs(b, c);
+int16_t rand_mask(int16_t max) PRESERVES_REGS(b, c);
 #elif defined(USE_YERRICK_RNG)
 int16_t rand(int16_t max);
 int16_t rand_mask(int16_t max);

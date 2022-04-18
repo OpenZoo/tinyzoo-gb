@@ -100,7 +100,7 @@ __asm
 __endasm;
 }
 
-static void gbc_hblank_switch_window(void) __naked {
+static void gbc_hblank_switch_window(void) NAKED {
 __asm
 .hblank_switch_window_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
@@ -115,7 +115,7 @@ __asm
 __endasm;
 }
 
-static void hblank_update_palette(void) __naked {
+static void hblank_update_palette(void) NAKED {
 __asm
 	push hl
 	push bc
@@ -274,7 +274,7 @@ void gbc_vblank_isr(void) {
 	global_vblank_isr();
 }
 
-static void gbc_sync_di(void) __naked __preserves_regs(d, e, h, l) {
+static void gbc_sync_di(void) NAKED PRESERVES_REGS(d, e, h, l) {
 __asm;
 	ldh a, (_LY_REG + 0)
 	cp a, #137
@@ -291,7 +291,7 @@ __endasm;
 }
 
 // Lower tolerance due to potential C overhead
-static void gbc_text_sync_hblank_safe(void) __naked {
+static void gbc_text_sync_hblank_safe(void) NAKED {
 __asm;
 GbcHSSyncDiLoop:
     ; LY in range?

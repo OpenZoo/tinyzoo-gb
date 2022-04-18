@@ -20,7 +20,7 @@ void sound_queue_nobank(int8_t priority, const uint8_t *data) {
 			if (priority >= 0 || !sound_is_playing) {
 				sound_current_priority = priority;
 				text_sync_hblank_safe();
-				__critical {
+				CRITICAL {
 					sound_duration_counter = 1;
 					sound_buffer_len = data_len;
 					sound_buffer_pos = 0;
@@ -34,7 +34,7 @@ void sound_queue_nobank(int8_t priority, const uint8_t *data) {
 				uint8_t pos = sound_buffer_pos;
 				memmove(sound_buffer, sound_buffer + pos, sound_buffer_len - pos);
 				text_sync_hblank_safe();
-				__critical {
+				CRITICAL {
 					sound_buffer_len -= pos;
 					sound_buffer_pos = 0;
 				};
