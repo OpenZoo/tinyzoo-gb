@@ -30,7 +30,7 @@ const uint16_t cgb_palette[16] = {
 	RGB(COL_LVL_3, COL_LVL_3, COL_LVL_3)
 };
 
-const uint16_t cgb_txtwind_palette[8] = {
+const uint16_t cgb_txtwind_palette[10] = {
 	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
 	RGB(COL_LVL_3, COL_LVL_3, COL_LVL_1),
 	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
@@ -38,7 +38,9 @@ const uint16_t cgb_txtwind_palette[8] = {
 	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
 	RGB(COL_LVL_3, COL_LVL_1, COL_LVL_3),
 	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
-	RGB(COL_LVL_1, COL_LVL_3, COL_LVL_1)
+	RGB(COL_LVL_1, COL_LVL_3, COL_LVL_1),
+	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
+	RGB(COL_LVL_3, COL_LVL_1, COL_LVL_1)
 };
 
 uint16_t cgb_message_palette[16];

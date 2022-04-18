@@ -70,6 +70,7 @@ void text_init(uint8_t mode, const renderer_t *renderer) {
 		memcpy(&active_renderer, renderer, sizeof(renderer_t));
 	}
 	active_renderer.init(mode);
+	active_renderer.update();
 
 	SWITCH_ROM_MBC5(prev_bank);
 }

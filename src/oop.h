@@ -10,17 +10,19 @@
 // defines
 #define OOP_DATA_POS_END 0xFFFF
 
-#define OOP_LABEL_BOMBED 250
-#define OOP_LABEL_TOUCH 251
-#define OOP_LABEL_THUD 252
-#define OOP_LABEL_ENERGIZE 253
-#define OOP_LABEL_SHOT 254
-#define OOP_LABEL_RESTART 255
+#define OOP_LABEL_BOMBED 249
+#define OOP_LABEL_TOUCH 250
+#define OOP_LABEL_THUD 251
+#define OOP_LABEL_ENERGIZE 252
+#define OOP_LABEL_SHOT 253
+#define OOP_LABEL_RESTART 254
+#define OOP_LABEL_VOID 255
 
 #define OOP_TARGET_EMPTY 251
 #define OOP_TARGET_SELF 252
 #define OOP_TARGET_OTHERS 253
 #define OOP_TARGET_ALL 254
+#define OOP_TARGET_VOID 255
 
 // oop_flags.c (bank 0)
 #define FLAG_ID_NONE 255
@@ -39,8 +41,8 @@ void oop_dataofs_free(uint16_t loc) BANKED;
 // oop.c (bank 0)
 extern const char oop_object_name[];
 extern const char oop_scroll_name[];
-void oop_send(uint8_t stat_id, bool respect_self_lock, uint8_t label_id, bool ignore_lock);
-void oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id, bool ignore_lock);
+bool oop_send(uint8_t stat_id, bool respect_self_lock, uint8_t label_id, bool ignore_lock);
+bool oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id, bool ignore_lock);
 bool oop_execute(uint8_t stat_id, const char *name);
 
 #endif

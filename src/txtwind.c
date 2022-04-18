@@ -5,8 +5,8 @@
 #include "sram_alloc.h"
 #include "txtwind.h"
 
-void txtwind_read_line(uint16_t idx, txtwind_line_t *line) {
-	if (idx >= txtwind_lines) {
+void txtwind_read_line(int16_t idx, txtwind_line_t *line) {
+	if (idx < 0 || idx >= ((int16_t) txtwind_lines)) {
 		line->type = TXTWIND_LINE_TYPE_REGULAR;
 		line->len = 0;
 		return;
@@ -24,6 +24,6 @@ void txtwind_read_line(uint16_t idx, txtwind_line_t *line) {
 	uint8_t prev_bank = _current_bank;
 	SWITCH_ROM_MBC5(fptr.bank);
 	const txtwind_line_t *tptr = (const txtwind_line_t*) fptr.ptr;
-	memcpy(line, tptr, 3 + tptr->len);
+	memcpy(line, tptr, TXTWIND_LINE_HEADER_LEN + tptr->len);
 	SWITCH_ROM_MBC5(prev_bank);
 }

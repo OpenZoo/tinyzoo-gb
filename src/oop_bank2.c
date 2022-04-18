@@ -17,8 +17,8 @@
 
 #include "element_defs_cycles.inc"
 
-void oop_banked_noop_why(void) BANKED {
-	
+void oop_banked_noop_why() BANKED {
+
 }
 
 static uint8_t get_color_for_tile_match(uint8_t element, uint8_t color) {
@@ -128,9 +128,9 @@ void oop_dataofs_free(uint16_t loc) BANKED {
 
 extern uint16_t oop_window_zzt_lines;
 
-void oop_handle_txtwind(void) BANKED {
+bool oop_handle_txtwind(void) BANKED {
 	if (oop_window_zzt_lines > 1) {
-		txtwind_draw();
+		return txtwind_run();
 	} else if (oop_window_zzt_lines == 1) {
 		uint8_t sram_ptr_data[9];
 		sram_ptr_t sram_ptr;
@@ -163,4 +163,5 @@ void oop_handle_txtwind(void) BANKED {
 				break;
 		}
 	}
+	return false;
 }
