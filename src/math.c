@@ -4,20 +4,20 @@
 // helper functions
 
 #ifdef GBZ80
+// TODO (SDCC 4.2 upgrade): Can this be optimized?
 int8_t signum8(int8_t x) __naked __preserves_regs(b, c, d) {
 	x;
 __asm
-	ldhl sp, #2
-	ld e, (hl)
+	ld e, a
 	bit 7, e
 	jr nz, Signum8ReturnMinusOne ; x < 0
 	xor a, a
 	cp a, e ; x == 0?
 	ret z
-	ld e, #0x01 ; x > 0
+	ld a, #0x01 ; x > 0
 	ret
 Signum8ReturnMinusOne:
-	ld e, #0xFF
+	ld a, #0xFF
 	ret
 __endasm;
 }
@@ -25,9 +25,6 @@ __endasm;
 int8_t difference8(int8_t a, int8_t b) __naked __preserves_regs(b, c, d) {
 	a, b;
 __asm
-	ldhl sp, #2
-	ld a, (hl+)
-	ld e, (hl)
 	cp a, e
 	jr nc, Diff8NoSwap
 
@@ -36,7 +33,6 @@ __asm
 
 Diff8NoSwap:
 	sub a, e
-	ld e, a
 	ret
 __endasm;
 }
@@ -99,6 +95,8 @@ int16_t rand_mask(int16_t max) {
 int16_t rand(int16_t max) {
 	max;
 __asm
+	ld b, d
+	ld c, e
 	ld a, (_rand_seed)
 	ld l, a
 	ld a, (_rand_seed+1)
@@ -118,18 +116,11 @@ __asm
 	xor a, h
 	ld d, a
 	ld (_rand_seed+1), a
-	ldhl	sp,	#2
-	ld	a, (hl+)
-	ld	c, a
-	ld	b, (hl)
-	push	bc
-	push	de
 	call	__moduint
-	add	sp, #4
 __endasm;
 }
 
-int16_t rand_mask(int16_t max) __preserves_regs(b, c) {
+int16_t rand_mask(int16_t max) {
 	max;
 __asm
 	ld a, (_rand_seed)
@@ -147,17 +138,14 @@ __asm
 	rra
 	xor a, l
 	ld (_rand_seed), a
-	ld e, a
+	ld c, a
 	xor a, h
 	ld (_rand_seed+1), a
-	ld d, a
-	ldhl sp, #2
-	ld a, (hl+)
-	and a, e
-	ld e, a
-	ld a, (hl)
 	and a, d
-	ld d, a
+	ld b, a
+	ld a, c
+	and a, e
+	ld c, a
 __endasm;
 }
 #elif defined(USE_YERRICK_RNG)
@@ -187,6 +175,8 @@ __endasm;
 int16_t rand(int16_t max) {
 	max;
 __asm
+	ld b, d
+	ld c, e
 	ld hl, #(_rand_seed)
 	ld a, (hl)
 	add a, #0xB3
@@ -199,18 +189,11 @@ __asm
 	adc a, (hl)
 	ld (hl), a
 	ld e, a
-	ldhl	sp,	#2
-	ld	a, (hl+)
-	ld	c, a
-	ld	b, (hl)
-	push	bc
-	push	de
 	call	__moduint
-	add	sp, #4
 __endasm;
 }
 
-int16_t rand_mask(int16_t max) __preserves_regs(d, e) {
+int16_t rand_mask(int16_t max) {
 	max;
 __asm
 	ld hl, #(_rand_seed)
@@ -224,12 +207,9 @@ __asm
 	ld c, a
 	adc a, (hl)
 	ld (hl), a
+	and a, d
 	ld b, a
-	ldhl sp, #2
-	ld a, (hl+)
-	and a, b
-	ld b, a
-	ld a, (hl)
+	ld a, e
 	and a, c
 	ld c, a
 __endasm;

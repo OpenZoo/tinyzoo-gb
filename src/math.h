@@ -31,7 +31,7 @@ int16_t rand(int16_t max);
 int16_t rand_mask(int16_t max) __preserves_regs(b, c);
 #elif defined(USE_YERRICK_RNG)
 int16_t rand(int16_t max);
-int16_t rand_mask(int16_t max) __preserves_regs(d, e);
+int16_t rand_mask(int16_t max);
 #else
 int16_t rand(int16_t max);
 int16_t rand_mask(int16_t max);

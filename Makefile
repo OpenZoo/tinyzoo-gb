@@ -5,7 +5,7 @@
 
 # If you move this project you can change the directory 
 # to match your GBDK root directory (ex: GBDK_HOME = "C:/GBDK/"
-GBDK_HOME = /home/asie/gbdk/
+GBDK_HOME = /opt/gbdk/
 
 LCC = $(GBDK_HOME)bin/lcc 
 

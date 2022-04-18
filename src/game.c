@@ -308,27 +308,27 @@ uint8_t get_stat_id_at(uint8_t x, uint8_t y) {
 #ifdef GBZ80
 	x; y;
 __asm
+	; TODO (SDCC 4.2.0 upgrade): optimize?
+	ld		c, a
 	; (hl) - stat pointer
 	; a - compared value
-	; bc - checked value
+	; ec (high, low) - checked value
 	; d - max stat count
-	; e - counter
+	; b - counter
 	ld		a, (_zoo_stat_count)
 	inc		a
 	ld		d, a
-	ld		e, #0
-	ldhl	sp, #2
-	ld		c, (hl)
-	inc		hl
-	ld		b, (hl)
+	ld		b, #0
 	ld		hl, #(_zoo_stats+16)
 GetStatIdAtLoop:
 	ld		a, (hl+)
 	cp		a, c
 	ld		a, (hl+)
 	jr		nz, GetStatIdAtNotFound
-	cp		a, b
-	ret		z
+	cp		a, e
+	jr		nz, GetStatIdAtNotFound
+	ld		a, b
+	ret
 GetStatIdAtNotFound:
 	; hl += 14
 	ld		a, l
@@ -338,11 +338,11 @@ GetStatIdAtNotFound:
 	sub		a, l
         ld              h, a
 	; d -= 1
-	inc		e
+	inc		b
 	dec		d
 	jr		nz, GetStatIdAtLoop
 GetStatIdFinished:
-	ld      e, #0xff
+	ld      	a, #0xff
 __endasm;
 #else
 	zoo_stat_t *stat = zoo_stats + 1;

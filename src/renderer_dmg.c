@@ -78,7 +78,7 @@ static void dmg_text_undraw(uint8_t x, uint8_t y) {
 
 }
 
-static void dmg_text_draw(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
+static void dmg_text_draw(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) OLDCALL {
 /*	x = (draw_offset_x + x) & 0x1F;
 	y = (draw_offset_y + y) & 0x1F;
 	
@@ -119,6 +119,11 @@ __asm
 __endasm;
 }
 
+// TODO (SDCC 4.2 upgrade) - remove
+static void dmg_text_draw_wrap(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
+	dmg_text_draw(x, y, chr, col);
+}
+
 static void dmg_text_sync_hblank_safe(void) {
 
 }
@@ -141,7 +146,7 @@ const renderer_t renderer_dmg = {
 	dmg_text_init,
 	dmg_text_sync_hblank_safe,
 	dmg_text_undraw,
-	dmg_text_draw,
+	dmg_text_draw_wrap,
 	dmg_text_free_line,
 	dmg_text_scroll,
 	dmg_text_update
