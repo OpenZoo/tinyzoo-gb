@@ -310,7 +310,7 @@ void global_vblank_isr(void);
 void gbc_vblank_isr(void) {
 	uint8_t local_doy = scy_shadow_reg >> 3;
 
-	LCDC_REG = 0b11010001;
+	LCDC_REG = lcdc_shadow_reg;
 	SCX_REG = scx_shadow_reg;
 	SCY_REG = scy_shadow_reg;
 

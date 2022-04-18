@@ -91,13 +91,13 @@ void gbc_text_init(uint8_t mode) {
 		cgb_message_palette[13] = cgb_palette[6];
 		cgb_message_palette[14] = cgb_palette[0];
 		cgb_message_palette[15] = cgb_palette[10];
+
+		gbc_text_init_wram();
 	}
 
 	renderer_mode = mode;
 
 	if (mode == RENDER_MODE_PLAYFIELD) {
-		gbc_text_init_wram();
-
 		// set bottom bar
 		uint8_t *bottom_bar_ptr = (uint8_t*) 0x9C00 + (13 << 5);
 		VBK_REG = 1;
@@ -122,7 +122,9 @@ void gbc_text_init(uint8_t mode) {
 	if (mode == RENDER_MODE_PLAYFIELD) {
 		STAT_REG = 0b01000000;
 		IE_REG |= LCD_IFLAG;
+		lcdc_shadow_reg = 0b11010001;
 	} else {
 		IE_REG &= ~LCD_IFLAG;
+		lcdc_shadow_reg = 0b11011001;
 	}
 }

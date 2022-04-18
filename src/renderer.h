@@ -30,6 +30,7 @@ extern uint8_t renderer_mode;
 extern uint8_t renderer_scrolling; // if 1, do not remove colors
 extern uint8_t draw_offset_x;
 extern uint8_t draw_offset_y;
+extern uint8_t lcdc_shadow_reg;
 extern uint8_t scx_shadow_reg;
 extern uint8_t scy_shadow_reg;
 extern const renderer_t renderer_dmg;

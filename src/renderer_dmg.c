@@ -58,7 +58,7 @@ __endasm;
 void global_vblank_isr(void);
 
 void dmg_vblank_isr(void) {
-	LCDC_REG = 0b11010001;
+	LCDC_REG = lcdc_shadow_reg;
 	BGP_REG = 0b11100100;
 	if (renderer_mode == RENDER_MODE_PLAYFIELD) {
 		LYC_REG = ly_bank_switch;

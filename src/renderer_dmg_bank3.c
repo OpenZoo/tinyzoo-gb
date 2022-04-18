@@ -33,7 +33,9 @@ void dmg_text_init(uint8_t mode) {
 
 		STAT_REG = 0b01000000;
 		IE_REG |= LCD_IFLAG;
+		lcdc_shadow_reg = 0b11010001;
 	} else {
 		IE_REG &= ~LCD_IFLAG;
+		lcdc_shadow_reg = 0b11011001;
 	}
 }

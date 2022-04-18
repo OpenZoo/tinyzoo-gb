@@ -42,14 +42,14 @@ static void txtwind_draw_line(int16_t idx) {
 	if ((idx == -1) || (idx == txtwind_lines)) {
 		if (renderer_id == RENDER_ID_GBC) {
 			VBK_REG = 1;
-			fill_bkg_rect(0, idx & 31, 20, 1, 8);
+			fill_win_rect(0, idx & 31, 20, 1, 8);
 			VBK_REG = 0;
 		}
-		fill_bkg_rect(0, idx & 31, 20, 1, 196);
+		fill_win_rect(0, idx & 31, 20, 1, 196);
 		return;
 	} else {
-		fill_bkg_rect(0, idx & 31, 20, 1, 32);
-		fill_bkg_rect(19, idx & 31, 20, 1, 32);
+		fill_win_rect(0, idx & 31, 20, 1, 32);
+		fill_win_rect(19, idx & 31, 20, 1, 32);
 	}
 
 	if (line.type == TXTWIND_LINE_TYPE_CENTERED) {
@@ -61,26 +61,26 @@ static void txtwind_draw_line(int16_t idx) {
 
 	if (renderer_id == RENDER_ID_GBC) {
 		VBK_REG = 1;
-		fill_bkg_rect(1, idx & 31, 18, 1, pal_color);
+		fill_win_rect(1, idx & 31, 18, 1, pal_color);
 		VBK_REG = 0;
 	}
-	fill_bkg_rect(1, idx & 31, 18, 1, 32);
+	fill_win_rect(1, idx & 31, 18, 1, 32);
 
 	if (line.len > 0) {
 		if (line.type == TXTWIND_LINE_TYPE_CENTERED) {
-			set_bkg_tiles((20 - line.len) >> 1, idx & 31, line.len, 1, line.text);
+			set_win_tiles((20 - line.len) >> 1, idx & 31, line.len, 1, line.text);
 		} else {
-			set_bkg_tiles(offset, idx & 31, line.len, 1, line.text);
+			set_win_tiles(offset, idx & 31, line.len, 1, line.text);
 		}
 	}
 
 	if (line.type == TXTWIND_LINE_TYPE_HYPERLINK) {
 		if (renderer_id == RENDER_ID_GBC) {
 			VBK_REG = 1;
-			fill_bkg_rect(2, idx & 31, 1, 1, 1);
+			fill_win_rect(2, idx & 31, 1, 1, 1);
 			VBK_REG = 0;
 		}
-		fill_bkg_rect(2, idx & 31, 1, 1, 16);
+		fill_win_rect(2, idx & 31, 1, 1, 16);
 	}
 }
 
@@ -98,6 +98,9 @@ static bool txtwind_exec_line(uint16_t idx) {
 }
 
 bool txtwind_run(void) BANKED {
+	uint8_t old_draw_offset_x = draw_offset_x;
+	uint8_t old_draw_offset_y = draw_offset_y;
+
 	uint8_t i;
 	int16_t old_pos = -8;
 	int16_t pos = -8;
@@ -110,12 +113,12 @@ bool txtwind_run(void) BANKED {
 
 	if (renderer_id == RENDER_ID_GBC) {
 		VBK_REG = 1;
-		fill_bkg_rect(0, 0, 1, 32, 2);
-		fill_bkg_rect(19, 0, 1, 32, 2);
+		fill_win_rect(0, 0, 1, 32, 2);
+		fill_win_rect(19, 0, 1, 32, 2);
 		VBK_REG = 0;
 	}
-	fill_bkg_rect(0, 0, 1, 32, 32);
-	fill_bkg_rect(19, 0, 1, 32, 32);
+	fill_win_rect(0, 0, 1, 32, 32);
+	fill_win_rect(19, 0, 1, 32, 32);
 
 	for (i = 0; i < 18; i++) {
 		txtwind_draw_line(pos + i);
@@ -150,25 +153,27 @@ bool txtwind_run(void) BANKED {
 
 		VBK_REG = 0;
 		if (old_pos != -9 && old_pos != (txtwind_lines - 8)) {
-			fill_bkg_rect(0, (old_pos + 8) & 31, 1, 1, 32);
-			fill_bkg_rect(19, (old_pos + 8) & 31, 1, 1, 32);
+			fill_win_rect(0, (old_pos + 8) & 31, 1, 1, 32);
+			fill_win_rect(19, (old_pos + 8) & 31, 1, 1, 32);
 		}
 		old_pos = pos;
 		if (pos != -9 && pos != (txtwind_lines - 8)) {
 			if (renderer_id == RENDER_ID_GBC) {
 				VBK_REG = 1;
-				fill_bkg_rect(0, (draw_offset_y + 8) & 31, 1, 1, 2);
-				fill_bkg_rect(19, (draw_offset_y + 8) & 31, 1, 1, 2);
+				fill_win_rect(0, (draw_offset_y + 8) & 31, 1, 1, 2);
+				fill_win_rect(19, (draw_offset_y + 8) & 31, 1, 1, 2);
 				VBK_REG = 0;
 			}
-			fill_bkg_rect(0, (draw_offset_y + 8) & 31, 1, 1, 175);
-			fill_bkg_rect(19, (draw_offset_y + 8) & 31, 1, 1, 174);
+			fill_win_rect(0, (draw_offset_y + 8) & 31, 1, 1, 175);
+			fill_win_rect(19, (draw_offset_y + 8) & 31, 1, 1, 174);
 		}
 	}
 
 	wait_vbl_done();
 	text_reinit(RENDER_MODE_PLAYFIELD);
-	board_redraw();
+	draw_offset_x = old_draw_offset_x;
+	draw_offset_y = old_draw_offset_y;
+	text_update();
 	game_update_sidebar_all();
 	return result;
 }
