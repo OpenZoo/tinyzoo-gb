@@ -55,6 +55,6 @@ void game_update_sidebar_keys(void);
 
 void board_create(void) BANKED;
 void world_create(void) BANKED;
-bool board_shoot(uint8_t element, uint8_t x, uint8_t y, int8_t dx, int8_t dy, uint8_t source) BANKED;
+bool board_shoot(uint8_t element, uint8_t x, uint8_t y, int8_t dx, int8_t dy, uint8_t source) BANKED OLDCALL;
 
 #endif

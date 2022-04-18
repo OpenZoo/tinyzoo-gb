@@ -42,6 +42,7 @@ void sram_write(sram_ptr_t *ptr, const void *data, uint16_t len);
 
 bool sram_alloc(uint16_t len, sram_ptr_t *ptr);
 void sram_free(sram_ptr_t *ptr);
+void sram_toggle_write(void);
 
 // No pre-setup required.
 void sram_init(bool force) BANKED;

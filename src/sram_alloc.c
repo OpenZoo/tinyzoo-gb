@@ -155,6 +155,11 @@ void sram_free(sram_ptr_t *ptr) {
 
 static const uint8_t sram_expected_magic[4] = {'G', 'b', 'Z', 0x01};
 
+void sram_toggle_write(void) {
+	SWITCH_RAM_MBC5(0);
+	((uint8_t*) 0xA000)[0] ^= 0x20;
+}
+
 void sram_init(bool force) BANKED {
 	uint8_t magic[4];
 	sram_ptr_t ptr;

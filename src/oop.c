@@ -474,10 +474,12 @@ static void oop_command_put(void) {
 	int8_t nx = oop_stat->x + oop_dir_x;
 	int8_t ny = oop_stat->y + oop_dir_y;
 
+	EMU_printf("putting %d,%d (%d,%d) %u:%u",oop_dir_x,oop_dir_y,nx,ny,element,color);
+
 #ifdef BUGFIX_PUT_RANGE
 	if (nx > 0 && ny > 0 && nx <= BOARD_WIDTH && ny <= BOARD_HEIGHT) {
 #else
-	if (nx > 0 && ny > 0 && nx <= BOARD_WIDTH && ny <= BOARD_HEIGHT) {
+	if (nx > 0 && ny > 0 && nx <= BOARD_WIDTH && ny < BOARD_HEIGHT) {
 #endif
 		oop_place_tile(nx, ny, element, color);
 	}
@@ -658,7 +660,7 @@ static uint8_t oop_ins_cost[] = {
 
 static uint8_t ins_count;
 
-bool oop_handle_txtwind(void) BANKED;
+bool oop_handle_txtwind(void) BANKED OLDCALL;
 
 bool oop_execute(uint8_t stat_id, const char *name) {
 	uint8_t prev_bank = _current_bank;

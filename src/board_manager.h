@@ -14,6 +14,6 @@ void load_board_data_rom(uint8_t bank, const uint8_t *data) NONBANKED;
 // on bank 2 - BANKED
 void load_world(uint8_t offset) BANKED;
 void load_board(uint8_t offset) BANKED;
-bool save_board(uint8_t offset) BANKED;
+bool save_board(uint8_t offset) BANKED OLDCALL;
 
 #endif /* __BOARD_MANAGER_H__ */

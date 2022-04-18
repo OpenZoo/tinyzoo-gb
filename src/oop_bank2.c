@@ -57,7 +57,7 @@ bool find_tile_on_board(uint8_t *x, uint8_t *y, uint8_t element, uint8_t color) 
 	}
 }
 
-void oop_place_tile(uint8_t x, uint8_t y, uint8_t element, uint8_t color) BANKED {
+void oop_place_tile(uint8_t x, uint8_t y, uint8_t element, uint8_t color) BANKED OLDCALL {
 	zoo_tile_t *src_tile = &ZOO_TILE(x, y);
 
 	if (src_tile->element != E_PLAYER) {
@@ -95,7 +95,7 @@ void oop_place_tile(uint8_t x, uint8_t y, uint8_t element, uint8_t color) BANKED
 	}
 }
 
-uint16_t oop_dataofs_clone(uint16_t loc) BANKED {
+uint16_t oop_dataofs_clone(uint16_t loc) BANKED OLDCALL {
 	uint8_t len = zoo_stat_data[loc + 3] & 0x7F;
 	memcpy(zoo_stat_data + zoo_stat_data_size, zoo_stat_data + loc, len);
 	uint16_t new_pos = zoo_stat_data_size;
@@ -134,11 +134,10 @@ extern uint16_t oop_window_zzt_lines;
 
 #define TWL_OFS (TXTWIND_LINE_HEADER_LEN - 1)
 
-bool oop_handle_txtwind(void) BANKED {
+bool oop_handle_txtwind(void) BANKED OLDCALL {
 	if (oop_window_zzt_lines > 1) {
 		return txtwind_run();
 	} else if (oop_window_zzt_lines == 1) {
-
 		uint8_t sram_ptr_data[9];
 		sram_ptr_t sram_ptr;
 
@@ -169,6 +168,9 @@ bool oop_handle_txtwind(void) BANKED {
 					(const char*) (*((uint16_t**) (sram_ptr_data + 6))) + TWL_OFS, sram_ptr_data[8]);
 				break;
 		}
+
+		return false;
+	} else {
+		return false;
 	}
-	return false;
 }

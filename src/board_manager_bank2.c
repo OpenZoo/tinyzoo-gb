@@ -192,7 +192,7 @@ void load_board(uint8_t offset) BANKED {
 	}
 }
 
-bool save_board(uint8_t offset) BANKED {
+bool save_board(uint8_t offset) BANKED OLDCALL {
 	sram_ptr_t ptr, board_ptr;
 
 	ptr.bank = 0;
@@ -202,6 +202,10 @@ bool save_board(uint8_t offset) BANKED {
 
 	sram_read(&ptr, &board_ptr, sizeof(sram_ptr_t));
 	sram_sub_ptr(&ptr, sizeof(sram_ptr_t));
+
+	// TODO: Reduce the amount of time during which writes are unsafe.
+	sram_toggle_write();
+
 	if (board_ptr.bank != 0 || board_ptr.position != 0) {
 		sram_free(&board_ptr);
 	}
@@ -212,6 +216,8 @@ bool save_board(uint8_t offset) BANKED {
 		board_ptr.position = 0;
 	}
 	sram_write(&ptr, &board_ptr, sizeof(sram_ptr_t));
+
+	sram_toggle_write();
 
 	return result;
 }
