@@ -51,24 +51,25 @@ void global_vblank_isr(void) {
 
 void text_init(uint8_t mode, const renderer_t *renderer) {
 	IE_REG &= ~LCD_IFLAG;
-	hblank_isr_jp = 0xC3;
 	draw_offset_x = 0;
 	draw_offset_y = 0;
 
-	// not using sprites here
-	_shadow_OAM_base = 0;
+	if (renderer != NULL) {
+		hblank_isr_jp = 0xC3;
+		// not using sprites here
+		_shadow_OAM_base = 0;
 
-	// clear bottom bar tiles
-	vmemset((uint8_t*) 0x9000, 0, 20 * 16);
+		// clear bottom bar tiles
+		vmemset((uint8_t*) 0x9000, 0, 20 * 16);
+
+		memcpy(&active_renderer, renderer, sizeof(renderer_t));
+	}
 
 	ly_bank_switch = 135;
 
 	uint8_t prev_bank = _current_bank;
 	SWITCH_ROM_MBC5(3);
 
-	if (renderer != NULL) {
-		memcpy(&active_renderer, renderer, sizeof(renderer_t));
-	}
 	active_renderer.init(mode);
 	active_renderer.update();
 
