@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gb/gb.h>
+#include <gbdk/emu_debug.h>
 #include "board_manager.h"
 #include "gamevars.h"
 #include "game.h"
@@ -21,7 +22,8 @@ const zoo_stat_t stat_template_default = {
 	0, 0, 0,
 	0, 0, 0,
 	STAT_ID_NONE, STAT_ID_NONE,
-	{0, 0}
+	{0, 0},
+	0xFFFF, 0
 };
 
 const int8_t neighbor_delta_x[4] = {0, 0, -1, 1};
