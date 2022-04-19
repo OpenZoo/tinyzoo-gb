@@ -308,8 +308,6 @@ void remove_stat(uint8_t stat_id) {
 	zoo_stat_count--;
 }
 
-void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y);
-
 bool move_stat_enable_scroll = true;
 
 void move_stat(uint8_t stat_id, uint8_t new_x, uint8_t new_y) {
@@ -345,10 +343,7 @@ void move_stat(uint8_t stat_id, uint8_t new_x, uint8_t new_y) {
 	board_draw_tile(old_x, old_y);
 
 	if (stat_id == 0 && move_stat_enable_scroll) {
-		uint8_t prev_bank = _current_bank;
-		SWITCH_ROM_MBC5(2);
-		move_stat_scroll_stat0(old_x, old_y, new_x, new_y);
-		SWITCH_ROM_MBC5(prev_bank);
+		move_stat_scroll_stat0(old_x, old_y, new_x, new_y, false);
 	}
 }
 

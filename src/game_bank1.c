@@ -49,8 +49,9 @@ static void game_play_handle_pause(bool pause_blink) {
 				ZOO_TILE_CHANGE2(mpx, mpy, E_PLAYER, zoo_element_defs_color[E_PLAYER]);
 				board_draw_tile(mpx, mpy);
 
-				center_viewport_on_player();
-				board_redraw();
+				// center_viewport_on_player();
+				// board_redraw();
+				move_stat_scroll_stat0(px, py, mpx, mpy, true);
 				text_update();
 			}
 

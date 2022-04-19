@@ -100,8 +100,9 @@ void damage_stat_stat0(zoo_stat_t *stat, zoo_tile_t *tile) {
 				board_draw_tile(old_x, old_y);
 				stat->x = zoo_board_info.start_player_x;
 				stat->y = zoo_board_info.start_player_y;
-				center_viewport_on_player();
-				board_redraw();
+				// center_viewport_on_player();
+				// board_redraw();
+				move_stat_scroll_stat0(old_x, old_y, stat->x, stat->y, true);
 				text_update();
 
 				zoo_game_state.paused = true;
@@ -117,7 +118,7 @@ void damage_stat_stat0(zoo_stat_t *stat, zoo_tile_t *tile) {
 	}
 }
 
-void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y) {
+void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y, bool force) BANKED OLDCALL {
 	if ((zoo_board_info.flags & BOARD_IS_DARK) && (zoo_world_info.torch_ticks > 0)) {
 		// TODO: optimize
 		board_redraw();
@@ -129,7 +130,7 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 		int8_t vy = viewport_y;
 		int8_t pox = new_x - vx;
 		int8_t poy = new_y - vy;
-		bool recalc_required = false;
+		bool recalc_required = force;
 
 		if (pox < VIEWPORT_PLAYER_MIN_X && vx > VIEWPORT_MIN_X) {
 			if ((old_x - 1) == new_x) {
