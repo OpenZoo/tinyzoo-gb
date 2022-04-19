@@ -21,6 +21,8 @@ static uint16_t oop_pos;
 static zoo_stat_t *oop_stat;
 static uint8_t *oop_prog_loc;
 static uint8_t *oop_code_loc;
+static uint8_t *oop_last_code_loc;
+static bool oop_running_skippable;
 static uint8_t oop_cmd;
 static int8_t oop_dir_x;
 static int8_t oop_dir_y;
@@ -306,6 +308,7 @@ static inline void oop_skip_command(void) {
 
 static inline void oop_run_skippable_command(void) {
 	oop_code_loc++;
+	oop_running_skippable = true;
 }
 
 typedef void (*oop_command_proc)(void);
@@ -317,7 +320,6 @@ static void oop_command_end(void) {
 #define oop_command_error oop_command_end
 
 static void oop_command_direction(void) {
-	uint8_t *last_code_loc = oop_code_loc - 1;
 	oop_stop_running = true;
 
 	oop_parse_direction();
@@ -345,9 +347,9 @@ OopDirMoveStat:
 		return;
 	}
 
-	if (oop_cmd == 0x01) {
-		oop_code_loc = last_code_loc;
-	} else if (oop_cmd == 0x04) {
+	if (oop_cmd == 0x01 /* /dir */ || oop_cmd == 0x03 /* GO */) {
+		oop_code_loc = oop_last_code_loc;
+	} else if (oop_cmd == 0x04 /* TRY */) {
 		oop_run_skippable_command();
 		oop_stop_running = false;
 	}
@@ -479,6 +481,13 @@ static void oop_command_put(void) {
 #else
 	if (nx > 0 && ny > 0 && nx <= BOARD_WIDTH && ny < BOARD_HEIGHT) {
 #endif
+		if (!(zoo_element_defs_flags[ZOO_TILE(nx, ny).element] & ELEMENT_WALKABLE)) {
+			uint8_t prev_bank = _current_bank;
+			SWITCH_ROM_MBC5(1);
+			ElementPushablePush(nx, ny, oop_dir_x, oop_dir_y);
+			SWITCH_ROM_MBC5(prev_bank);
+		}
+
 		oop_place_tile(nx, ny, element, color);
 	}
 }
@@ -693,7 +702,11 @@ OopStartParsing:
 #ifdef SRAM_DEBUG_OOP_EXECUTE
 		sram_debug8(oop_code_loc - (oop_prog_loc + 5));
 #endif
-
+		if (oop_running_skippable) {
+			oop_running_skippable = false;
+		} else {
+			oop_last_code_loc = oop_code_loc;
+		}
 		oop_cmd = *(oop_code_loc++);
 		ins_count -= oop_ins_cost[oop_cmd];
 		oop_procs[oop_cmd]();
