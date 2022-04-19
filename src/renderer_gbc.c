@@ -78,10 +78,9 @@ __asm
 
 	; restore SP
 	ld hl, #(_hblank_isr_sp)
-	ld c, (hl)
-	inc hl
+	ld a, (hl+)
 	ld h, (hl)
-	ld l, c
+	ld l, a
 	ld sp, hl
 
 	ei
@@ -106,10 +105,9 @@ __asm
 	ld a, h
 	and a, #0xD7
 	ld c, l
-	ld hl, #(_hblank_isr_pal_pos)
+	ld hl, #(_hblank_isr_pal_pos + 1)
+	ld (hl-), a
 	ld (hl), c
-	inc hl
-	ld (hl), a
 
 	pop hl
 
@@ -140,10 +138,9 @@ __asm
 
 	; restore SP
 	ld hl, #(_hblank_isr_sp)
-	ld c, (hl)
-	inc hl
+	ld a, (hl+)
 	ld h, (hl)
-	ld l, c
+	ld l, a
 	ld sp, hl
 
 	ei
@@ -187,10 +184,9 @@ __asm
 	ld a, h
 	and a, #0xD7
 	ld c, l
-	ld hl, #(_hblank_isr_pal_pos)
+	ld hl, #(_hblank_isr_pal_pos + 1)
+	ld (hl-), a
 	ld (hl), c
-	inc hl
-	ld (hl), a
 
 	pop hl
 
@@ -244,10 +240,9 @@ __asm
 .hblank_update_palette_restore:
 	; restore SP
 	ld hl, #(_hblank_isr_sp)
-	ld c, (hl)
-	inc hl
+	ld a, (hl+)
 	ld h, (hl)
-	ld l, c
+	ld l, a
 	ld sp, hl
 
 	pop de
@@ -371,9 +366,10 @@ __asm
 
 	; de = y << 7
 	ld d, a
-	ld e, #0
+	xor a, a
 	sra d
-	rr e
+	rra
+	ld e, a
 
 	; a = col
 	ldhl sp, #3
@@ -394,13 +390,13 @@ __asm
 	ld b, a
 	ld a, e
 	and a, #0x80
-	ld c, a
 
 	; bc = y << 4
 .rept 3
 	sra b
-	rr c
+	rra
 .endm
+	ld c, a
 
 	; bc |= 0xD000
 	ld a, b
@@ -466,9 +462,10 @@ __asm
 
 	; de = y << 7
 	ld d, a
-	ld e, #0
+	xor a, a
 	sra d
-	rr e
+	rra
+	ld e, a
 
 	; bc = y << 7
 	ld b, d
@@ -480,10 +477,12 @@ __asm
 	ld d, a
 
 	; bc = y << 4
+	ld a, c
 .rept 3
 	sra b
-	rr c
+	rra
 .endm
+	ld c, a
 
 	; bc |= 0xD000
 	ld a, b
@@ -502,7 +501,7 @@ GbcTextFreeLineLoop1:
 	inc de
 .endm
 
-	ld a, #0x00
+	xor a, a
 	ld (_SVBK_REG), a
 	ei
 
@@ -513,7 +512,7 @@ GbcTextFreeLineLoop1:
 	ld a, #0x04
 	ld (_SVBK_REG), a
 
-	ld a, #0x00
+	xor a, a
 	ld h, #0x10
 
 GbcTextFreeLineLoop2:
@@ -541,9 +540,10 @@ __asm
 
 	; de = y << 7
 	ld d, a
-	ld e, #0
+	xor a, a
 	sra d
-	rr e
+	rra
+	ld e, a
 
 	; a = col
 	ldhl sp, #3
@@ -564,13 +564,13 @@ __asm
 	ld b, a
 	ld a, e
 	and a, #0x80
-	ld c, a
 
 	; bc = y << 4
 .rept 3
 	sra b
-	rr c
+	rra
 .endm
+	ld c, a
 
 	; bc |= 0xD000
 	ld a, b
@@ -658,11 +658,12 @@ GbcTextAddColorAllocFound:
 
 	; de = y << 6
 	ld d, a
-	ld e, #0
+	xor a, a
 	sra d
-	rr e
+	rra
 	sra d
-	rr e
+	rra
+	ld e, a
 
 	; de = y << 6 | slot << 2
 	ld a, c
@@ -762,12 +763,13 @@ __asm
 	ld a, (hl-)
 	add a, b
 	and a, #0x1F ; a = (y + draw_offset_y) & 0x1F
-	ld e, a
-	ld d, #0x00
-.rept 5
-	sla e
-	rl d
+	ld d, a
+	xor a, a
+.rept 3
+	sra d
+	rra
 .endm
+	ld e, a
 	ld a, (hl)
 	add a, c
 	and a, #0x1F ; a = (x + draw_offset_x) & 0x1F
@@ -821,12 +823,13 @@ __asm
 	ld a, (hl-)
 	add a, b
 	and a, #0x1F ; a = (y + draw_offset_y) & 0x1F
-	ld e, a
-	ld d, #0x00
-.rept 5
-	sla e
-	rl d
+	ld d, a
+	xor a, a
+.rept 3
+	sra d
+	rra
 .endm
+	ld e, a
 	ld a, (hl)
 	add a, c
 	and a, #0x1F ; a = (x + draw_offset_x) & 0x1F
@@ -924,7 +927,7 @@ GbcTextDrawNoRemove:
 
 	; prepare value to write to VRAM bank 1
 	ld a, (0xFFA4)
-	rr a
+	rra
 	jr nc, GbcTextDrawSetColorAAA
 	or a, #0x08
 

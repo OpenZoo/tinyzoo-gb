@@ -58,7 +58,17 @@ void game_transition_step(void) {
 			uint8_t y = *(arr++);
 			board_draw_tile(viewport_x + x, viewport_y + y);
 		}
-		transition_pos += 10;
+		{
+			uint8_t x = *(arr++);
+			uint8_t y = *(arr++);
+			board_draw_tile(viewport_x + x, viewport_y + y);
+		}
+		{
+			uint8_t x = *(arr++);
+			uint8_t y = *(arr++);
+			board_draw_tile(viewport_x + x, viewport_y + y);
+		}
+		transition_pos += 14;
 	} else {
 		{
 			uint8_t x = *(arr++);
@@ -85,7 +95,17 @@ void game_transition_step(void) {
 			uint8_t y = *(arr++);
 			text_draw(x, y, 178, transition_color);
 		}
-		transition_pos += 10;
+		{
+			uint8_t x = *(arr++);
+			uint8_t y = *(arr++);
+			text_draw(x, y, 178, transition_color);
+		}
+		{
+			uint8_t x = *(arr++);
+			uint8_t y = *(arr++);
+			text_draw(x, y, 178, transition_color);
+		}
+		transition_pos += 14;
 	}
 }
 
