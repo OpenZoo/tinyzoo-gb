@@ -508,6 +508,7 @@ GbcTextFreeLineLoop1:
 	dec h
 	jr nz, GbcTextFreeLineLoop1
 
+	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; set SVBK to 4
 	ld a, #0x04
 	ld (_SVBK_REG), a
