@@ -181,9 +181,9 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 				viewport_y = vy;
 				board_redraw();
 			} else {
+				renderer_scrolling = 1;
 				if (pox < 0) {
 					// move left
-					renderer_scrolling = 1;
 					pox = -pox;
 					for (uint8_t ix = 0; ix < (uint8_t)pox; ix++) {
 						for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
@@ -199,7 +199,6 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 					}
 				} else if (pox > 0) {
 					// move right
-					renderer_scrolling = 1;
 					for (uint8_t ix = 0; ix < (uint8_t)pox; ix++) {
 						for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
 							board_undraw_tile(viewport_x + ix, iy + viewport_y);
@@ -215,7 +214,6 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 				}
 				if (poy < 0) {
 					// move up
-					renderer_scrolling = 1;
 					viewport_y += poy;
 					text_scroll(0, poy);
 					poy = -poy;
@@ -227,7 +225,6 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 					}
 				} else if (poy > 0) {
 					// move down
-					renderer_scrolling = 1;
 					viewport_y += poy;
 					text_scroll(0, poy);
 					for (uint8_t iy = 0; iy < (uint8_t)poy; iy++) {

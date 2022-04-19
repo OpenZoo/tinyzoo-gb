@@ -866,11 +866,13 @@ __asm
 	ld (_SVBK_REG), a
 
 	ld a, (de)
+	ld c, a
 
 	xor a, a
 	ld (_SVBK_REG), a
 	ei
 
+	ld a, c
 	cp a, b
 	jr z, GbcTextDrawSetChar
 
