@@ -1,5 +1,6 @@
 #pragma bank 1
 
+#include <gbdk/emu_debug.h>
 #include "../elements.h"
 #include "../elements_utils.h"
 #include "../gamevars.h"

@@ -185,6 +185,7 @@ void init_display_message(uint8_t time, bool visible) {
 
 	if (visible) {
 		add_stat(0, 0, E_MESSAGE_TIMER, 0, 1, &stat_template_default);
+		sid = zoo_stat_count;
 SetDuration:
 		dur = time / (zoo_game_state.tick_time_duration + 1);
 		ZOO_STAT(sid).p2 = dur;
