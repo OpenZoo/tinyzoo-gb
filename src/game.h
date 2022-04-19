@@ -26,6 +26,7 @@ void board_enter_stage2(void); // during transition
 void board_enter_stage3(void); // after transition
 void board_change(uint8_t id);
 void board_undraw_tile(uint8_t x, uint8_t y);
+void board_draw_char(uint8_t x, uint8_t y, uint8_t chr, uint8_t col);
 void board_draw_tile(uint8_t x, uint8_t y);
 uint8_t get_stat_id_at(uint8_t x, uint8_t y);
 void add_stat(uint8_t tx, uint8_t ty, uint8_t element, uint8_t color, uint8_t cycle, const zoo_stat_t *template);
@@ -36,7 +37,6 @@ void board_damage_tile(uint8_t x, uint8_t y);
 void board_attack(uint8_t stat_id, uint8_t x, uint8_t y);
 void calc_direction_rnd(int8_t *dx, int8_t *dy);
 void calc_direction_seek(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy);
-void game_play_loop(bool board_changed);
 
 void init_display_message(uint8_t time, bool visible);
 void display_message(uint8_t time, const char* line1, const char* line2, const char* line3); // bank 3 only
@@ -50,6 +50,10 @@ void game_update_sidebar_gems_time(void);
 void game_update_sidebar_torches(void);
 void game_update_sidebar_score(void);
 void game_update_sidebar_keys(void);
+
+// game_bank1.c (bank 1)
+
+void game_play_loop(bool board_changed) BANKED;
 
 // game_bank2.c (bank 2)
 
