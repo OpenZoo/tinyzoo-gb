@@ -1,6 +1,6 @@
-#include "stdbool.h"
 #pragma bank 1
 
+#include <stdbool.h>
 #include "../elements.h"
 #include "../elements_utils.h"
 #include "../gamevars.h"

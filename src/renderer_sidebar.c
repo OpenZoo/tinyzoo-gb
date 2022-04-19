@@ -7,17 +7,17 @@
 #include "sram_debug.h"
 
 AT(0xC040) uint8_t sidebar_tile_data[96];
-
 extern uint8_t sidebar_tile_data_ly_switch;
-extern uint8_t sidebar_tile_data_len;
-extern uint16_t sidebar_tile_data_address;
+// extern uint8_t sidebar_tile_data_len;
+// extern uint16_t sidebar_tile_data_address;
 extern volatile bool sidebar_tile_data_awaiting;
 
 extern uint8_t ly_bank_switch;
 
 void sidebar_copy_data(uint16_t address, uint8_t len) {
-	sidebar_tile_data_address = address;
-	sidebar_tile_data_len = len;
+	vmemcpy((uint8_t*) address, sidebar_tile_data, len);
+	/* sidebar_tile_data_address = address;
+	sidebar_tile_data_len = len; */
 	sidebar_tile_data_awaiting = true;
 }
 

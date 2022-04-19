@@ -97,6 +97,7 @@ void gbc_text_init(uint8_t mode) {
 
 	renderer_mode = mode;
 
+	wait_vbl_done();
 	if (mode == RENDER_MODE_PLAYFIELD) {
 		// set bottom bar
 		uint8_t *bottom_bar_ptr = (uint8_t*) 0x9C00 + (13 << 5);
@@ -111,7 +112,6 @@ void gbc_text_init(uint8_t mode) {
 		}
 	}
 
-	wait_vbl_done();
 	if (renderer_id != RENDER_ID_GBC) {
 		gbc_vblank_isr();
 		add_VBL(gbc_vblank_isr);
