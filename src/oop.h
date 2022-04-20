@@ -35,14 +35,13 @@ void world_clear_flag(uint8_t flag_id);
 bool find_tile_on_board(uint8_t *x, uint8_t *y, uint8_t element, uint8_t color) BANKED OLDCALL;
 void oop_place_tile(uint8_t x, uint8_t y, uint8_t element, uint8_t color) BANKED OLDCALL;
 uint16_t oop_dataofs_clone(uint16_t loc) BANKED OLDCALL;
-void oop_dataofs_free_if_unused(uint16_t loc) BANKED OLDCALL;
-void oop_dataofs_free(uint16_t loc) BANKED OLDCALL;
+void oop_dataofs_free_if_unused(uint16_t loc, uint8_t except_id) BANKED OLDCALL;
 
 // oop.c (bank 0)
 extern const char oop_object_name[];
 extern const char oop_scroll_name[];
 bool oop_send(uint8_t stat_id, bool respect_self_lock, uint8_t label_id, bool ignore_lock);
 bool oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id, bool ignore_lock);
-bool oop_execute(uint8_t stat_id, const char *name);
+bool oop_execute(uint8_t stat_id, const char *name) OLDCALL;
 
 #endif

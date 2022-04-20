@@ -73,9 +73,9 @@ void load_board_data_rom(uint8_t bank, const uint8_t *data) NONBANKED {
 	uint16_t zoo_stat_size = sizeof(zoo_stat_t) * (zoo_stat_count + 1);
 	memcpy(zoo_stats + 1, data, zoo_stat_size);
 	data += zoo_stat_size;
- 
-	zoo_stat_data_size = *(data++);
-	zoo_stat_data_size |= (*(data++)) << 8;
+
+	zoo_stat_data_size = *((uint16_t*)data);
+	data += 2;
 	memcpy(zoo_stat_data, data, zoo_stat_data_size);
 
 	SWITCH_ROM_MBC5(prev_bank);

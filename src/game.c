@@ -133,7 +133,7 @@ NotDark:
 			uint8_t prev_bank = _current_bank;
 			SWITCH_ROM_MBC5(1);
 
-			if (zoo_element_defs_drawprocs[tile.element] != 0) {
+			if (ZOO_ELEMENT_BOUNDS(tile.element) && zoo_element_defs_drawprocs[tile.element] != 0) {
 				ch = zoo_element_defs_drawprocs[tile.element](x, y);
 			} else {
 				ch = zoo_element_defs_character[tile.element];
@@ -285,8 +285,12 @@ void add_stat(uint8_t tx, uint8_t ty, uint8_t element, uint8_t color, uint8_t cy
 void remove_stat(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
 
+#ifdef DEBUG_PRINTFS
+	EMU_printf("removing stat %u @ %u %u", stat_id, stat->x, stat->y);
+#endif
 	if (stat->data_ofs != 0xFFFF) {
-		oop_dataofs_free_if_unused(stat->data_ofs);
+		oop_dataofs_free_if_unused(stat->data_ofs, stat_id);
+		stat->data_ofs = 0xFFFF;
 	}
 
 	if (stat_id < zoo_game_state.current_stat_ticked) zoo_game_state.current_stat_ticked--;
@@ -326,6 +330,9 @@ void move_stat(uint8_t stat_id, uint8_t new_x, uint8_t new_y) {
 	if (ZOO_TILE_READBOUNDS(new_x, new_y)) {
 		ZOO_TILE_ASSIGN(stat->under, new_x, new_y);
 	} else {
+#ifdef DEBUG_PRINTFS
+		EMU_printf("stat %u oob move! %u %u -> %u %u", stat_id, old_x, old_y, new_x, new_y);
+#endif
 		stat->under.element = 0;
 		stat->under.color = 0;
 	}

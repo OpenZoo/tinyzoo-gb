@@ -15,7 +15,7 @@
 const char oop_object_name[] = "Interaction";
 const char oop_scroll_name[] = "Scroll";
 
-static uint8_t oop_stat_id = 255;
+uint8_t oop_stat_id = 255;
 static uint16_t oop_pos;
 static zoo_stat_t *oop_stat;
 static uint8_t *oop_prog_loc;
@@ -37,6 +37,25 @@ static uint16_t find_label_loc;
 #define SET_ZAP_FALSE_IF_FIND_STRING_VISIBLE 2
 
 void oop_banked_noop_why() BANKED;
+
+static void oop_command_end(void) {
+	oop_pos = 0xFFFF;
+	oop_stop_running = true;
+}
+#define oop_command_error oop_command_end
+
+void oop_after_potential_stat_list_change() {
+	if (oop_stat->data_ofs == 0xFFFF) {
+		oop_command_end();
+	} else {
+		uint8_t *data_loc = zoo_stat_data + oop_stat->data_ofs;
+		SWITCH_ROM_MBC5(data_loc[2]);
+		uint8_t *prog_loc = *((uint8_t**) data_loc);
+		oop_pos = oop_stat->data_pos;
+		oop_prog_loc = prog_loc;
+		oop_code_loc = oop_prog_loc + 5 + oop_pos;
+	}
+}
 
 bool oop_find_label_in_stat(uint8_t stat_id, uint8_t label_id, bool zapped, uint8_t set_zap) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
@@ -123,8 +142,10 @@ bool oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id
 
 		zoo_stat_t *stat = &ZOO_STAT(0);
 		uint8_t stat_id = 0;
-		if (target_id == OOP_TARGET_ALL || (target_id == OOP_TARGET_OTHERS && stat_id != oop_stat_id)) {
+		/* OTHERS = 253, ALL = 254 */
+		if (target_id >= OOP_TARGET_OTHERS) {
 			for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
+				if (stat_id == oop_stat_id) continue;
 				if (stat->data_ofs != 0xFFFF) {
 					if (oop_send(stat_id, respect_self_lock, label_id, ignore_lock)) {
 						result = true;
@@ -312,12 +333,6 @@ static inline void oop_run_skippable_command(void) {
 
 typedef void (*oop_command_proc)(void);
 
-static void oop_command_end(void) {
-	oop_pos = 0xFFFF;
-	oop_stop_running = true;
-}
-#define oop_command_error oop_command_end
-
 static void oop_command_direction(void) {
 	oop_stop_running = true;
 
@@ -325,22 +340,26 @@ static void oop_command_direction(void) {
 	if (oop_cmd >= 0x03 || oop_dir_x != 0 || oop_dir_y != 0) {
 		uint8_t dest_x = oop_stat->x + oop_dir_x;
 		uint8_t dest_y = oop_stat->y + oop_dir_y;
-		if (!(zoo_element_defs_flags[ZOO_TILE(dest_x, dest_y).element] & ELEMENT_WALKABLE)) {
-			uint8_t prev_bank = _current_bank;
-			SWITCH_ROM_MBC5(1);
-			ElementPushablePush(dest_x, dest_y, oop_dir_x, oop_dir_y);
-			SWITCH_ROM_MBC5(prev_bank);
-		} else {
-			// minor optimization
-			goto OopDirMoveStat;
-		}
-		if (zoo_element_defs_flags[ZOO_TILE(dest_x, dest_y).element] & ELEMENT_WALKABLE) {
-OopDirMoveStat:
-			move_stat(oop_stat_id, dest_x, dest_y);
-			if (oop_cmd == 0x04) {
-				oop_skip_command();
+		if (ZOO_TILE_READBOUNDS(dest_x, dest_y)) {
+			if (!(zoo_element_defs_flags[ZOO_TILE(dest_x, dest_y).element] & ELEMENT_WALKABLE)) {
+				uint8_t prev_bank = _current_bank;
+				SWITCH_ROM_MBC5(1);
+				ElementPushablePush(dest_x, dest_y, oop_dir_x, oop_dir_y);
+				SWITCH_ROM_MBC5(prev_bank);
+				oop_after_potential_stat_list_change();
+			} else {
+				// minor optimization
+				goto OopDirMoveStat;
 			}
-			return;
+			if (zoo_element_defs_flags[ZOO_TILE(dest_x, dest_y).element] & ELEMENT_WALKABLE) {
+OopDirMoveStat:
+				move_stat(oop_stat_id, dest_x, dest_y);
+				oop_after_potential_stat_list_change();
+				if (oop_cmd == 0x04) {
+					oop_skip_command();
+				}
+				return;
+			}
 		}
 	} else {
 		return;
@@ -488,6 +507,7 @@ static void oop_command_put(void) {
 		}
 
 		oop_place_tile(nx, ny, element, color);
+		oop_after_potential_stat_list_change();
 	}
 }
 
@@ -498,6 +518,7 @@ static void oop_command_change(void) {
 	uint8_t color_to = *(oop_code_loc++);
 	uint8_t ix = 0;
 	uint8_t iy = 1;
+	bool changed = false;
 	if (color_to == 0) {
 		color_to = zoo_element_defs_color[element_to];
 		if (color_to >= COLOR_SPECIAL_MIN) {
@@ -506,6 +527,10 @@ static void oop_command_change(void) {
 	}
 	while (find_tile_on_board(&ix, &iy, element_from, color_from)) {
 		oop_place_tile(ix, iy, element_to, color_to);
+		changed = true;
+	}
+	if (changed) {
+		oop_after_potential_stat_list_change();
 	}
 }
 
@@ -554,8 +579,10 @@ static void oop_command_bind(void) {
 			SWITCH_ROM_MBC5(data_loc[2]);
 			uint8_t *prog_loc = *((uint8_t**) data_loc);
 			if (target_id == prog_loc[0]) {
-				// #BIND does not clone DataOfs, but rather assigns it 
-				oop_dataofs_free_if_unused(oop_stat->data_ofs);
+				if (oop_stat_id == stat_id) break;
+
+				// #BIND does not clone DataOfs, but rather assigns it
+				oop_dataofs_free_if_unused(oop_stat->data_ofs, oop_stat_id);
 				oop_stat->data_ofs = stat->data_ofs;
 				oop_stat->data_pos = 0;
 
@@ -668,7 +695,7 @@ static uint8_t ins_count;
 
 bool oop_handle_txtwind(void) BANKED OLDCALL;
 
-bool oop_execute(uint8_t stat_id, const char *name) {
+bool oop_execute(uint8_t stat_id, const char *name) OLDCALL {
 	uint8_t prev_bank = _current_bank;
 
 	oop_stat_id = stat_id;
@@ -684,6 +711,10 @@ OopStartParsing:
 
 	SWITCH_ROM_MBC5(oop_data_loc[2]);
 
+#ifdef DEBUG_PRINTFS_OOP_EXEC
+	EMU_printf("executing stat %u @ %d,%d %x:%x, pos %u", stat_id, oop_stat->x, oop_stat->y, oop_data_loc[2], *((uint16_t*)oop_data_loc), oop_pos);
+#endif
+
 	oop_prog_loc = *((uint8_t**) oop_data_loc);
 	oop_code_loc = oop_prog_loc + 5 + oop_pos;
 	oop_stop_running = false;
@@ -698,6 +729,12 @@ OopStartParsing:
 			oop_last_code_loc = oop_code_loc;
 		}
 		oop_cmd = *(oop_code_loc++);
+#ifdef DEBUG_PRINTFS_OOP_EXEC
+		if (oop_pos != 0xFFFF) {
+			oop_pos = oop_code_loc - (oop_prog_loc + 5);
+		}
+		EMU_printf("- pos %d, cmd 0x%x", oop_pos, oop_cmd);
+#endif
 		ins_count -= oop_ins_cost[oop_cmd];
 		oop_procs[oop_cmd]();
 	}

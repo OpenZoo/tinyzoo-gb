@@ -45,4 +45,7 @@
 #define MAX_SOUND_BUFFER_SIZE 254
 #define MAX_TEXT_WINDOW_LINES 512
 
+// #define DEBUG_PRINTFS
+// #define DEBUG_PRINTFS_OOP_EXEC
+
 #endif /* __CONFIG_H__ */

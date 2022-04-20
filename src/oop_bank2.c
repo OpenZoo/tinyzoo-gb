@@ -98,26 +98,21 @@ void oop_place_tile(uint8_t x, uint8_t y, uint8_t element, uint8_t color) BANKED
 
 uint16_t oop_dataofs_clone(uint16_t loc) BANKED OLDCALL {
 	uint8_t len = zoo_stat_data[loc + 3] & 0x7F;
+#ifdef DEBUG_PRINTFS
+	EMU_printf("cloning dataofs @ %u, len %u, size %u", loc, len, zoo_stat_data_size);
+#endif
 	memcpy(zoo_stat_data + zoo_stat_data_size, zoo_stat_data + loc, len);
 	uint16_t new_pos = zoo_stat_data_size;
 	zoo_stat_data_size += len;
 	return new_pos;
 }
 
-void oop_dataofs_free_if_unused(uint16_t loc) BANKED OLDCALL {
-	zoo_stat_t *stat = &ZOO_STAT(0);
-	uint8_t stat_id = 0;
-	for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
-		if (stat->data_ofs == loc) {
-			return;
-		}
-	}
-	oop_dataofs_free(loc);
-}
-
-void oop_dataofs_free(uint16_t loc) BANKED OLDCALL {
+static void oop_dataofs_free(uint16_t loc) {
 	uint8_t len = zoo_stat_data[loc + 3] & 0x7F;
-	memmove(zoo_stat_data + loc + len, zoo_stat_data + loc, zoo_stat_data_size - loc - len);
+#ifdef DEBUG_PRINTFS
+	EMU_printf("freeing dataofs @ %u, len %u, size %u", loc, len, zoo_stat_data_size);
+#endif
+	memmove(zoo_stat_data + loc, zoo_stat_data + loc + len, zoo_stat_data_size - loc - len);
 	zoo_stat_data_size -= len;
 
 	zoo_stat_t *stat = &ZOO_STAT(0);
@@ -125,10 +120,24 @@ void oop_dataofs_free(uint16_t loc) BANKED OLDCALL {
 	for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
 		if (stat->data_ofs != 0xFFFF) {
 			if (stat->data_ofs > loc) {
+#ifdef DEBUG_PRINTFS
+				EMU_printf("shifting stat %d from %u", stat_id, stat->data_ofs);
+#endif
 				stat->data_ofs -= len;
 			}
 		}
 	}
+}
+
+void oop_dataofs_free_if_unused(uint16_t loc, uint8_t except_id) BANKED OLDCALL {
+	zoo_stat_t *stat = &ZOO_STAT(0);
+	uint8_t stat_id = 0;
+	for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
+		if (stat_id != except_id && stat->data_ofs == loc) {
+			return;
+		}
+	}
+	oop_dataofs_free(loc);
 }
 
 extern uint16_t oop_window_zzt_lines;
