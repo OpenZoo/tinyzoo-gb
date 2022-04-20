@@ -12,6 +12,7 @@
 #define STAT_ID_UNUSED_STAGE2 254
 #define STAT_ID_VALID(id) ((id) < STAT_ID_UNUSED_STAGE2)
 
+// WARNING: No READBOUNDS
 void ElementCentipedeHeadTick(uint8_t stat_id) {
 	uint8_t tmp;
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);

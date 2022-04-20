@@ -17,7 +17,7 @@ void ElementBulletTick(uint8_t stat_id) {
 TryMove:
 	ix = stat->x + stat->step_x;
 	iy = stat->y + stat->step_y;
-	ielem = ZOO_TILE(ix, iy).element;
+	ielem = ZOO_TILE_READBOUNDS(ix, iy) ? ZOO_TILE(ix, iy).element : 0;
 
 	if ((zoo_element_defs_flags[ielem] & ELEMENT_WALKABLE) || (ielem == E_WATER)) {
 		move_stat(stat_id, ix, iy);

@@ -116,10 +116,13 @@ typedef struct {
 	uint8_t tick_time_duration;
 } zoo_game_state_t;
 
+#define ZOO_TILE_READBOUNDS(x, y) ( ((x) >= 0) && ((y) >= 0) && ((x) <= 61) && ((y) <= 26) )
 #ifdef OPT_BOARD_EDGE_IMMUTABLE
 extern zoo_tile_t zoo_tiles[62 * 26];
+#define ZOO_TILE_WRITEBOUNDS(x, y) ( ((x) >= 0) && ((y) >= 0) && ((x) <= 61) && ((y) < 26) )
 #else
 extern zoo_tile_t zoo_tiles[62 * 27];
+#define ZOO_TILE_WRITEBOUNDS(x, y) ( ((x) >= 0) && ((y) >= 0) && ((x) <= 61) && ((y) <= 26) )
 #endif
 
 #ifndef __GAMEVARS_INTERNAL__

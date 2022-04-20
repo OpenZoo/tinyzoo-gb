@@ -12,6 +12,8 @@
 
 void ElementScrollTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
+	if (!ZOO_TILE_WRITEBOUNDS(stat->x, stat->y)) return;
+
 	zoo_tile_t *tile = &ZOO_TILE(stat->x, stat->y);
 	if (tile->color >= 15) {
 		tile->color = 9;

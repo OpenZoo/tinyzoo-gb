@@ -47,12 +47,12 @@ __asm
 	ldh (_NR52_REG + 0), a
 	xor a, a
 	ldh (_NR51_REG + 0), a
+	ld b, a ; for sound_buffer_pos
 	ld a, #0xFF
 	ldh (_NR50_REG + 0), a
 
 	ld a, (_sound_buffer_pos)
 	ld c, a
-	ld b, #0x00 ; bc = sound_buffer_pos
 	ld hl, #(_sound_buffer)
 	add hl, bc ; hl = pointer to next entry
 
@@ -64,9 +64,9 @@ __asm
 	jr c, .timer_handler_check_drum
 	cp a, #96
 	jr nc, .timer_handler_check_drum
-	add a, a 
+	add a, a
 	ld c, a
-	ld b, #0x00
+	; ld b, #0x00 - still set from above
 	ld hl, #(_sound_freqs)
 	add hl, bc
 	ld a, #0x80

@@ -27,6 +27,7 @@ void ElementBlinkWallTick(uint8_t stat_id) {
 		// clear ray
 		bool cleared_ray = false;
 		while (true) {
+			if (!ZOO_TILE_READBOUNDS(ix, iy)) break;
 			zoo_tile_t *tile = &ZOO_TILE(ix, iy);
 			if (tile->element != elem || tile->color != color) {
 				break;
@@ -41,6 +42,8 @@ void ElementBlinkWallTick(uint8_t stat_id) {
 		if (!cleared_ray) {
 			// spawn new ray
 			while (true) {
+				if (!ZOO_TILE_READBOUNDS(ix, iy)) goto HitBoundary;
+
 				zoo_tile_t *tile = &ZOO_TILE(ix, iy);
 				if ((tile->element != E_EMPTY) && ((zoo_element_defs_flags[tile->element] & ELEMENT_DESTRUCTIBLE))) {
 					board_damage_tile(ix, iy);

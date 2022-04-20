@@ -261,12 +261,16 @@ void add_stat(uint8_t tx, uint8_t ty, uint8_t element, uint8_t color, uint8_t cy
 	dest_stat->x = tx;
 	dest_stat->y = ty;
 	dest_stat->cycle = cycle;
-	ZOO_TILE_COPY(dest_stat->under, ZOO_TILE(tx, ty));
+	if (ZOO_TILE_READBOUNDS(tx, ty)) {
+		ZOO_TILE_COPY(dest_stat->under, ZOO_TILE(tx, ty));
+	}
 	dest_stat->data_pos = 0;
 
 	if (template->data_ofs != 0xFFFF) {
 		dest_stat->data_ofs = oop_dataofs_clone(template->data_ofs);
 	}
+
+	if (!ZOO_TILE_WRITEBOUNDS(tx, ty)) return;
 
 	if (zoo_element_defs_flags[dest_stat->under.element] & ELEMENT_PLACEABLE_ON_TOP) {
 		ZOO_TILE(tx, ty).color = (color & 0x0F) | ((dest_stat->under.color) & 0x70);
@@ -288,8 +292,10 @@ void remove_stat(uint8_t stat_id) {
 
 	if (stat_id < zoo_game_state.current_stat_ticked) zoo_game_state.current_stat_ticked--;
 
-	ZOO_TILE_COPY(ZOO_TILE(stat->x, stat->y), stat->under);
-	board_draw_tile(stat->x, stat->y);
+	if (ZOO_TILE_WRITEBOUNDS(stat->x, stat->y)) {
+		ZOO_TILE_COPY(ZOO_TILE(stat->x, stat->y), stat->under);
+		board_draw_tile(stat->x, stat->y);
+	}
 
 	for (uint8_t i = 1; i <= zoo_stat_count; i++) {
 		zoo_stat_t *cstat = &ZOO_STAT(i);
@@ -318,11 +324,18 @@ void move_stat(uint8_t stat_id, uint8_t new_x, uint8_t new_y) {
 
 	zoo_tile_t old_under;
 	ZOO_TILE_COPY(old_under, stat->under);
-	ZOO_TILE_ASSIGN(stat->under, new_x, new_y);
+	if (ZOO_TILE_READBOUNDS(new_x, new_y)) {
+		ZOO_TILE_ASSIGN(stat->under, new_x, new_y);
+	} else {
+		stat->under.element = 0;
+		stat->under.color = 0;
+	}
 
-	zoo_tile_t old_tile;
+	zoo_tile_t old_tile = {0, 0};
 	zoo_tile_t new_tile;
-	ZOO_TILE_ASSIGN(old_tile, old_x, old_y);
+	if (ZOO_TILE_READBOUNDS(old_x, old_y)) {
+		ZOO_TILE_ASSIGN(old_tile, old_x, old_y);
+	}
 	ZOO_TILE_COPY(new_tile, stat->under);
 
 	uint8_t new_color;
@@ -334,14 +347,19 @@ void move_stat(uint8_t stat_id, uint8_t new_x, uint8_t new_y) {
 		new_color = (old_tile.color & 0x0F) | (new_tile.color & 0x70);
 	}
 
-	ZOO_TILE_CHANGE2(new_x, new_y, old_tile.element, new_color);
-	ZOO_TILE_COPY(ZOO_TILE(old_x, old_y), old_under);
+	if (ZOO_TILE_WRITEBOUNDS(new_x, new_y)) {
+		ZOO_TILE_CHANGE2(new_x, new_y, old_tile.element, new_color);
+	}
 
 	stat->x = new_x;
 	stat->y = new_y;
 
 	board_draw_tile(new_x, new_y);
-	board_draw_tile(old_x, old_y);
+
+	if (ZOO_TILE_WRITEBOUNDS(old_x, old_y)) {
+		ZOO_TILE_COPY(ZOO_TILE(old_x, old_y), old_under);
+		board_draw_tile(old_x, old_y);
+	}
 
 	if (stat_id == 0 && move_stat_enable_scroll) {
 		move_stat_scroll_stat0(old_x, old_y, new_x, new_y, false);
@@ -379,8 +397,10 @@ void board_damage_tile(uint8_t x, uint8_t y) {
 	if (stat_id != STAT_ID_NONE) {
 		damage_stat(stat_id);
 	} else {
-		ZOO_TILE(x, y).element = E_EMPTY;
-		board_draw_tile(x, y);
+		if (ZOO_TILE_WRITEBOUNDS(x, y)) {
+			ZOO_TILE(x, y).element = E_EMPTY;
+			board_draw_tile(x, y);
+		}
 	}
 }
 

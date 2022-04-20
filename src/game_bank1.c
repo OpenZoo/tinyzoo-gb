@@ -94,7 +94,7 @@ void game_play_loop(bool board_changed) BANKED {
 			game_play_handle_pause(pause_blink);
 		} else if (zoo_game_state.current_stat_ticked <= zoo_stat_count) {
 			zoo_stat_t *stat = &ZOO_STAT(zoo_game_state.current_stat_ticked);
-			/* if (stat->x <= (BOARD_WIDTH + 1) && stat->y <= (BOARD_HEIGHT + 1)) */ {
+			if (ZOO_TILE_READBOUNDS(stat->x, stat->y)) {
 				uint8_t element = ZOO_TILE(stat->x, stat->y).element;
 
 				if (zoo_element_defs_tickprocs[element] != 0 && stat->cycle != 0) {

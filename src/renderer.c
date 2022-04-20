@@ -33,7 +33,7 @@ static inline void sidebar_vbl_copy_data(void) {
 			memmove(sidebar_tile_data, sidebar_tile_data + 48, sidebar_tile_data_len);
 			return;
 		}
-		memcpy((uint8_t*) sidebar_tile_data_address, sidebar_tile_data, sidebar_tile_data_len); */
+		vmemcpy((uint8_t*) sidebar_tile_data_address, sidebar_tile_data, sidebar_tile_data_len); */
 		if (sidebar_tile_data_ly_switch != 0) {
 			ly_bank_switch = sidebar_tile_data_ly_switch;
 			sidebar_tile_data_ly_switch = 0;

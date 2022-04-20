@@ -17,6 +17,7 @@ uint8_t ElementDuplicatorDraw(uint8_t x, uint8_t y) {
 	return duplicator_tiles[p1];
 }
 
+// Warning: No READBOUNDS
 void ElementDuplicatorTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
 	uint8_t sx = stat->x;

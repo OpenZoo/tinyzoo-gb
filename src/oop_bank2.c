@@ -58,6 +58,8 @@ bool find_tile_on_board(uint8_t *x, uint8_t *y, uint8_t element, uint8_t color) 
 }
 
 void oop_place_tile(uint8_t x, uint8_t y, uint8_t element, uint8_t color) BANKED OLDCALL {
+	if (!ZOO_TILE_WRITEBOUNDS(x, y)) return;
+
 	zoo_tile_t *src_tile = &ZOO_TILE(x, y);
 
 	if (src_tile->element != E_PLAYER) {

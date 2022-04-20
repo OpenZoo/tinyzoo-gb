@@ -13,10 +13,14 @@ void ElementMove(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y) {
 	if (stat_id != STAT_ID_NONE) {
 		move_stat(stat_id, new_x, new_y);
 	} else {
-		ZOO_TILE_COPY(ZOO_TILE(new_x, new_y), ZOO_TILE(old_x, old_y));
-		board_draw_tile(new_x, new_y);
-		ZOO_TILE(old_x, old_y).element = E_EMPTY;
-		board_draw_tile(old_x, old_y);
+		if (ZOO_TILE_WRITEBOUNDS(new_x, new_y)) {
+			ZOO_TILE_COPY(ZOO_TILE(new_x, new_y), ZOO_TILE(old_x, old_y));
+			board_draw_tile(new_x, new_y);
+		}
+		if (ZOO_TILE_WRITEBOUNDS(old_x, old_y)) {
+			ZOO_TILE(old_x, old_y).element = E_EMPTY;
+			board_draw_tile(old_x, old_y);
+		}
 	}
 }
 
@@ -25,7 +29,7 @@ void ElementPushablePush(uint8_t x, uint8_t y, int8_t dx, int8_t dy) {
 	ZOO_TILE_ASSIGN(tile, x, y);
 	if (((tile.element == E_SLIDER_NS) && (dx == 0)) || ((tile.element == E_SLIDER_EW) && (dy == 0))
 		|| (zoo_element_defs_flags[tile.element] & ELEMENT_PUSHABLE)) {
-		
+
 		zoo_tile_t dtile;
 		ZOO_TILE_ASSIGN(dtile, x + dx, y + dy);
 		if (dtile.element == E_TRANSPORTER) {
