@@ -9,7 +9,6 @@
 #include "math.h"
 #include "oop.h"
 #include "sram_alloc.h"
-#include "sram_debug.h"
 #include "timer.h"
 #include "txtwind.h"
 
@@ -692,16 +691,7 @@ OopStartParsing:
 	ins_count = MAX_OOP_INSTRUCTION_COUNT;
 	oop_window_zzt_lines = 0;
 
-#ifdef SRAM_DEBUG_OOP_EXECUTE
-	sram_debug8('O');
-	sram_debug8(oop_stat_id);
-	sram_debug8('E');
-#endif
-
 	while (ins_count > 0 && !oop_stop_running) {
-#ifdef SRAM_DEBUG_OOP_EXECUTE
-		sram_debug8(oop_code_loc - (oop_prog_loc + 5));
-#endif
 		if (oop_running_skippable) {
 			oop_running_skippable = false;
 		} else {

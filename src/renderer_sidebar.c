@@ -4,7 +4,6 @@
 #include <gb/gb.h>
 #include "gamevars.h"
 #include "renderer_sidebar.h"
-#include "sram_debug.h"
 
 AT(0xC040) uint8_t sidebar_tile_data[96];
 extern uint8_t sidebar_tile_data_ly_switch;

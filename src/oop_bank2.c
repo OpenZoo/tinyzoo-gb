@@ -12,7 +12,6 @@
 #include "oop.h"
 #include "renderer_sidebar.h"
 #include "sram_alloc.h"
-#include "sram_debug.h"
 #include "txtwind.h"
 
 #include "element_defs_cycles.inc"

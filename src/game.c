@@ -14,7 +14,6 @@
 #include "renderer.h"
 #include "renderer_sidebar.h"
 #include "sound_consts.h"
-#include "sram_debug.h"
 #include "timer.h"
 
 const zoo_stat_t stat_template_default = {

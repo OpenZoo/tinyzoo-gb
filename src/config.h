@@ -45,9 +45,4 @@
 #define MAX_SOUND_BUFFER_SIZE 254
 #define MAX_TEXT_WINDOW_LINES 512
 
-// #define SRAM_DEBUG
-#ifdef SRAM_DEBUG
-#define SRAM_DEBUG_OOP_EXECUTE
-#endif
-
 #endif /* __CONFIG_H__ */
