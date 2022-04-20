@@ -65,6 +65,8 @@ void ElementBoardEdgeTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 			board_enter_stage3();
 		} else {
 			board_change(prev_board_id);
+			// redraw player (was hidden)
+			board_draw_tile(ZOO_STAT(0).x, ZOO_STAT(0).y);
 		}
 	}
 }
