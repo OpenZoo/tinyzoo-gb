@@ -281,6 +281,7 @@ void add_stat(uint8_t tx, uint8_t ty, uint8_t element, uint8_t color, uint8_t cy
 	board_draw_tile(tx, ty);
 }
 
+extern uint8_t oop_stat_id;
 
 void remove_stat(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
@@ -294,6 +295,9 @@ void remove_stat(uint8_t stat_id) {
 	}
 
 	if (stat_id < zoo_game_state.current_stat_ticked) zoo_game_state.current_stat_ticked--;
+#ifdef BUGFIX_DIEMOVE_OOP_EXEC
+	if (stat_id < oop_stat_id) oop_stat_id--;
+#endif
 
 	if (ZOO_TILE_WRITEBOUNDS(stat->x, stat->y)) {
 		ZOO_TILE_COPY(ZOO_TILE(stat->x, stat->y), stat->under);

@@ -44,7 +44,17 @@ static void oop_command_end(void) {
 }
 #define oop_command_error oop_command_end
 
-void oop_after_potential_stat_list_change() {
+static void oop_before_potential_stat_list_change() {
+	if (oop_pos != 0xFFFF) {
+		oop_pos = oop_code_loc - (oop_prog_loc + 5);
+	}
+	oop_stat->data_pos = oop_pos;
+}
+
+static void oop_after_potential_stat_list_change() {
+#ifdef BUGFIX_DIEMOVE_OOP_EXEC
+	oop_stat = &ZOO_STAT(oop_stat_id);
+#endif
 	if (oop_stat->data_ofs == 0xFFFF) {
 		oop_command_end();
 	} else {
@@ -341,6 +351,7 @@ static void oop_command_direction(void) {
 		uint8_t dest_x = oop_stat->x + oop_dir_x;
 		uint8_t dest_y = oop_stat->y + oop_dir_y;
 		if (ZOO_TILE_READBOUNDS(dest_x, dest_y)) {
+			oop_before_potential_stat_list_change();
 			if (!(zoo_element_defs_flags[ZOO_TILE(dest_x, dest_y).element] & ELEMENT_WALKABLE)) {
 				uint8_t prev_bank = _current_bank;
 				SWITCH_ROM_MBC5(1);
@@ -499,6 +510,7 @@ static void oop_command_put(void) {
 #else
 	if (nx > 0 && ny > 0 && nx <= BOARD_WIDTH && ny < BOARD_HEIGHT) {
 #endif
+		oop_before_potential_stat_list_change();
 		if (!(zoo_element_defs_flags[ZOO_TILE(nx, ny).element] & ELEMENT_WALKABLE)) {
 			uint8_t prev_bank = _current_bank;
 			SWITCH_ROM_MBC5(1);
@@ -525,6 +537,7 @@ static void oop_command_change(void) {
 			color_to = 0;
 		}
 	}
+	oop_before_potential_stat_list_change();
 	while (find_tile_on_board(&ix, &iy, element_from, color_from)) {
 		oop_place_tile(ix, iy, element_to, color_to);
 		changed = true;
