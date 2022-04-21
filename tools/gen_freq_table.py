@@ -1,26 +1,38 @@
 #!/usr/bin/python3
-import math
+import math, sys
 
-FREQS = [
-		64,	67,	71,	76,	80,	85,	90,	95,	101,	107,	114,	120,	0,	0,	0,	0,
-		128,	135,	143,	152,	161,	170,	181,	191,	203,	215,	228,	241,	0,	0,	0,	0,
-		256,	271,	287,	304,	322,	341,	362,	383,	406,	430,	456,	483,	0,	0,	0,	0,
-		512,	542,	574,	608,	645,	683,	724,	767,	812,	861,	912,	966,	0,	0,	0,	0,
-		1024,	1084,	1149,	1217,	1290,	1366,	1448,	1534,	1625,	1722,	1824,	1933,	0,	0,	0,	0,
-		2048,	2169,	2298,	2435,	2580,	2733,	2896,	3068,	3250,	3444,	3649,	3866,	0,	0,	0,	0
-]
+APPLY_ZZT_ROUNDING = False
+APPLY_PIT_ROUNDING = False
+
+FREQS = [0] * 16 * 6
 
 print("const uint16_t sound_freqs[%d] = {" % len(FREQS))
+
+freqC1 = 32.0
+ln2 = math.log(2)
+noteStep = math.exp(ln2 / 12.0)
+
+for octave in range(1, 6+1):
+	noteBase = math.exp(octave * ln2) * freqC1
+	noteBase = round(noteBase) # 64, 128, 256, 512, 1024, 2048
+	for note in range(0, 12):
+		if APPLY_ZZT_ROUNDING:
+			FREQS[(octave - 1) * 16 + note] = int(noteBase)
+		else:
+			FREQS[(octave - 1) * 16 + note] = noteBase
+		noteBase = noteBase * noteStep
+
+print(FREQS, file=sys.stderr)
 
 for i in FREQS:
 	if i == 0:
 		i = 0x0000
 	else:
-		# PIT transformation
-		i = math.floor(1193182.0 / i)
-		# PIT de-transformation
-		i = 1193182.0 / i
-		# GB transformation
+		if APPLY_PIT_ROUNDING:
+			# PIT transformation
+			i = math.floor(1193182.0 / i)
+			# PIT de-transformation
+			i = 1193182.0 / i
 		i = round(2048 - (131072.0 / i)) | 0x8000
 	print("\t%d," % i)
 

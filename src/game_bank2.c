@@ -244,6 +244,8 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 
 bool board_shoot(uint8_t element, uint8_t x, uint8_t y, int8_t dx, int8_t dy, uint8_t source) BANKED OLDCALL {
 	zoo_tile_t ntile;
+	if (!ZOO_TILE_WRITEBOUNDS(x + dx, y + dy)) return false;
+
 	ZOO_TILE_COPY(ntile, ZOO_TILE(x + dx, y + dy));
 
 	if ((zoo_element_defs_flags[ntile.element] & ELEMENT_WALKABLE) || (ntile.element == E_WATER)) {

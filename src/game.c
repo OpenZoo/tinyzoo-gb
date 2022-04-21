@@ -262,6 +262,9 @@ void add_stat(uint8_t tx, uint8_t ty, uint8_t element, uint8_t color, uint8_t cy
 	dest_stat->cycle = cycle;
 	if (ZOO_TILE_READBOUNDS(tx, ty)) {
 		ZOO_TILE_COPY(dest_stat->under, ZOO_TILE(tx, ty));
+	} else {
+		dest_stat->under.element = 0;
+		dest_stat->under.color = 0;
 	}
 	dest_stat->data_pos = 0;
 
