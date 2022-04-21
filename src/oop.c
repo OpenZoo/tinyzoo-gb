@@ -83,6 +83,8 @@ bool oop_find_label_in_stat(uint8_t stat_id, uint8_t label_id, bool zapped, uint
 	uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
 	SWITCH_ROM_MBC5(data_loc[2]);
 	uint8_t *prog_loc = *((uint8_t**) data_loc);
+	oop_banked_noop_why(); // TODO: why?
+
 	uint16_t label_offset = *((uint16_t*) (prog_loc + 3));
 	if (label_offset == 0) {
 		goto FindLabelReturn;
@@ -90,10 +92,9 @@ bool oop_find_label_in_stat(uint8_t stat_id, uint8_t label_id, bool zapped, uint
 
 	uint8_t *label_loc = prog_loc + label_offset;
 	uint8_t label_count = *(label_loc++);
-	oop_banked_noop_why(); // TODO: why?
 	for (uint8_t i = 0; i < label_count; i++) {
 		uint8_t label_id_at_loc = *(label_loc++);
-		oop_banked_noop_why(); // TODO: why?
+		// oop_banked_noop_why(); // TODO: why?
 		if (label_id_at_loc == label_id) {
 			uint8_t *data_zap_loc = data_loc + 4 + (i >> 3);
 			find_label_loc = (*((uint16_t*) label_loc));
@@ -168,6 +169,7 @@ bool oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id
 					uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
 					SWITCH_ROM_MBC5(data_loc[2]);
 					uint8_t *prog_loc = *((uint8_t**) data_loc);
+					oop_banked_noop_why(); // TODO: why?
 					if (target_id == prog_loc[0]) {
 						if (oop_send(stat_id, respect_self_lock, label_id, ignore_lock)) {
 							result = true;
@@ -219,6 +221,7 @@ void oop_zap_target(uint8_t target_id, uint8_t label_id, oop_zap_proc zap_proc) 
 					uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
 					SWITCH_ROM_MBC5(data_loc[2]);
 					uint8_t *prog_loc = *((uint8_t**) data_loc);
+					oop_banked_noop_why(); // TODO: why?
 					if (target_id == prog_loc[0]) {
 						zap_proc(stat_id, label_id, false);
 					}
@@ -591,13 +594,14 @@ static void oop_command_bind(void) {
 			uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
 			SWITCH_ROM_MBC5(data_loc[2]);
 			uint8_t *prog_loc = *((uint8_t**) data_loc);
+			oop_banked_noop_why(); // TODO: why?
 			if (target_id == prog_loc[0]) {
 				if (oop_stat_id == stat_id) break;
 
 				// #BIND does not clone DataOfs, but rather assigns it
 				oop_dataofs_free_if_unused(oop_stat->data_ofs, oop_stat_id);
 				oop_stat->data_ofs = stat->data_ofs;
-				oop_stat->data_pos = 0;
+				// oop_stat->data_pos = 0; (done later anyway)
 
 				// update cached values
 				oop_pos = 0;
@@ -734,6 +738,8 @@ OopStartParsing:
 	oop_replace_element = 255;
 	ins_count = MAX_OOP_INSTRUCTION_COUNT;
 	oop_window_zzt_lines = 0;
+
+	oop_banked_noop_why(); // TODO: why?
 
 	while (ins_count > 0 && !oop_stop_running) {
 		if (oop_running_skippable) {
