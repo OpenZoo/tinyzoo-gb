@@ -106,9 +106,8 @@ bool oop_find_label_in_stat(uint8_t stat_id, uint8_t label_id, bool zapped, uint
 				} else if (set_zap == SET_ZAP_TRUE) {
 					(*data_zap_loc) |= zap_mask;
 				} else if (set_zap == SET_ZAP_FALSE_IF_FIND_STRING_VISIBLE) {
-					if (find_label_loc & 0x8000) {
-						(*data_zap_loc) &= ~zap_mask;
-					}
+					if ((find_label_loc & 0x8000) == 0) goto FindLabelNotUsed;
+					(*data_zap_loc) &= ~zap_mask;
 				}
 
 				SWITCH_ROM_MBC5(prev_bank);
@@ -116,6 +115,7 @@ bool oop_find_label_in_stat(uint8_t stat_id, uint8_t label_id, bool zapped, uint
 			}
 		}
 
+FindLabelNotUsed:
 		// not jumping
 		label_loc += 2;
 	}
