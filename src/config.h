@@ -35,6 +35,7 @@
 #define TORCH_DX 8
 #define TORCH_DY 5
 #define TORCH_DIST_SQR 50
+#define TORCH_DURATION 200
 #define MAX_FLAG 10
 #define MAX_STAT 150
 #define MAX_ELEMENT 53

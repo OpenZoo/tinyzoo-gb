@@ -3,6 +3,7 @@
 #include <string.h>
 #include <gb/gb.h>
 #include "game_transition.h"
+#include "input.h"
 #include "renderer.h"
 
 renderer_t active_renderer;
@@ -16,6 +17,7 @@ uint8_t lcdc_shadow_reg = 0b11010001;
 uint8_t scx_shadow_reg = 0;
 uint8_t scy_shadow_reg = 0;
 uint8_t ly_bank_switch;
+uint8_t vbl_ticks;
 
 uint8_t sidebar_tile_data_ly_switch;
 // uint8_t sidebar_tile_data_len;
@@ -43,6 +45,8 @@ static inline void sidebar_vbl_copy_data(void) {
 }
 
 void global_vblank_isr(void) {
+	vbl_ticks++;
+	input_update_vbl();
 	sidebar_vbl_copy_data();
 #ifdef FEAT_BOARD_TRANSITIONS
 	game_transition_step();

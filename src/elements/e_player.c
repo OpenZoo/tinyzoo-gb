@@ -39,7 +39,8 @@ void ElementPlayerTick(uint8_t stat_id) {
 	if (zoo_world_info.health <= 0) {
 		input_delta_x = 0;
 		input_delta_y = 0;
-		input_shift_pressed = false;
+		// gbzoo: replaced with a goto
+		// input_shift_pressed = false;
 
 		if (get_stat_id_at(0, 0) == STAT_ID_NONE) {
 			display_message(255, NULL, msg_game_over_line1, msg_game_over_line2);
@@ -47,12 +48,17 @@ void ElementPlayerTick(uint8_t stat_id) {
 
 		zoo_game_state.tick_time_duration = 0;
 		sound_block_queueing = true;
+
+		goto NoKeyInput;
 	}
 
 	if (input_shift_pressed) {
 		if (input_delta_x != 0 || input_delta_y != 0) {
 			player_dir_x = input_delta_x;
 			player_dir_y = input_delta_y;
+		} else {
+			// gbzoo change: no SPACE key
+			goto NoShootMove;
 		}
 
 		if (player_dir_x != 0 || player_dir_y != 0) {
@@ -107,9 +113,33 @@ void ElementPlayerTick(uint8_t stat_id) {
 		sx = stat->x;
 		sy = stat->y;
 	}
-	
-	// TODO
 
+NoShootMove:
+	if (input_b_pressed) {
+		if (zoo_world_info.torch_ticks <= 0) {
+			if (zoo_world_info.torches > 0) {
+				if (zoo_board_info.flags & BOARD_IS_DARK) {
+					zoo_world_info.torches--;
+					zoo_world_info.torch_ticks = TORCH_DURATION;
+
+					DrawPlayerSurroundings(sx, sy, 0);
+					game_update_sidebar_torches();
+				} else {
+					if (!(msg_flags.f1 & MSG_FLAG1_ROOM_NOT_DARK)) {
+						display_message(200, NULL, msg_room_not_dark_line1, msg_room_not_dark_line2);
+						msg_flags.f1 |= MSG_FLAG1_ROOM_NOT_DARK;
+					}
+				}
+			} else {
+				if (!(msg_flags.f1 & MSG_FLAG1_OUT_OF_TORCHES)) {
+					display_message(200, NULL, msg_out_of_line1, msg_out_of_torches_line2);
+					msg_flags.f1 |= MSG_FLAG1_OUT_OF_TORCHES;
+				}
+			}
+		}
+	}
+
+NoKeyInput:
 	if (zoo_world_info.torch_ticks > 0) {
 		if ((--zoo_world_info.torch_ticks) <= 0) {
 			DrawPlayerSurroundings(sx, sy, 0);
