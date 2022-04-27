@@ -151,10 +151,18 @@ static void gbc_hblank_switch_window(void) NAKED {
 __asm
 .hblank_switch_window_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
-	bit 1, a				; 1 cycles
+#ifdef __POCKET__
+	bit 6, a
+#else
+	bit 1, a
+#endif
 	jr nz, .hblank_switch_window_sync		; 1.5 cycles
 
+#ifdef __POCKET__
+	ld a, #0x93 ; 8
+#else
 	ld a, #0xC9 ; 8
+#endif
 	ldh (_LCDC_REG + 0), a ; 12
 
 	pop af
@@ -218,7 +226,11 @@ __asm
 	; wait for STAT to be correct
 .hblank_update_palette_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
-	bit 1, a				; 1 cycles
+#ifdef __POCKET__
+	bit 6, a
+#else
+	bit 1, a
+#endif
 	jr nz, .hblank_update_palette_sync		; 1.5 cycles
 
 	; write 9 color pairs (18 colors)
@@ -269,7 +281,11 @@ __asm
 	; wait for STAT to be correct
 .hblank_update_palette_window_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
-	bit 1, a				; 1 cycles
+#ifdef __POCKET__
+	bit 6, a
+#else
+	bit 1, a
+#endif
 	jr nz, .hblank_update_palette_window_sync		; 1.5 cycles
 
 	; budget: 67-71 cycles
@@ -314,8 +330,9 @@ void gbc_vblank_isr(void) {
 		hblank_isr_pal_pos = 0xD000 | ((uint16_t)local_doy << 6);
 		LYC_REG = 7;
 		ly_bank_switch_mirror = ly_bank_switch;
-		new_lcdc_val = (ly_bank_switch < 135) ? 0xD9 : 0xC9;
-
+		new_lcdc_val = (ly_bank_switch < 135)
+			? (LCDCF_ON | LCDCF_WIN9C00 | LCDCF_BG8000 | LCDCF_BG9C00 | LCDCF_BGON)
+			: (LCDCF_ON | LCDCF_WIN9C00 | LCDCF_BG9C00 | LCDCF_BGON);
 		vblank_update_palette();
 	} else if (renderer_mode == RENDER_MODE_TXTWIND) {
 		load_palette(cgb_txtwind_palette);
@@ -947,7 +964,11 @@ GbcTextDrawSetColorAAA:
 	call _gbc_sync_di
 	ld a, b
 GbcTextDrawSetColorLoop:
+#ifdef __POCKET__
+	bit 6, (hl)
+#else
 	bit 1, (hl)
+#endif
 	jr nz, GbcTextDrawSetColorLoop
 
 	ld (de), a
@@ -992,7 +1013,11 @@ GbcTextDrawSetChar:
 	call _gbc_sync_di
 	ld a, b
 GbcTextDrawSetCharLoop:
+#ifdef __POCKET__
+	bit 6, (hl)
+#else
 	bit 1, (hl)
+#endif
 	jr nz, GbcTextDrawSetCharLoop
 
 	ld (de), a

@@ -33,7 +33,11 @@ extern uint8_t draw_offset_y;
 extern uint8_t lcdc_shadow_reg;
 extern uint8_t scx_shadow_reg;
 extern uint8_t scy_shadow_reg;
+
+#ifndef __POCKET__
 extern const renderer_t renderer_dmg;
+#endif
+
 extern const renderer_t renderer_gbc;
 
 extern renderer_t active_renderer;

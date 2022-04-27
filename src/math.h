@@ -18,8 +18,13 @@
 )(x)
 */
 
+#if defined(SM83)
 int8_t signum8(int8_t x) PRESERVES_REGS(b, c, d, h, l);
 int8_t difference8(int8_t a, int8_t b) PRESERVES_REGS(b, c, h, l);
+#else
+int8_t signum8(int8_t x);
+int8_t difference8(int8_t a, int8_t b);
+#endif
 
 /*
 int8_t signum16(int16_t x);

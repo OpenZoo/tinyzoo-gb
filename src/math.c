@@ -3,7 +3,7 @@
 
 // helper functions
 
-#ifdef GBZ80
+#if defined(SM83)
 // TODO (SDCC 4.2 upgrade): Can this be optimized?
 int8_t signum8(int8_t x) NAKED PRESERVES_REGS(b, c, d, h, l) {
 	x;

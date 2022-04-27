@@ -5,13 +5,19 @@
 #include "renderer.h"
 #include "font_manager.h"
 
+#ifndef __POCKET__
+
 extern uint8_t ly_bank_switch;
 
 void dmg_hblank_switch_window_pre(void) NAKED {
 __asm
 .hblank_switch_window_pre_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
+#ifdef __POCKET__
+	bit 6, a				; 1 cycles
+#else
 	bit 1, a				; 1 cycles
+#endif
 	jr nz, .hblank_switch_window_pre_sync		; 1.5 cycles
 
 	ld a, #0xD9 ; 8
@@ -39,7 +45,11 @@ void dmg_hblank_switch_window(void) NAKED {
 __asm
 .hblank_switch_window_sync:
 	ldh a, (_STAT_REG + 0)	; 1.5 cycles
+#ifdef __POCKET__
+	bit 6, a				; 1 cycles
+#else
 	bit 1, a				; 1 cycles
+#endif
 	jr nz, .hblank_switch_window_sync		; 1.5 cycles
 
 	ld a, #0xC9 ; 8
@@ -113,7 +123,11 @@ __asm
 	di
 .DmgTextDrawSync:
 	ldh     a, (_STAT_REG + 0)
-	bit     1, a
+#ifdef __POCKET__
+	bit 6, a
+#else
+	bit 1, a
+#endif
 	jr      nz, .DmgTextDrawSync
 	ld      a, (hl)	; a = chr
 	ld      (bc), a
@@ -148,3 +162,5 @@ const renderer_t renderer_dmg = {
 	dmg_text_scroll,
 	dmg_text_update
 };
+
+#endif

@@ -1,0 +1,25 @@
+
+# Platform specific flags for compiling (only populate if they're both present)
+ifneq ($(strip $(PORT)),)
+ifneq ($(strip $(PLAT)),)
+LCCFLAGS += -m$(PORT):$(PLAT)
+endif
+endif
+
+# Called by the individual targets below to build a ROM
+build-target: $(BINS)
+
+clean-target:
+	rm -rf $(OBJDIR)
+	rm -rf $(BINDIR)
+
+gb-clean:
+	${MAKE} clean-target TARGET=gb
+gb:
+	${MAKE} build-target PORT=sm83 PLAT=gb TARGET=gb
+
+
+pocket-clean:
+	${MAKE} clean-target TARGET=pocket
+pocket:
+	${MAKE} build-target PORT=sm83 PLAT=ap TARGET=pocket

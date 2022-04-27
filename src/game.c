@@ -200,7 +200,7 @@ void display_message(uint8_t time, const char* line1, const char* line2, const c
 }
 
 uint8_t get_stat_id_at(uint8_t x, uint8_t y) {
-#ifdef GBZ80
+#if defined(SM83)
 	x; y;
 __asm
 	; TODO (SDCC 4.2.0 upgrade): optimize?

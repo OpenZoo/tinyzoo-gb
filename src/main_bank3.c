@@ -20,12 +20,17 @@ void init_main(void) BANKED {
 
 	sound_init();
 
+#ifdef __POCKET__
+	cpu_fast();
+	text_init(RENDER_MODE_PLAYFIELD, &renderer_gbc);
+#else
 	if (_cpu == CGB_TYPE) {
 		cpu_fast();
 		text_init(RENDER_MODE_PLAYFIELD, &renderer_gbc);
 	} else {
 		text_init(RENDER_MODE_PLAYFIELD, &renderer_dmg);
 	}
+#endif
 
 	sram_init(false);
 

@@ -125,11 +125,11 @@ void gbc_text_init(uint8_t mode) {
 	}
 
 	if (mode == RENDER_MODE_PLAYFIELD) {
-		STAT_REG = 0b01000000;
+		STAT_REG = STATF_LYC;
 		IE_REG |= LCD_IFLAG;
-		lcdc_shadow_reg = 0b11010001;
+		lcdc_shadow_reg = LCDCF_ON | LCDCF_WIN9C00 | LCDCF_BG8000 | LCDCF_BGON;
 	} else {
 		IE_REG &= ~LCD_IFLAG;
-		lcdc_shadow_reg = 0b11011001;
+		lcdc_shadow_reg = LCDCF_ON | LCDCF_WIN9C00 | LCDCF_BG8000 | LCDCF_BG9C00 | LCDCF_BGON;
 	}
 }
