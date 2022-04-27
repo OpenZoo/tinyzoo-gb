@@ -33,7 +33,8 @@
 #define MAX_SCROLL_DISTANCE_BEFORE_REDRAW 15
 
 #define TORCH_DX 8
-#define TORCH_DY 5
+// #define TORCH_DY 5
+#define TORCH_DY 4
 #define TORCH_DIST_SQR 50
 #define TORCH_DURATION 200
 #define MAX_FLAG 10

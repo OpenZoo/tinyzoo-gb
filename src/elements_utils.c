@@ -102,12 +102,12 @@ void DrawPlayerSurroundings(uint8_t x, uint8_t y, uint8_t bomb_phase) {
 			if (iy < 1) continue;
 			if (iy > BOARD_HEIGHT) break;
 
-			zoo_tile_t *tile = &ZOO_TILE(ix, iy);
 			if (bomb_phase > 0) {
-				int16_t dx = ix - x;
-				int16_t dy = iy - y;
-				int16_t dist = (dx*dx) + (dy*dy) << 1;
+				int8_t dx = ix - x;
+				int8_t dy = iy - y;
+				int16_t dist = (int16_t)(dx*dx) + ((int16_t)(dy*dy) << 1);
 				if (dist < TORCH_DIST_SQR) {
+					zoo_tile_t *tile = &ZOO_TILE(ix, iy);
 					if (bomb_phase == 1) {
 						if (zoo_element_defs_flags[tile->element] & ELEMENT_TYPICALLY_TEXTED) {
 							uint8_t i_stat = get_stat_id_at(ix, iy);

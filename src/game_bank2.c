@@ -119,8 +119,8 @@ void damage_stat_stat0(zoo_stat_t *stat, zoo_tile_t *tile) {
 }
 
 void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y, bool force) BANKED OLDCALL {
-	// TODO: optimize torch moves
-	bool force_redraw = (zoo_board_info.flags & BOARD_IS_DARK) && (zoo_world_info.torch_ticks > 0);
+	bool is_dark = (zoo_board_info.flags & BOARD_IS_DARK) && (zoo_world_info.torch_ticks > 0);
+	bool force_redraw = false;
 	// move viewport?
 	int8_t ovx = viewport_x;
 	int8_t ovy = viewport_y;
@@ -170,7 +170,7 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 		viewport_y = ovy;
 	}
 
-	if (force_redraw || ovx != vx || ovy != vy) {
+	if (force_redraw || is_dark || ovx != vx || ovy != vy) {
 		pox = vx - ovx;
 		poy = vy - ovy;
 		uint8_t dist = abs(pox) + abs(poy);
@@ -230,6 +230,17 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 					text_free_line(VIEWPORT_HEIGHT - 1 - iy);
 					for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
 						board_draw_tile(ix + viewport_x, viewport_y + VIEWPORT_HEIGHT - 1 - iy);
+					}
+				}
+			}
+			renderer_scrolling = 0;
+			if (is_dark) {
+				// redraw tiles around the player, plus one
+				uint8_t py = new_y - viewport_y;
+				for (int8_t iy = -TORCH_DY-1; iy <= TORCH_DY+1; iy++) {
+					// text_free_line(py + iy);
+					for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
+						board_draw_tile(ix + viewport_x, new_y + iy);
 					}
 				}
 			}

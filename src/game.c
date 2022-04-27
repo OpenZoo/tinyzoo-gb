@@ -112,9 +112,9 @@ void board_draw_tile(uint8_t x, uint8_t y) {
 	if ((zoo_board_info.flags & BOARD_IS_DARK)) {
 		if (!(zoo_element_defs_flags[tile.element] & ELEMENT_VISIBLE_IN_DARK)) {
 			if (zoo_world_info.torch_ticks > 0) {
-				int16_t dx = ZOO_STAT(0).x - x;
-				int16_t dy = ZOO_STAT(0).y - y;
-				int16_t dist = (dx*dx) + (dy*dy) << 1;
+				int8_t dx = ZOO_STAT(0).x - x;
+				int8_t dy = ZOO_STAT(0).y - y;
+				int16_t dist = (int16_t)(dx*dx) + ((int16_t)(dy*dy) << 1);
 				if (dist < TORCH_DIST_SQR) {
 					goto NotDark;
 				}
