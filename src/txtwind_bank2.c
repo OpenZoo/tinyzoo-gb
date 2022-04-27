@@ -175,5 +175,6 @@ bool txtwind_run(void) BANKED OLDCALL {
 	draw_offset_y = old_draw_offset_y;
 	text_update();
 	game_update_sidebar_all();
+	input_reset();
 	return result;
 }

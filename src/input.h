@@ -16,5 +16,6 @@ extern uint8_t input_held;
 
 void input_update(void);
 void input_update_vbl(void);
+void input_reset(void);
 
 #endif /* __INPUT_H__ */

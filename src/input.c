@@ -23,6 +23,15 @@ void input_update_vbl(void) {
 	input_keys_released |= (input_held & (~keys));
 }
 
+void input_reset(void) {
+	CRITICAL {
+		input_keys = 0;
+		input_keys_repressed = 0;
+		input_keys_released = 0;
+		input_update_vbl();
+	}
+}
+
 void input_update(void) {
 	uint8_t keys_pressed;
 	uint8_t keys_repressed;
@@ -74,10 +83,5 @@ KeyRepressed:
 		}
 	}
 
-	CRITICAL {
-		input_keys = 0;
-		input_keys_repressed = 0;
-		input_keys_released = 0;
-		input_update_vbl();
-	}
+	input_reset();
 }
