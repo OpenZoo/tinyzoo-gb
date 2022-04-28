@@ -411,6 +411,7 @@ static void oop_command_noop(void) {
 static void oop_command_shoot(void) {
 	oop_parse_direction();
 	board_shoot(oop_cmd == 0x0A ? E_STAR : E_BULLET, oop_stat->x, oop_stat->y, oop_dir_x, oop_dir_y, SHOT_SOURCE_ENEMY);
+	oop_stop_running = true;
 }
 
 static void oop_command_endgame(void) {
