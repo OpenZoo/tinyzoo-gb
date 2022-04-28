@@ -341,7 +341,7 @@ void gbc_vblank_isr(void) {
 	global_vblank_isr();
 }
 
-static void gbc_sync_di(void) NAKED PRESERVES_REGS(d, e, h, l) {
+static void gbc_sync_di(void) NAKED PRESERVES_REGS(b, c, d, e, h, l) {
 __asm;
 	ldh a, (_LY_REG + 0)
 	cp a, #137
@@ -358,7 +358,7 @@ __endasm;
 }
 
 // Lower tolerance due to potential C overhead
-static void gbc_text_sync_hblank_safe(void) NAKED {
+static void gbc_text_sync_hblank_safe(void) NAKED PRESERVES_REGS(b, c, d, e, h, l) {
 __asm;
 GbcHSSyncDiLoop:
     ; LY in range?
@@ -367,6 +367,42 @@ GbcHSSyncDiLoop:
 	cp a, #0x04
 	jr nc, GbcHSSyncDiLoop
 	ret
+__endasm;
+}
+
+void safe_vmemcpy(uint8_t *dest, const uint8_t *src, uint8_t blocks) {
+__asm;
+	// dest = de
+	// src = bc
+	// blocks = stack
+	ldhl sp, #2
+	ld a, (hl)
+	ld h, b
+	ld l, c
+	ld b, a
+
+SafeVmemcpyLoop:
+	call _gbc_sync_di
+
+SafeVmemcpyStatLoop:
+	ld a, (_STAT_REG + 0)
+#ifdef __POCKET__
+	and a, #0x40
+#else
+	and a, #0x02
+#endif
+	jr nz, SafeVmemcpyStatLoop
+
+	ld a, (hl+)
+	ld (de), a
+	inc de
+	ld a, (hl+)
+	ld (de), a
+	inc de
+
+	ei
+	dec b
+	jr nz,SafeVmemcpyLoop
 __endasm;
 }
 

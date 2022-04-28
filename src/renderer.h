@@ -52,4 +52,6 @@ void text_init(uint8_t mode, const renderer_t *renderer);
 #define text_scroll(a, b) active_renderer.scroll(a, b)
 #define text_update() active_renderer.update()
 
+void safe_vmemcpy(uint8_t *dest, const uint8_t *src, uint8_t blocks); // renderer_gbc.c
+
 #endif /* __RENDERER_H__ */

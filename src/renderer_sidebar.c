@@ -14,7 +14,7 @@ extern volatile bool sidebar_tile_data_awaiting;
 extern uint8_t ly_bank_switch;
 
 void sidebar_copy_data(uint16_t address, uint8_t len) {
-	vmemcpy((uint8_t*) address, sidebar_tile_data, len);
+	safe_vmemcpy((uint8_t*) address, sidebar_tile_data, len >> 1);
 	/* sidebar_tile_data_address = address;
 	sidebar_tile_data_len = len; */
 	sidebar_tile_data_awaiting = true;
