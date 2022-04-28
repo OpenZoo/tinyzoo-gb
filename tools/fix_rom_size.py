@@ -25,3 +25,18 @@ while size_base < size_file:
 with open(sys.argv[1], "r+b") as fp:
 	fp.seek(0x148)
 	fp.write(struct.pack("<B", size_base_i))
+	if (len(sys.argv) >= 3) and (sys.argv[2] == "tpp1"):
+		fp.seek(0x147)
+		fp.write(struct.pack("<B", 0xBC))
+		fp.seek(0x149)
+		fp.write(struct.pack("<B", 0xC1))
+		fp.seek(0x14A)
+		fp.write(struct.pack("<B", 0x65))
+		fp.seek(0x150)
+		fp.write(struct.pack("<B", 0x01))
+		fp.seek(0x151)
+		fp.write(struct.pack("<B", 0x00))
+		fp.seek(0x152)
+		fp.write(struct.pack("<B", int(sys.argv[3])))
+		fp.seek(0x153)
+		fp.write(struct.pack("<B", int(0x08)))

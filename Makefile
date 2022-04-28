@@ -7,11 +7,13 @@
 # to match your GBDK root directory (ex: GBDK_HOME = "C:/GBDK/"
 GBDK_HOME = /opt/gbdk/
 LCC = $(GBDK_HOME)bin/lcc
-TARGETS = gb pocket
+TARGETS = gb gb_tpp1 pocket
 
 EXT_gb = gb
+EXT_gb_tpp1 = gb
 EXT_pocket = pocket
 LCCFLAGS_gb = -Wm-yt27 -DSM83 -D__GB__
+LCCFLAGS_gb_tpp1 = -Wm-yt27 -DSM83 -D__GB__ -D__TPP1__
 LCCFLAGS_pocket = -Wm-yt27 -DSM83 -D__POCKET__
 
 # You can set flags for LCC here

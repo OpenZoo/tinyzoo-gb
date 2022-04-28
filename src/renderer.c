@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <gb/gb.h>
+
+#include "bank_switch.h"
 #include "game_transition.h"
 #include "input.h"
 #include "renderer.h"
@@ -72,10 +74,10 @@ void text_init(uint8_t mode, const renderer_t *renderer) {
 	ly_bank_switch = 135;
 
 	uint8_t prev_bank = _current_bank;
-	SWITCH_ROM_MBC5(3);
+	ZOO_SWITCH_ROM(3);
 
 	active_renderer.init(mode);
 	active_renderer.update();
 
-	SWITCH_ROM_MBC5(prev_bank);
+	ZOO_SWITCH_ROM(prev_bank);
 }

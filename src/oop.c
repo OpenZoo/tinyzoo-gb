@@ -1,6 +1,7 @@
 #include <gb/gb.h>
 #include <gbdk/emu_debug.h>
 
+#include "bank_switch.h"
 #include "elements.h"
 #include "elements_utils.h"
 #include "game.h"
@@ -36,8 +37,6 @@ static uint16_t find_label_loc;
 #define SET_ZAP_TRUE 1
 #define SET_ZAP_FALSE_IF_FIND_STRING_VISIBLE 2
 
-void oop_banked_noop_why() BANKED;
-
 static void oop_command_end(void) {
 	oop_pos = 0xFFFF;
 	oop_stop_running = true;
@@ -59,7 +58,7 @@ static void oop_after_potential_stat_list_change() {
 		oop_command_end();
 	} else {
 		uint8_t *data_loc = zoo_stat_data + oop_stat->data_ofs;
-		SWITCH_ROM_MBC5(data_loc[2]);
+		ZOO_SWITCH_ROM(data_loc[2]);
 		uint8_t *prog_loc = *((uint8_t**) data_loc);
 		oop_pos = oop_stat->data_pos;
 		oop_prog_loc = prog_loc;
@@ -81,9 +80,8 @@ bool oop_find_label_in_stat(uint8_t stat_id, uint8_t label_id, bool zapped, uint
 	uint8_t prev_bank = _current_bank;
 
 	uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
-	SWITCH_ROM_MBC5(data_loc[2]);
+	ZOO_SWITCH_ROM(data_loc[2]);
 	uint8_t *prog_loc = *((uint8_t**) data_loc);
-	oop_banked_noop_why(); // TODO: why?
 
 	uint16_t label_offset = *((uint16_t*) (prog_loc + 3));
 	if (label_offset == 0) {
@@ -94,7 +92,6 @@ bool oop_find_label_in_stat(uint8_t stat_id, uint8_t label_id, bool zapped, uint
 	uint8_t label_count = *(label_loc++);
 	for (uint8_t i = 0; i < label_count; i++) {
 		uint8_t label_id_at_loc = *(label_loc++);
-		// oop_banked_noop_why(); // TODO: why?
 		if (label_id_at_loc == label_id) {
 			uint8_t *data_zap_loc = data_loc + 4 + (i >> 3);
 			find_label_loc = (*((uint16_t*) label_loc));
@@ -110,7 +107,7 @@ bool oop_find_label_in_stat(uint8_t stat_id, uint8_t label_id, bool zapped, uint
 					(*data_zap_loc) &= ~zap_mask;
 				}
 
-				SWITCH_ROM_MBC5(prev_bank);
+				ZOO_SWITCH_ROM(prev_bank);
 				return true;
 			}
 		}
@@ -121,7 +118,7 @@ FindLabelNotUsed:
 	}
 
 FindLabelReturn:
-	SWITCH_ROM_MBC5(prev_bank);
+	ZOO_SWITCH_ROM(prev_bank);
 	return false;
 }
 
@@ -167,9 +164,8 @@ bool oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id
 			for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
 				if (stat->data_ofs != 0xFFFF) {
 					uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
-					SWITCH_ROM_MBC5(data_loc[2]);
+					ZOO_SWITCH_ROM(data_loc[2]);
 					uint8_t *prog_loc = *((uint8_t**) data_loc);
-					oop_banked_noop_why(); // TODO: why?
 					if (target_id == prog_loc[0]) {
 						if (oop_send(stat_id, respect_self_lock, label_id, ignore_lock)) {
 							result = true;
@@ -179,7 +175,7 @@ bool oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id
 			}
 		}
 
-		SWITCH_ROM_MBC5(prev_bank);
+		ZOO_SWITCH_ROM(prev_bank);
 		return result;
 	}
 }
@@ -219,9 +215,8 @@ void oop_zap_target(uint8_t target_id, uint8_t label_id, oop_zap_proc zap_proc) 
 					zap_proc(stat_id, label_id, false);
 				} else {
 					uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
-					SWITCH_ROM_MBC5(data_loc[2]);
+					ZOO_SWITCH_ROM(data_loc[2]);
 					uint8_t *prog_loc = *((uint8_t**) data_loc);
-					oop_banked_noop_why(); // TODO: why?
 					if (target_id == prog_loc[0]) {
 						zap_proc(stat_id, label_id, false);
 					}
@@ -229,7 +224,7 @@ void oop_zap_target(uint8_t target_id, uint8_t label_id, oop_zap_proc zap_proc) 
 			}
 		}
 
-		SWITCH_ROM_MBC5(prev_bank);
+		ZOO_SWITCH_ROM(prev_bank);
 	}
 }
 
@@ -357,9 +352,9 @@ static void oop_command_direction(void) {
 			oop_before_potential_stat_list_change();
 			if (!(zoo_element_defs_flags[ZOO_TILE(dest_x, dest_y).element] & ELEMENT_WALKABLE)) {
 				uint8_t prev_bank = _current_bank;
-				SWITCH_ROM_MBC5(1);
+				ZOO_SWITCH_ROM(1);
 				ElementPushablePush(dest_x, dest_y, oop_dir_x, oop_dir_y);
-				SWITCH_ROM_MBC5(prev_bank);
+				ZOO_SWITCH_ROM(prev_bank);
 				oop_after_potential_stat_list_change();
 			} else {
 				// minor optimization
@@ -516,9 +511,9 @@ static void oop_command_put(void) {
 		oop_before_potential_stat_list_change();
 		if (!(zoo_element_defs_flags[ZOO_TILE(nx, ny).element] & ELEMENT_WALKABLE)) {
 			uint8_t prev_bank = _current_bank;
-			SWITCH_ROM_MBC5(1);
+			ZOO_SWITCH_ROM(1);
 			ElementPushablePush(nx, ny, oop_dir_x, oop_dir_y);
-			SWITCH_ROM_MBC5(prev_bank);
+			ZOO_SWITCH_ROM(prev_bank);
 		}
 
 		oop_place_tile(nx, ny, element, color);
@@ -592,9 +587,8 @@ static void oop_command_bind(void) {
 	for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
 		if (stat->data_ofs != 0xFFFF) {
 			uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
-			SWITCH_ROM_MBC5(data_loc[2]);
+			ZOO_SWITCH_ROM(data_loc[2]);
 			uint8_t *prog_loc = *((uint8_t**) data_loc);
-			oop_banked_noop_why(); // TODO: why?
 			if (target_id == prog_loc[0]) {
 				if (oop_stat_id == stat_id) break;
 
@@ -613,7 +607,7 @@ static void oop_command_bind(void) {
 		}
 	}
 
-	SWITCH_ROM_MBC5(prev_bank);
+	ZOO_SWITCH_ROM(prev_bank);
 }
 
 uint16_t oop_window_zzt_lines;
@@ -726,7 +720,7 @@ OopStartParsing:
 	oop_pos = oop_stat->data_pos;
 	uint8_t *oop_data_loc = zoo_stat_data + oop_stat->data_ofs;
 
-	SWITCH_ROM_MBC5(oop_data_loc[2]);
+	ZOO_SWITCH_ROM(oop_data_loc[2]);
 
 #ifdef DEBUG_PRINTFS_OOP_EXEC
 	EMU_printf("executing stat %u @ %d,%d %x:%x, pos %u", stat_id, oop_stat->x, oop_stat->y, oop_data_loc[2], *((uint16_t*)oop_data_loc), oop_pos);
@@ -738,8 +732,6 @@ OopStartParsing:
 	oop_replace_element = 255;
 	ins_count = MAX_OOP_INSTRUCTION_COUNT;
 	oop_window_zzt_lines = 0;
-
-	oop_banked_noop_why(); // TODO: why?
 
 	while (ins_count > 0 && !oop_stop_running) {
 		if (oop_running_skippable) {
@@ -764,7 +756,7 @@ OopStartParsing:
 
 	oop_stat->data_pos = oop_pos;
 
-	SWITCH_ROM_MBC5(prev_bank);
+	ZOO_SWITCH_ROM(prev_bank);
 
 	if (oop_window_zzt_lines != 0) {
 		if (oop_handle_txtwind()) {

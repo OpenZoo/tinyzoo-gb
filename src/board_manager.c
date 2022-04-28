@@ -2,48 +2,43 @@
 #include <gb/gb.h>
 #include "gamevars.h"
 #include "game.h"
+#include "bank_switch.h"
 #include "board_manager.h"
 #include "config.h"
 
 static uint8_t board_pointers_bank;
 static far_ptr_t *board_pointers_ptr;
 
-void oop_banked_noop_why() BANKED;
-
 void load_world_rom(uint8_t offset) NONBANKED {
 	uint8_t prev_bank = _current_bank;
-	SWITCH_ROM_MBC5(ROM_DATA_START_BANK);
-	oop_banked_noop_why();
+	ZOO_SWITCH_ROM(ROM_DATA_START_BANK);
 
 	far_ptr_t *world_ptr_ptr = (far_ptr_t*) (0x4000 | (offset * 3));
 	uint8_t *data = world_ptr_ptr->ptr;
 	board_pointers_bank = world_ptr_ptr->bank;
-	SWITCH_ROM_MBC5(board_pointers_bank);
-	oop_banked_noop_why();
+	ZOO_SWITCH_ROM(board_pointers_bank);
 
 	// load world info
 	memcpy(&zoo_world_info, data, sizeof(zoo_world_info_t));
 	data += sizeof(zoo_world_info_t);
 	board_pointers_ptr = (far_ptr_t*) data;
 
-	SWITCH_ROM_MBC5(prev_bank);
+	ZOO_SWITCH_ROM(prev_bank);
 }
 
 void load_board_rom(uint8_t offset) NONBANKED {
 	uint8_t prev_bank = _current_bank;
-	SWITCH_ROM_MBC5(board_pointers_bank);
-	oop_banked_noop_why();
+	ZOO_SWITCH_ROM(board_pointers_bank);
 
 	far_ptr_t *ptr = &board_pointers_ptr[offset];
 	load_board_data_rom(ptr->bank, ptr->ptr);
 
-	SWITCH_ROM_MBC5(prev_bank);
+	ZOO_SWITCH_ROM(prev_bank);
 }
 
 void load_board_data_rom(uint8_t bank, const uint8_t *data) NONBANKED {
 	uint8_t prev_bank = _current_bank;
-	SWITCH_ROM_MBC5(bank);
-	oop_banked_noop_why();
+	ZOO_SWITCH_ROM(bank);
 
 	// RLE decode
 	uint8_t ix = 1;
@@ -84,5 +79,5 @@ void load_board_data_rom(uint8_t bank, const uint8_t *data) NONBANKED {
 	data += 2;
 	memcpy(zoo_stat_data, data, zoo_stat_data_size);
 
-	SWITCH_ROM_MBC5(prev_bank);
+	ZOO_SWITCH_ROM(prev_bank);
 }

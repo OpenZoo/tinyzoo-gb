@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <gb/gb.h>
+
+#include "bank_switch.h"
 #include "gamevars.h"
 #include "renderer_sidebar.h"
 
@@ -39,13 +41,13 @@ void sidebar_show_message(const char* line1, uint8_t bank1, const char* line2, u
 
 	// write text data
 	uint8_t prev_bank = _current_bank;
-	SWITCH_ROM_MBC5(bank1);
+	ZOO_SWITCH_ROM(bank1);
 	sidebar_show_line(line1);
-	SWITCH_ROM_MBC5(bank2);
+	ZOO_SWITCH_ROM(bank2);
 	sidebar_show_line(line2);
-	SWITCH_ROM_MBC5(bank3);
+	ZOO_SWITCH_ROM(bank3);
 	sidebar_show_line(line3);
-	SWITCH_ROM_MBC5(prev_bank);
+	ZOO_SWITCH_ROM(prev_bank);
 
 	sidebar_tile_data_ly_switch = 135 - (sb_offset >> 2);
 	sidebar_copy_data(0x9C00 + (14 << 5) + (96 - sb_offset), sb_offset);

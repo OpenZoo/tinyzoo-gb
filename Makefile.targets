@@ -19,6 +19,12 @@ gb:
 	${MAKE} build-target PORT=sm83 PLAT=gb TARGET=gb
 
 
+gb_tpp1-clean:
+	${MAKE} clean-target TARGET=gb_tpp1
+gb_tpp1:
+	${MAKE} build-target PORT=sm83 PLAT=gb TARGET=gb_tpp1
+
+
 pocket-clean:
 	${MAKE} clean-target TARGET=pocket
 pocket:

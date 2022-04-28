@@ -3,6 +3,8 @@
 #define SRAM_ALLOC_INTERNAL
 
 #include <string.h>
+
+#include "bank_switch.h"
 #include "config.h"
 #include "gamevars.h"
 #include "sram_alloc.h"
@@ -48,14 +50,14 @@ void sram_sub_ptr(sram_ptr_t *ptr, uint16_t val) {
 }
 
 uint8_t sram_read8(sram_ptr_t *ptr) {
-	SWITCH_RAM_MBC5(ptr->bank);
+	ZOO_SWITCH_RAM(ptr->bank);
 	uint8_t value = ((uint8_t*) 0xA000)[ptr->position];
 	sram_inc_ptr(ptr);
 	return value;
 }
 
 void sram_write8(sram_ptr_t *ptr, uint8_t value) {
-	SWITCH_RAM_MBC5(ptr->bank);
+	ZOO_SWITCH_RAM(ptr->bank);
 	((uint8_t*) 0xA000)[ptr->position] = value;
 	sram_inc_ptr(ptr);
 }
@@ -67,7 +69,7 @@ void sram_read(sram_ptr_t *ptr, uint8_t *data, uint16_t len) {
 		if (len_to_read > len) {
 			len_to_read = len;
 		}
-		SWITCH_RAM_MBC5(ptr->bank);
+		ZOO_SWITCH_RAM(ptr->bank);
 		memcpy(data, ((uint8_t*) 0xA000) + ptr->position, len_to_read);
 		sram_add_ptr(ptr, len_to_read);
 		data += len_to_read;
@@ -87,7 +89,7 @@ void sram_write(sram_ptr_t *ptr, const uint8_t *data, uint16_t len) {
 		if (len_to_read > len) {
 			len_to_read = len;
 		}
-		SWITCH_RAM_MBC5(ptr->bank);
+		ZOO_SWITCH_RAM(ptr->bank);
 		memcpy(((uint8_t*) 0xA000) + ptr->position, data, len_to_read);
 		sram_add_ptr(ptr, len_to_read);
 		data += len_to_read;
@@ -108,7 +110,8 @@ bool sram_alloc(uint16_t len, sram_ptr_t *ptr) {
 	ptr->bank = 0;
 	ptr->position = sizeof(sram_header_t);
 
-	while (ptr->bank < SRAM_MAX_BANK) {
+	uint8_t max_bank = zoo_get_ram_bank_count();
+	while (ptr->bank < max_bank) {
 		sram_read(ptr, (uint8_t*) &entry, sizeof(sram_entry_t));
 		if ((entry.flags & SRAM_FLAG_USED) != 0) {
 			offset = 0;
@@ -156,7 +159,7 @@ void sram_free(sram_ptr_t *ptr) {
 static const uint8_t sram_expected_magic[4] = {'G', 'b', 'Z', 0x01};
 
 void sram_toggle_write(void) {
-	SWITCH_RAM_MBC5(0);
+	ZOO_SWITCH_RAM(0);
 	((uint8_t*) 0xA000)[0] ^= 0x20;
 }
 
@@ -168,7 +171,7 @@ void sram_init(bool force) BANKED {
 	ptr.position = 0;
 	ptr.bank = 0;
 
-	ENABLE_RAM_MBC5;
+	ZOO_ENABLE_RAM;
 
 	sram_read(&ptr, magic, 4);
 	if (magic[0] != sram_expected_magic[0]
@@ -194,11 +197,12 @@ void sram_init(bool force) BANKED {
 
 		entry.size += sizeof(sram_header_t);
 
-		while (ptr.bank < SRAM_MAX_BANK) {
+		uint8_t max_bank = zoo_get_ram_bank_count();
+		while (ptr.bank < max_bank) {
 			sram_write(&ptr, (const uint8_t*) &entry, sizeof(sram_entry_t));
 			sram_add_ptr(&ptr, entry.size);
 		}
 	}
 
-	DISABLE_RAM_MBC5;
+	ZOO_DISABLE_RAM;
 }

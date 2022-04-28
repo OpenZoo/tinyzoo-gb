@@ -1,5 +1,7 @@
 #include <gb/gb.h>
 #include <string.h>
+
+#include "bank_switch.h"
 #include "config.h"
 #include "gamevars.h"
 #include "sram_alloc.h"
@@ -17,13 +19,13 @@ void txtwind_read_line(int16_t idx, txtwind_line_t *line) {
 	ptr.bank = 0;
 	ptr.position = SRAM_TEXT_WINDOW_POS + (idx * 3);
 
-	ENABLE_RAM_MBC5;
+	ZOO_ENABLE_RAM;
 	sram_read(&ptr, &fptr, 3);
-	DISABLE_RAM_MBC5;
+	ZOO_DISABLE_RAM;
 
 	uint8_t prev_bank = _current_bank;
-	SWITCH_ROM_MBC5(fptr.bank);
+	ZOO_SWITCH_ROM(fptr.bank);
 	const txtwind_line_t *tptr = (const txtwind_line_t*) fptr.ptr;
 	memcpy(line, tptr, TXTWIND_LINE_HEADER_LEN + tptr->len);
-	SWITCH_ROM_MBC5(prev_bank);
+	ZOO_SWITCH_ROM(prev_bank);
 }

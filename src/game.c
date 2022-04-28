@@ -3,6 +3,7 @@
 #include <string.h>
 #include <gb/gb.h>
 #include <gbdk/emu_debug.h>
+#include "bank_switch.h"
 #include "board_manager.h"
 #include "gamevars.h"
 #include "game.h"
@@ -131,7 +132,7 @@ NotDark:
 		if (tile.element < E_TEXT_MIN) {
 			uint8_t ch;
 			uint8_t prev_bank = _current_bank;
-			SWITCH_ROM_MBC5(1);
+			ZOO_SWITCH_ROM(1);
 
 			if (ZOO_ELEMENT_BOUNDS(tile.element) && zoo_element_defs_drawprocs[tile.element] != 0) {
 				ch = zoo_element_defs_drawprocs[tile.element](x, y);
@@ -139,7 +140,7 @@ NotDark:
 				ch = zoo_element_defs_character[tile.element];
 			}
 
-			SWITCH_ROM_MBC5(prev_bank);
+			ZOO_SWITCH_ROM(prev_bank);
 
 			text_draw(vx, vy, ch, tile.color);
 		} else {
@@ -387,9 +388,9 @@ void damage_stat(uint8_t stat_id) {
 
 	if (stat_id == 0) {
 		uint8_t prev_bank = _current_bank;
-		SWITCH_ROM_MBC5(2);
+		ZOO_SWITCH_ROM(2);
 		damage_stat_stat0(stat, tile);
-		SWITCH_ROM_MBC5(prev_bank);
+		ZOO_SWITCH_ROM(prev_bank);
 	} else {
 		switch (tile->element) {
 			case E_BULLET:

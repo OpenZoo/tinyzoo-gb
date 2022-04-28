@@ -1,6 +1,8 @@
 #pragma bank 2
 
 #include <gb/gb.h>
+
+#include "bank_switch.h"
 #include "config.h"
 #include "game.h"
 #include "gamevars.h"
@@ -28,11 +30,11 @@ void txtwind_append(uint16_t line_ptr, uint8_t line_bank) BANKED {
 	ptr.bank = 0;
 	ptr.position = SRAM_TEXT_WINDOW_POS + (txtwind_lines * 3);
 
-	ENABLE_RAM_MBC5;
+	ZOO_ENABLE_RAM;
 	sram_write8(&ptr, line_ptr);
 	sram_write8(&ptr, line_ptr >> 8);
 	sram_write8(&ptr, line_bank);
-	DISABLE_RAM_MBC5;
+	ZOO_DISABLE_RAM;
 
 	txtwind_lines++;
 }

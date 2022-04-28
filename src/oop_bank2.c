@@ -3,6 +3,8 @@
 #include <string.h>
 #include <gb/gb.h>
 #include <gbdk/emu_debug.h>
+
+#include "bank_switch.h"
 #include "elements.h"
 #include "elements_utils.h"
 #include "game.h"
@@ -15,10 +17,6 @@
 #include "txtwind.h"
 
 #include "element_defs_cycles.inc"
-
-void oop_banked_noop_why() BANKED {
-
-}
 
 static uint8_t get_color_for_tile_match(uint8_t element, uint8_t color) {
 	uint8_t def_color = zoo_element_defs_color[element];
@@ -151,11 +149,11 @@ bool oop_handle_txtwind(void) BANKED OLDCALL {
 		uint8_t sram_ptr_data[9];
 		sram_ptr_t sram_ptr;
 
-		ENABLE_RAM_MBC5;
+		ZOO_ENABLE_RAM;
 		sram_ptr.bank = 0;
 		sram_ptr.position = SRAM_TEXT_WINDOW_POS;
 		sram_read(&sram_ptr, sram_ptr_data, sizeof(sram_ptr_data));
-		DISABLE_RAM_MBC5;
+		ZOO_DISABLE_RAM;
 
 		// TODO: This doesn't handle 1-liners prefixed with $ or !.
 		// Let's hope they don't actually occur much?

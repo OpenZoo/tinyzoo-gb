@@ -2,10 +2,12 @@
 
 #include <string.h>
 #include <gb/gb.h>
-#include "gamevars.h"
-#include "game.h"
+
+#include "bank_switch.h"
 #include "board_manager.h"
 #include "config.h"
+#include "game.h"
+#include "gamevars.h"
 #include "sram_alloc.h"
 
 static bool load_world_sram(uint8_t offset) {
@@ -165,13 +167,13 @@ static bool save_board_data_sram(sram_ptr_t *new_ptr) {
 void load_world(uint8_t offset) BANKED {
 	load_world_rom(offset); // initializes pointers to ROM
 
-	ENABLE_RAM_MBC5;
+	ZOO_ENABLE_RAM;
 
 	if (!load_world_sram(offset)) {
 		save_world_sram(offset, true);
 	}
 
-	DISABLE_RAM_MBC5;
+	ZOO_DISABLE_RAM;
 }
 
 void load_board(uint8_t offset) BANKED {
@@ -180,14 +182,14 @@ void load_board(uint8_t offset) BANKED {
 	ptr.bank = 0;
 	ptr.position = SRAM_BOARD_PTRS_POS + (offset * sizeof(sram_ptr_t));
 
-	ENABLE_RAM_MBC5;
+	ZOO_ENABLE_RAM;
 
 	sram_read(&ptr, &board_ptr, sizeof(sram_ptr_t));
 	if (board_ptr.bank != 0 || board_ptr.position != 0) {
 		load_board_data_sram(&board_ptr);
-		DISABLE_RAM_MBC5;
+		ZOO_DISABLE_RAM;
 	} else {
-		DISABLE_RAM_MBC5;
+		ZOO_DISABLE_RAM;
 		load_board_rom(offset);
 	}
 }
@@ -198,7 +200,7 @@ bool save_board(uint8_t offset) BANKED OLDCALL {
 	ptr.bank = 0;
 	ptr.position = SRAM_BOARD_PTRS_POS + (offset * sizeof(sram_ptr_t));
 
-	ENABLE_RAM_MBC5;
+	ZOO_ENABLE_RAM;
 
 	sram_read(&ptr, &board_ptr, sizeof(sram_ptr_t));
 	sram_sub_ptr(&ptr, sizeof(sram_ptr_t));
@@ -223,13 +225,13 @@ bool save_board(uint8_t offset) BANKED OLDCALL {
 }
 
 bool save_world(uint8_t offset) BANKED OLDCALL {
-	ENABLE_RAM_MBC5;
+	ZOO_ENABLE_RAM;
 
 	sram_toggle_write();
 	save_world_sram(offset, false);
 	sram_toggle_write();
 
-	DISABLE_RAM_MBC5;
+	ZOO_DISABLE_RAM;
 
 	return true; // TODO
 }
