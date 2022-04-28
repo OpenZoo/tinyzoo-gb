@@ -4,10 +4,14 @@
 #include "config.h"
 #include "game.h"
 #include "gamevars.h"
+#include "input.h"
 #include "oop.h"
 #include "renderer.h"
 #include "sram_alloc.h"
 #include "txtwind.h"
+
+#define TEXT_WIDTH_INNER 19
+#define TEXT_WIDTH_OUTER (TEXT_WIDTH_INNER + 2)
 
 uint16_t txtwind_lines;
 
@@ -42,14 +46,14 @@ static void txtwind_draw_line(int16_t idx) {
 	if ((idx == -1) || (idx == txtwind_lines)) {
 		if (renderer_id == RENDER_ID_GBC) {
 			VBK_REG = 1;
-			fill_win_rect(0, idx & 31, 20, 1, 8);
+			fill_win_rect(0, idx & 31, TEXT_WIDTH_OUTER, 1, 8);
 			VBK_REG = 0;
 		}
-		fill_win_rect(0, idx & 31, 20, 1, 196);
+		fill_win_rect(0, idx & 31, TEXT_WIDTH_OUTER, 1, 196);
 		return;
 	} else {
-		fill_win_rect(0, idx & 31, 20, 1, 32);
-		fill_win_rect(19, idx & 31, 20, 1, 32);
+		fill_win_rect(0, idx & 31, TEXT_WIDTH_OUTER, 1, 32);
+		fill_win_rect(TEXT_WIDTH_OUTER - 1, idx & 31, TEXT_WIDTH_OUTER, 1, 32);
 	}
 
 	if (line.type == TXTWIND_LINE_TYPE_CENTERED) {
@@ -61,14 +65,14 @@ static void txtwind_draw_line(int16_t idx) {
 
 	if (renderer_id == RENDER_ID_GBC) {
 		VBK_REG = 1;
-		fill_win_rect(1, idx & 31, 18, 1, pal_color);
+		fill_win_rect(1, idx & 31, TEXT_WIDTH_INNER, 1, pal_color);
 		VBK_REG = 0;
 	}
-	fill_win_rect(1, idx & 31, 18, 1, 32);
+	fill_win_rect(1, idx & 31, TEXT_WIDTH_INNER, 1, 32);
 
 	if (line.len > 0) {
 		if (line.type == TXTWIND_LINE_TYPE_CENTERED) {
-			set_win_tiles((20 - line.len) >> 1, idx & 31, line.len, 1, line.text);
+			set_win_tiles((TEXT_WIDTH_OUTER - line.len) >> 1, idx & 31, line.len, 1, line.text);
 		} else {
 			set_win_tiles(offset, idx & 31, line.len, 1, line.text);
 		}
@@ -111,14 +115,16 @@ bool txtwind_run(void) BANKED OLDCALL {
 	draw_offset_y = pos & 31;
 	text_update();
 
+	scx_shadow_reg = 4;
+
 	if (renderer_id == RENDER_ID_GBC) {
 		VBK_REG = 1;
 		fill_win_rect(0, 0, 1, 32, 2);
-		fill_win_rect(19, 0, 1, 32, 2);
+		fill_win_rect(TEXT_WIDTH_OUTER - 1, 0, 1, 32, 2);
 		VBK_REG = 0;
 	}
 	fill_win_rect(0, 0, 1, 32, 32);
-	fill_win_rect(19, 0, 1, 32, 32);
+	fill_win_rect(TEXT_WIDTH_OUTER - 1, 0, 1, 32, 32);
 
 	for (i = 0; i < 18; i++) {
 		txtwind_draw_line(pos + i);
@@ -149,23 +155,24 @@ bool txtwind_run(void) BANKED OLDCALL {
 
 		draw_offset_y = pos & 31;
 		text_update();
+		scx_shadow_reg = 4;
 		wait_vbl_done();
 
 		VBK_REG = 0;
 		if (old_pos != -9 && old_pos != (txtwind_lines - 8)) {
 			fill_win_rect(0, (old_pos + 8) & 31, 1, 1, 32);
-			fill_win_rect(19, (old_pos + 8) & 31, 1, 1, 32);
+			fill_win_rect(TEXT_WIDTH_OUTER - 1, (old_pos + 8) & 31, 1, 1, 32);
 		}
 		old_pos = pos;
 		if (pos != -9 && pos != (txtwind_lines - 8)) {
 			if (renderer_id == RENDER_ID_GBC) {
 				VBK_REG = 1;
 				fill_win_rect(0, (draw_offset_y + 8) & 31, 1, 1, 2);
-				fill_win_rect(19, (draw_offset_y + 8) & 31, 1, 1, 2);
+				fill_win_rect(TEXT_WIDTH_OUTER - 1, (draw_offset_y + 8) & 31, 1, 1, 2);
 				VBK_REG = 0;
 			}
 			fill_win_rect(0, (draw_offset_y + 8) & 31, 1, 1, 175);
-			fill_win_rect(19, (draw_offset_y + 8) & 31, 1, 1, 174);
+			fill_win_rect(TEXT_WIDTH_OUTER - 1, (draw_offset_y + 8) & 31, 1, 1, 174);
 		}
 	}
 
