@@ -73,7 +73,7 @@ void game_transition_step(void) {
 			uint8_t y = *(arr++);
 			text_draw(x, y, 178, transition_color);
 		}
-		transition_pos += 16;
+		transition_pos += 14;
 	}
 
 	ZOO_SWITCH_ROM(prev_bank);
