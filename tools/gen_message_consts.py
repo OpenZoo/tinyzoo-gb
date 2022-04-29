@@ -9,7 +9,7 @@ with (
 	open(sys.argv[2], "w") as fp_c,
 	open(sys.argv[3], "w") as fp_h,
 ):
-	print("#pragma bank 3\n", file = fp_c)
+	#print("#pragma bank 3\n", file = fp_c)
 	print("// Auto-generated file. Please do not edit directly.\n", file = fp_c)
 	print("#include <stdint.h>\n", file = fp_c)
 	print("// Auto-generated file. Please do not edit directly.\n", file = fp_h)

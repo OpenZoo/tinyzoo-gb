@@ -10,29 +10,8 @@
 #include "../sound_consts.h"
 #include "../timer.h"
 
-// TODO: These are being initialized cross-bank, which causes them to be
-// initialized at runtime - using up 32 bytes (!) of RAM. FIXME
-static const char *msg_key_pickup_tbl[] = {
-	msg_key_pickup_08,
-	msg_key_pickup_09,
-	msg_key_pickup_0a,
-	msg_key_pickup_0b,
-	msg_key_pickup_0c,
-	msg_key_pickup_0d,
-	msg_key_pickup_0e,
-	msg_key_pickup_0f
-};
-
-static const char *msg_door_open_tbl[] = {
-	msg_door_open_08,
-	msg_door_open_09,
-	msg_door_open_0a,
-	msg_door_open_0b,
-	msg_door_open_0c,
-	msg_door_open_0d,
-	msg_door_open_0e,
-	msg_door_open_0f
-};
+const char *msg_key_pickup_get(uint8_t x) BANKED;
+const char *msg_door_open_get(uint8_t x) BANKED;
 
 void ElementKeyTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	zoo_tile_t *tile = &ZOO_TILE(x, y);
@@ -55,14 +34,14 @@ void ElementKeyTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 		uint8_t key_shift = 1 << key;
 
 		if (zoo_world_info.keys & key_shift) {
-			display_message(200, NULL, msg_key_pickup_no, msg_key_pickup_tbl[key]);
+			display_message(200, NULL, msg_key_pickup_no, msg_key_pickup_get(key));
 			sound_queue(2, sound_key_failure);
 		} else {
 			zoo_world_info.keys |= key_shift;
 			tile->element = E_EMPTY;
 			game_update_sidebar_keys();
 
-			display_message(200, NULL, msg_key_pickup_yes, msg_key_pickup_tbl[key]);
+			display_message(200, NULL, msg_key_pickup_yes, msg_key_pickup_get(key));
 			sound_queue(2, sound_key_success);
 		}
 	}
@@ -91,7 +70,7 @@ void ElementDoorTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 		uint8_t key_shift = 1 << key;
 
 		if (!(zoo_world_info.keys & key_shift)) {
-			display_message(200, NULL, msg_door_open_tbl[key], msg_door_open_no);
+			display_message(200, NULL, msg_door_open_get(key), msg_door_open_no);
 			sound_queue(3, sound_door_failure);
 		} else {
 			tile->element = E_EMPTY;
@@ -100,7 +79,7 @@ void ElementDoorTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 			zoo_world_info.keys &= ~key_shift;
 			game_update_sidebar_keys();
 
-			display_message(200, NULL, msg_door_open_tbl[key], msg_door_open_yes);
+			display_message(200, NULL, msg_door_open_get(key), msg_door_open_yes);
 			sound_queue(3, sound_door_success);
 		}
 	}
