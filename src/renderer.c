@@ -21,28 +21,13 @@ uint8_t scy_shadow_reg = 0;
 uint8_t ly_bank_switch;
 uint8_t vbl_ticks;
 
-uint8_t sidebar_tile_data_ly_switch;
-// uint8_t sidebar_tile_data_len;
-// uint16_t sidebar_tile_data_address;
+uint8_t sidebar_tile_data_ly_switch = 0;
 AT(0xC040) static uint8_t sidebar_tile_data[96];
-volatile bool sidebar_tile_data_awaiting = false;
 
 static inline void sidebar_vbl_copy_data(void) {
-	if (sidebar_tile_data_awaiting) {
-		// TODO: this is a kludge...
-		/* if (_cpu != CGB_TYPE && sidebar_tile_data_len > 48) {
-			memcpy((uint8_t*) sidebar_tile_data_address, sidebar_tile_data, 48);
-			sidebar_tile_data_address += 48;
-			sidebar_tile_data_len -= 48;
-			memmove(sidebar_tile_data, sidebar_tile_data + 48, sidebar_tile_data_len);
-			return;
-		}
-		vmemcpy((uint8_t*) sidebar_tile_data_address, sidebar_tile_data, sidebar_tile_data_len); */
-		if (sidebar_tile_data_ly_switch != 0) {
-			ly_bank_switch = sidebar_tile_data_ly_switch;
-			sidebar_tile_data_ly_switch = 0;
-		}
-		sidebar_tile_data_awaiting = false;
+	if (sidebar_tile_data_ly_switch != 0) {
+		ly_bank_switch = sidebar_tile_data_ly_switch;
+		sidebar_tile_data_ly_switch = 0;
 	}
 }
 

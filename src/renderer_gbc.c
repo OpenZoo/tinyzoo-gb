@@ -415,9 +415,9 @@ SafeVmemcpyLoop:
 SafeVmemcpyStatLoop:
 	ld a, (_STAT_REG + 0)
 #ifdef __POCKET__
-	and a, #0x40
+	bit 6, a
 #else
-	and a, #0x02
+	bit 1, a
 #endif
 	jr nz, SafeVmemcpyStatLoop
 
@@ -426,9 +426,9 @@ SafeVmemcpyStatLoop:
 	inc de
 	ld a, (hl+)
 	ld (de), a
+	ei
 	inc de
 
-	ei
 	dec b
 	jr nz,SafeVmemcpyLoop
 __endasm;
@@ -486,7 +486,7 @@ __asm
 	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; set SVBK to 3
 	ld a, #0x03
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	; read [de]
 	ld a, (de)
@@ -502,7 +502,7 @@ __asm
 
 	; set SVBK to 4
 	ld a, #0x04
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	; read [bc]
 	ld a, (bc)
@@ -518,7 +518,7 @@ __asm
 
 	; set SVBK to 3
 	ld a, #0x03
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	; deallocate (palette color map)
 	ld a, #0xFF
@@ -527,7 +527,7 @@ __asm
 GbcTextRemoveColorFinish:
 	; clear SVBK
 	xor a, a
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 	ei ; SVBK cannot be changed between interrupts
 __endasm;
 }
@@ -572,7 +572,7 @@ __asm
 GbcTextFreeLineLoop1:
 	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	ld a, #0x03
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	ld a, #0xFF
 .rept 8
@@ -581,7 +581,7 @@ GbcTextFreeLineLoop1:
 .endm
 
 	xor a, a
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 	ei
 
 	dec h
@@ -590,7 +590,7 @@ GbcTextFreeLineLoop1:
 	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; set SVBK to 4
 	ld a, #0x04
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	xor a, a
 	ld h, #0x10
@@ -602,7 +602,7 @@ GbcTextFreeLineLoop2:
 	jr nz, GbcTextFreeLineLoop2
 
 	; clear SVBK
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 	ei ; SVBK cannot be changed between interrupts
 __endasm;
 }
@@ -659,7 +659,7 @@ __asm
 	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; set SVBK to 3
 	ld a, #0x03
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	; read [de]
 	ld a, (de)
@@ -673,7 +673,7 @@ __asm
 
 	; set SVBK to 4
 	ld a, #0x04
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	; read [bc]
 	ld a, (bc)
@@ -682,7 +682,7 @@ __asm
 GbcTextAddColorAlloc:
 	; set SVBK to 4
 	ld a, #0x04
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	ld h, #0x00
 	; color not present, allocate...
@@ -700,7 +700,7 @@ GbcTextAddColorAlloc:
 
 	; clear SVBK
 	xor a, a
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 	ei ; SVBK cannot be changed between interrupts
 
 	; return zero
@@ -710,7 +710,7 @@ GbcTextAddColorAlloc:
 GbcTextAddColorAllocFound:
 	; set SVBK to 3
 	ld a, #0x03
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	; c & 0x0F = slot
 	ld a, c
@@ -723,7 +723,7 @@ GbcTextAddColorAllocFound:
 
 	; set SVBK to 0 so we can access the y/col values again
 	xor a, a
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 	ei ; SVBK cannot be changed between interrupts
 
 	ldhl sp, #2
@@ -764,7 +764,7 @@ GbcTextAddColorAllocFound:
 	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; set SVBK to 2
 	ld a, #0x02
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	; calculate offset for bg color
 	ld hl, #_cgb_palette
@@ -808,7 +808,7 @@ GbcTextAddColorAllocFound:
 
 	; set SVBK to 4
 	ld a, #0x04
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	; set usage count to 0
 	xor a, a
@@ -819,7 +819,7 @@ GbcTextAddColorIncrAlloc:
 GbcTextAddColorFinish:
 	; clear SVBK
 	xor a, a
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 	ei ; SVBK cannot be changed between interrupts
 
 	; c & 0x0F - palette entry
@@ -857,7 +857,7 @@ __asm
 	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; configure SVBK
 	ld a, #0x02
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	ld a, d
 	or a, #0xD8
@@ -869,7 +869,7 @@ __asm
 
 	; clear SVBK
 	xor a, a
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 	ei ; SVBK cannot be changed between interrupts
 
 	ldhl sp, #3
@@ -940,13 +940,13 @@ __asm
 	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; configure SVBK
 	ld a, #0x02
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	ld a, (de)
 	ld c, a
 
 	xor a, a
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 	ei
 
 	ld a, c
@@ -986,7 +986,7 @@ GbcTextDrawNoRemove:
 	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; configure SVBK
 	ld a, #0x02
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	; create buffer pointer for color
 	ld a, (0xFFA0)
@@ -1000,7 +1000,7 @@ GbcTextDrawNoRemove:
 	ld (de), a
 
 	xor a, a
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 	ei ; SVBK cannot be changed between interrupts
 
 	; prepare value to write to VRAM bank 1
@@ -1016,7 +1016,7 @@ GbcTextDrawSetColorAAA:
 	ld d, a
 
 	ld a, #0x01
-	ld (_VBK_REG), a
+	ldh (_VBK_REG + 0), a
 
 	ld hl, #(_STAT_REG)
 	call _gbc_sync_di
@@ -1033,7 +1033,7 @@ GbcTextDrawSetColorLoop:
 	ei
 
 	xor a, a
-	ld (_VBK_REG), a
+	ldh (_VBK_REG + 0), a
 
 	; all registers trashed
 
@@ -1041,7 +1041,7 @@ GbcTextDrawSetChar:
 	call _gbc_sync_di ; SVBK cannot be changed between interrupts
 	; configure SVBK
 	ld a, #0x02
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 
 	; read char from buffer
 	ld a, (0xFFA0)
@@ -1060,7 +1060,7 @@ GbcTextDrawSetChar:
 	ld b, a
 
 	xor a, a
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 	ei ; SVBK cannot be changed between interrupts
 
 	ld a, d
@@ -1084,7 +1084,7 @@ GbcTextDrawSetCharLoop:
 GbcTextDrawFinish:
 	; clear SVBK
 	xor a, a
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 	ei ; SVBK cannot be changed between interrupts
 __endasm;
 }

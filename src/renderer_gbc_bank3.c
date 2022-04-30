@@ -52,15 +52,18 @@ __endasm; */
 __asm
 	; clear bank 2
 	ld a, #2
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 	ld hl, #0xD000
 	xor a, a
 WramClearLoop:
 	ld (hl+), a
+	ld (hl+), a
+	ld (hl+), a
+	ld (hl+), a
 	bit 5, h
 	jr z, WramClearLoop
 	; finish
-	ld (_SVBK_REG), a
+	ldh (_SVBK_REG + 0), a
 __endasm;
 }
 
@@ -105,19 +108,17 @@ void gbc_text_init(uint8_t mode) {
 		vmemcpy(bottom_bar_ptr, cgb_sidebar_colors, 20);
 	}
 
-	if (mode == RENDER_MODE_PLAYFIELD || renderer_id != RENDER_ID_GBC) {
-		wait_vbl_done();
-	}
-
 	if (mode == RENDER_MODE_PLAYFIELD) {
 		// set bottom bar
 		VBK_REG = 0;
 		for (i = 0; i < 20; i++, bottom_bar_ptr++) {
-			*bottom_bar_ptr = i;
+			set_vram_byte(bottom_bar_ptr, i);
 		}
 	}
 
 	if (renderer_id != RENDER_ID_GBC) {
+		wait_vbl_done();
+
 		gbc_vblank_isr();
 		add_VBL(gbc_vblank_isr);
 

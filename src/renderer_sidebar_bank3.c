@@ -10,10 +10,7 @@
 #include "../res/font_small.h"
 
 extern uint8_t sidebar_tile_data_ly_switch;
-extern uint8_t sidebar_tile_data_len;
-extern uint16_t sidebar_tile_data_address;
 extern uint8_t sidebar_tile_data[96];
-extern volatile bool sidebar_tile_data_awaiting;
 
 static void sidebar_draw_char(uint8_t x, uint8_t chr, uint8_t col) {
 	const uint8_t *font_data = _font_small_bin + (chr << 3);
@@ -42,15 +39,14 @@ void sidebar_copy_data(uint16_t address, uint8_t len);
 // TODO: Fall back gracefully on DMG
 void sidebar_draw_panel(uint8_t x_shifted, uint8_t chr, uint8_t col, int16_t value, bool wide) BANKED {
 	uint8_t text[5];
-	uint8_t text_pos = 5;
+	uint8_t data_len = wide ? 64 : 48;
 
-	// ZOO_BUSYLOOP(sidebar_tile_data_awaiting);
-
-	memset(&sidebar_tile_data, 0, sizeof(sidebar_tile_data));
+	memset(&sidebar_tile_data, 0, data_len);
 	sidebar_draw_char(0, chr, col);
 	uint8_t offset = 2;
 
-	if (wide || ((value >= -99) && (value <= 999))) {
+	if (wide) {
+DrawFullNumber:
 		// six tiles
 		if (value < 0) {
 			sidebar_draw_char(offset++, '-', 3);
@@ -59,6 +55,7 @@ void sidebar_draw_panel(uint8_t x_shifted, uint8_t chr, uint8_t col, int16_t val
 		if (value == 0) {
 			sidebar_draw_char(offset, '0', 3);
 		} else {
+			uint8_t text_pos = 5;
 			while (value > 0) {
 				text[--text_pos] = 48 + (value % 10);
 				value /= 10;
@@ -81,16 +78,14 @@ void sidebar_draw_panel(uint8_t x_shifted, uint8_t chr, uint8_t col, int16_t val
 			if (value > 0) {
 				sidebar_draw_char(offset++, '+', 3);
 			}
-		}
+		} else goto DrawFullNumber;
 	}
 
-	sidebar_copy_data(0x9000 | (x_shifted << 4), wide ? 64 : 48);
+	sidebar_copy_data(0x9000 | (x_shifted << 4), data_len);
 }
 
 // TODO: Fall back gracefully on DMG
 void sidebar_draw_keys(uint8_t x_shifted, uint8_t value) BANKED {
-	// ZOO_BUSYLOOP(sidebar_tile_data_awaiting);
-
 	memset(&sidebar_tile_data, 0, sizeof(sidebar_tile_data));
 
 	if (value & 0x02) sidebar_draw_char(1, 0x0C, 1);

@@ -9,17 +9,11 @@
 
 AT(0xC040) uint8_t sidebar_tile_data[96];
 extern uint8_t sidebar_tile_data_ly_switch;
-// extern uint8_t sidebar_tile_data_len;
-// extern uint16_t sidebar_tile_data_address;
-extern volatile bool sidebar_tile_data_awaiting;
 
 extern uint8_t ly_bank_switch;
 
 void sidebar_copy_data(uint16_t address, uint8_t len) {
 	safe_vmemcpy((uint8_t*) address, sidebar_tile_data, len >> 1);
-	/* sidebar_tile_data_address = address;
-	sidebar_tile_data_len = len; */
-	sidebar_tile_data_awaiting = true;
 }
 
 static uint8_t sb_offset;
@@ -36,7 +30,6 @@ static void sidebar_show_line(const char *line1) {
 }
 
 void sidebar_show_message(const char* line1, uint8_t bank1, const char* line2, uint8_t bank2, const char* line3, uint8_t bank3) {
-	// ZOO_BUSYLOOP(sidebar_tile_data_awaiting);
 	sb_offset = 0;
 
 	// write text data
