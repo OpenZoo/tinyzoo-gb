@@ -124,5 +124,6 @@ void ElementInvisibleTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 
 #include "element_defs_character.inc"
 #include "element_defs_drawprocs.inc"
+#include "element_defs_scorevalues.inc"
 #include "element_defs_tickprocs.inc"
 #include "element_defs_touchprocs.inc"

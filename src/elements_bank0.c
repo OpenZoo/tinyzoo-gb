@@ -11,4 +11,3 @@
 
 #include "element_defs_color.inc"
 #include "element_defs_flags.inc"
-#include "element_defs_scorevalues.inc"

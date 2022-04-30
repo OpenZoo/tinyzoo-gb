@@ -13,7 +13,30 @@
 #include "oop.h"
 #include "renderer.h"
 #include "renderer_sidebar.h"
+#include "sound_consts.h"
 #include "timer.h"
+
+void board_attack(uint8_t stat_id, uint8_t x, uint8_t y) {
+	if (stat_id == 0 && zoo_world_info.energizer_ticks > 0) {
+		zoo_world_info.score += zoo_element_defs_scorevalues[ZOO_TILE(x, y).element];
+		game_update_sidebar_score();
+	} else {
+		damage_stat(stat_id);
+	}
+
+	if (stat_id > 0 && stat_id <= zoo_game_state.current_stat_ticked) {
+		zoo_game_state.current_stat_ticked--;
+	}
+
+	if ((ZOO_TILE(x, y).element == E_PLAYER) && zoo_world_info.energizer_ticks > 0) {
+		zoo_stat_t *attacker_stat = &ZOO_STAT(stat_id);
+		zoo_world_info.score += zoo_element_defs_scorevalues[ZOO_TILE(attacker_stat->x, attacker_stat->y).element];
+		game_update_sidebar_score();
+	} else {
+		board_damage_tile(x, y);
+		sound_queue(2, sound_damage);
+	}
+}
 
 static void game_play_handle_pause(bool pause_blink) {
 	uint8_t px = ZOO_STAT(0).x;

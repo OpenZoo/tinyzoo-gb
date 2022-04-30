@@ -34,7 +34,6 @@ void remove_stat(uint8_t stat_id);
 void move_stat(uint8_t stat_id, uint8_t x, uint8_t y);
 void damage_stat(uint8_t stat_id);
 void board_damage_tile(uint8_t x, uint8_t y);
-void board_attack(uint8_t stat_id, uint8_t x, uint8_t y);
 void calc_direction_rnd(int8_t *dx, int8_t *dy);
 void calc_direction_seek(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy);
 
@@ -53,6 +52,7 @@ void game_update_sidebar_keys(void);
 
 // game_bank1.c (bank 1)
 
+void board_attack(uint8_t stat_id, uint8_t x, uint8_t y);
 void game_play_loop(bool board_changed) BANKED;
 
 // game_bank2.c (bank 2)
