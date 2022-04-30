@@ -69,8 +69,8 @@ __asm
 	ld sp, hl
 	ld hl, #(_BCPD_REG)
 
-	; write 9 color pairs (18 colors)
-.rept 18
+	; write 10 color pairs (20 colors)
+.rept 20
 	pop bc
 	ld (hl), c
 	ld (hl), b
@@ -125,8 +125,8 @@ __asm
 	ld sp, hl
 	ld hl, #(_BCPD_REG)
 
-	; write 9 color pairs (18 colors)
-.rept 18
+	; write 10 color pairs (20 colors)
+.rept 20
 	pop bc
 	ld (hl), c
 	ld (hl), b
@@ -232,13 +232,13 @@ __asm
 	; - halt bug workaround
 	nop
 
-	; write 9 color pairs (18 colors)
+	; write 10 color pairs (20 colors)
 	; budget: 67-71 cycles
 	ld (hl), c	; 1 cycle
 	ld (hl), b	; 1 cycle
 	ld (hl), e	; 1 cycle
 	ld (hl), d	; 1 cycle
-.rept 16		; 3.5 x 16 = 56 cycles
+.rept 18		; 3.5 x 16 = 56 cycles
 	pop bc
 	ld (hl), c
 	ld (hl), b
@@ -321,7 +321,7 @@ __asm
 	ld (hl), b	; 1 cycle
 	ld (hl), e	; 1 cycle
 	ld (hl), d	; 1 cycle
-.rept 14
+.rept 16
 	pop bc
 	ld (hl), c
 	ld (hl), b
@@ -689,7 +689,7 @@ GbcTextAddColorAlloc:
 	ld a, (bc)
 	cp a, h
 	jr z, GbcTextAddColorAllocFound
-.rept 8
+.rept 9
 	inc bc
 	ld a, (bc)
 	cp a, h
