@@ -26,6 +26,6 @@ void txtwind_read_line(int16_t idx, txtwind_line_t *line) {
 	uint8_t prev_bank = _current_bank;
 	ZOO_SWITCH_ROM(fptr.bank);
 	const txtwind_line_t *tptr = (const txtwind_line_t*) fptr.ptr;
-	memcpy(line, tptr, TXTWIND_LINE_HEADER_LEN + tptr->len);
+	memcpy(line, tptr, TXTWIND_LINE_HEADER_LEN + tptr->len + 2 /* hyperlink */);
 	ZOO_SWITCH_ROM(prev_bank);
 }

@@ -95,7 +95,7 @@ static bool txtwind_exec_line(uint16_t idx) {
 	txtwind_read_line(idx, &line);
 
 	if (line.type == TXTWIND_LINE_TYPE_HYPERLINK) {
-		if (oop_send_target(line.target_id, false, line.label_id, false)) {
+		if (oop_send_target(line.text[line.len], false, line.text[line.len + 1], false)) {
 			return true;
 		}
 	}

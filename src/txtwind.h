@@ -10,14 +10,13 @@
 #define TXTWIND_LINE_TYPE_CENTERED 1
 #define TXTWIND_LINE_TYPE_HYPERLINK 2
 #define MAX_TXTWIND_LINE_WIDTH 20
-#define TXTWIND_LINE_HEADER_LEN 4
+#define TXTWIND_LINE_HEADER_LEN 2
+#define TXTWIND_LINE_AFTER_LEN 2
 
 typedef struct {
 	uint8_t type;
-	uint8_t target_id;
-	uint8_t label_id;
 	uint8_t len;
-	char text[MAX_TXTWIND_LINE_WIDTH];
+	uint8_t text[MAX_TXTWIND_LINE_WIDTH + TXTWIND_LINE_AFTER_LEN];
 } txtwind_line_t;
 
 extern uint16_t txtwind_lines;
