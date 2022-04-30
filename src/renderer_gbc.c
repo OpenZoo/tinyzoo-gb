@@ -223,15 +223,21 @@ __asm
 	pop bc
 	pop de
 
-	; wait for STAT to be correct
-.hblank_update_palette_sync:
-	ldh a, (_STAT_REG + 0)	; 1.5 cycles
+	; do the thing you are not supposed to do
+	; - set STAT to respond to the beginning of HBlank
 #ifdef __POCKET__
-	bit 6, a
+	ld a, #0x10
 #else
-	bit 1, a
+	ld a, #0x08
 #endif
-	jr nz, .hblank_update_palette_sync		; 1.5 cycles
+	ldh (_STAT_REG + 0), a
+	; - set IE to only respond to LCD STAT
+	ld a, #0x02
+	ldh (_IE_REG + 0), a
+	; - halt
+	halt
+	; - halt bug workaround
+	nop
 
 	; write 9 color pairs (18 colors)
 	; budget: 67-71 cycles
@@ -256,6 +262,22 @@ __asm
 	ld h, (hl)
 	ld l, a
 	ld sp, hl
+
+	; undo the thing you are not supposed to do
+	; - set STAT to respond to the beginning of HBlank
+#ifdef __POCKET__
+	ld a, #0x02
+#else
+	ld a, #0x40
+#endif
+	ldh (_STAT_REG + 0), a
+	; - set IE to respond to all three
+	ld a, #0x07
+	ldh (_IE_REG + 0), a
+	; - clear LCD STAT IF
+	ldh a, (_IF_REG + 0)
+	and a, #0xFD
+	ldh (_IF_REG + 0), a
 
 	pop de
 	pop bc
