@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "config.h"
+#include "himem.h"
 #include "renderer.h"
 
 typedef struct {
@@ -131,7 +132,7 @@ extern zoo_board_info_t zoo_board_info;
 extern zoo_world_info_t zoo_world_info;
 extern zoo_tile_t *const zoo_tiles_y[27];
 extern zoo_message_flags_t msg_flags;
-extern uint8_t zoo_stat_count;
+// extern uint8_t zoo_stat_count;
 extern uint16_t zoo_stat_data_size;
 extern uint8_t zoo_stat_data[MAX_DATA_OFS_SIZE];
 extern zoo_stat_t zoo_stats[MAX_STAT + 3];

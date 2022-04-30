@@ -3,8 +3,9 @@
 #include <string.h>
 #include <gb/gb.h>
 #include <gb/cgb.h>
-#include "renderer.h"
 #include "font_manager.h"
+#include "himem.h"
+#include "renderer.h"
 
 #define COL_LVL_0 0
 #define COL_LVL_1 10
@@ -49,7 +50,6 @@ static uint16_t hblank_isr_sp;
 static uint16_t hblank_isr_pal_pos;
 extern uint8_t ly_bank_switch;
 static uint8_t new_lcdc_val;
-static uint8_t ly_bank_switch_mirror;
 
 static void load_palette(const uint16_t *pal) {
 __asm
@@ -179,27 +179,30 @@ __asm
 	; backup sp
 	ld (_hblank_isr_sp), sp
 
-	; hl = pal_pos; pal_pos += 0x40
+	; do the thing you are not supposed to do, part 1
+	; - set STAT to respond to the beginning of HBlank
+#ifdef __POCKET__
+	ld a, #0x10
+#else
+	ld a, #0x08
+#endif
+	ldh (_STAT_REG + 0), a
+	; - set IE to only respond to LCD STAT
+	ld a, #0x02
+	ldh (_IE_REG + 0), a
+	; - clear LCD STAT IF
+	ldh a, (_IF_REG + 0)
+	and a, #0xFD
+	ldh (_IF_REG + 0), a
+
+	; hl = pal_pos
 	ld hl, #(_hblank_isr_pal_pos)
 	ld a, (hl+)
 	ld h, (hl)
 	ld l, a
 
-	push hl
-
-	ld bc, #0x0040
-	add hl, bc
-	ld a, h
-	and a, #0xD7
-	ld c, l
-	ld hl, #(_hblank_isr_pal_pos + 1)
-	ld (hl-), a
-	ld (hl), c
-
-	pop hl
-
 	; increment LY
-	ld a, (_ly_bank_switch_mirror)
+	ldh a, (_ly_bank_switch_mirror)
 	ld b, a
 	ldh a, (_LYC_REG + 0)
 	cp a, b
@@ -223,17 +226,7 @@ __asm
 	pop bc
 	pop de
 
-	; do the thing you are not supposed to do
-	; - set STAT to respond to the beginning of HBlank
-#ifdef __POCKET__
-	ld a, #0x10
-#else
-	ld a, #0x08
-#endif
-	ldh (_STAT_REG + 0), a
-	; - set IE to only respond to LCD STAT
-	ld a, #0x02
-	ldh (_IE_REG + 0), a
+	; do the thing you are not supposed to do, part 2
 	; - halt
 	halt
 	; - halt bug workaround
@@ -254,6 +247,23 @@ __asm
 	; restore work banks
 	xor a, a
 	ldh (_SVBK_REG + 0), a
+
+	; hl = pal_pos; pal_pos += 0x40
+	ld hl, #(_hblank_isr_pal_pos)
+	ld a, (hl+)
+	ld h, (hl)
+	ld l, a
+
+	ld bc, #0x0040
+	add hl, bc
+	ld a, h
+	and a, #0xD7
+	ld c, l
+	ld hl, #(_hblank_isr_pal_pos + 1)
+	ld (hl-), a
+	ld (hl), c
+
+	pop hl
 
 .hblank_update_palette_restore:
 	; restore SP
@@ -300,15 +310,11 @@ __asm
 	pop bc
 	pop de
 
-	; wait for STAT to be correct
-.hblank_update_palette_window_sync:
-	ldh a, (_STAT_REG + 0)	; 1.5 cycles
-#ifdef __POCKET__
-	bit 6, a
-#else
-	bit 1, a
-#endif
-	jr nz, .hblank_update_palette_window_sync		; 1.5 cycles
+	; do the thing you are not supposed to do, part 2
+	; - halt
+	halt
+	; - halt bug workaround
+	nop
 
 	; budget: 67-71 cycles
 	ld (hl), c	; 1 cycle
@@ -434,8 +440,7 @@ __asm
 	ld a, (hl)
 
 	ld e, a
-	ld hl, #(_draw_offset_y)
-	ld a, (hl)
+	ld a, (_draw_offset_y)
 	add a, e
 	and a, #0x1F
 
@@ -530,8 +535,7 @@ __endasm;
 static void gbc_text_free_line(uint8_t y) {
 __asm
 	ld e, a
-	ld hl, #(_draw_offset_y)
-	ld a, (hl)
+	ld a, (_draw_offset_y)
 	add a, e
 	and a, #0x1F
 
@@ -609,8 +613,7 @@ __asm
 	ld a, (hl)
 
 	ld e, a
-	ld hl, #(_draw_offset_y)
-	ld a, (hl)
+	ld a, (_draw_offset_y)
 	add a, e
 	and a, #0x1F
 
@@ -727,8 +730,7 @@ GbcTextAddColorAllocFound:
 	ld a, (hl)
 
 	ld e, a
-	ld hl, #(_draw_offset_y)
-	ld a, (hl)
+	ld a, (_draw_offset_y)
 	add a, e
 	and a, #0x1F
 
@@ -931,8 +933,7 @@ __asm
 	ld d, a
 
 	; renderer scrolling check 1 - assume color changed
-	ld hl, #(_renderer_scrolling)
-	ld a, (hl)
+	ld a, (_renderer_scrolling)
 	bit 0, a
 	jr nz, GbcTextDrawColorChanged
 
@@ -964,8 +965,7 @@ GbcTextDrawColorChanged:
 	ld e, a
 
 	; renderer scrolling check 2 - no remove
-	ld hl, #(_renderer_scrolling)
-	ld a, (hl)
+	ld a, (_renderer_scrolling)
 	bit 0, a
 	jr nz, GbcTextDrawNoRemove
 

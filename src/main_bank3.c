@@ -11,10 +11,12 @@
 #include "timer.h"
 
 #include "board_manager.h"
+#include "himem.h"
 
 void init_main(void) BANKED {
 	wait_vbl_done();
 	LCDC_REG = 0x00;
+	oop_stat_id = 255;
 
 	srand(1);
 

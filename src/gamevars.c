@@ -5,7 +5,7 @@
 zoo_board_info_t zoo_board_info;
 zoo_world_info_t zoo_world_info;
 zoo_message_flags_t msg_flags;
-uint8_t zoo_stat_count;
+// uint8_t zoo_stat_count; - himem.h
 zoo_stat_t zoo_stats[MAX_STAT + 3];
 zoo_game_state_t zoo_game_state;
 uint8_t zoo_stat_data[MAX_DATA_OFS_SIZE];

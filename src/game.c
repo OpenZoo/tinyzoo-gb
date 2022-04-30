@@ -8,6 +8,7 @@
 #include "gamevars.h"
 #include "game.h"
 #include "elements.h"
+#include "himem.h"
 #include "input.h"
 #include "math.h"
 #include "../res/message_consts.h"
@@ -211,7 +212,7 @@ __asm
 	; ec (high, low) - checked value
 	; d - max stat count
 	; b - counter
-	ld		a, (_zoo_stat_count)
+	ldh		a, (_zoo_stat_count)
 	inc		a
 	ld		d, a
 	ld		b, #0

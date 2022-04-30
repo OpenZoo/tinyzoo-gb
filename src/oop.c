@@ -16,19 +16,21 @@
 const char oop_object_name[] = "Interaction";
 const char oop_scroll_name[] = "Scroll";
 
-uint8_t oop_stat_id = 255;
 static uint16_t oop_pos;
 static zoo_stat_t *oop_stat;
 static uint8_t *oop_prog_loc;
 static uint8_t *oop_code_loc;
 static uint8_t *oop_last_code_loc;
-static bool oop_running_skippable;
 static uint8_t oop_cmd;
 static int8_t oop_dir_x;
 static int8_t oop_dir_y;
-static bool oop_stop_running;
 static uint8_t oop_replace_element;
 static uint8_t oop_replace_color;
+
+uint8_t oop_stat_id = 255;
+static bool oop_running_skippable;
+static bool oop_stop_running;
+static uint8_t oop_ins_count;
 
 static uint16_t find_label_loc;
 
@@ -703,8 +705,6 @@ static uint8_t oop_ins_cost[] = {
 	0, // text line
 };
 
-static uint8_t ins_count;
-
 bool oop_handle_txtwind(void) BANKED OLDCALL;
 
 bool oop_execute(uint8_t stat_id, const char *name) OLDCALL {
@@ -731,10 +731,10 @@ OopStartParsing:
 	oop_code_loc = oop_prog_loc + 5 + oop_pos;
 	oop_stop_running = false;
 	oop_replace_element = 255;
-	ins_count = MAX_OOP_INSTRUCTION_COUNT;
+	oop_ins_count = MAX_OOP_INSTRUCTION_COUNT;
 	oop_window_zzt_lines = 0;
 
-	while (ins_count > 0 && !oop_stop_running) {
+	while (oop_ins_count > 0 && !oop_stop_running) {
 		if (oop_running_skippable) {
 			oop_running_skippable = false;
 		} else {
@@ -747,7 +747,7 @@ OopStartParsing:
 		}
 		EMU_printf("- pos %d, cmd 0x%x", oop_pos, oop_cmd);
 #endif
-		ins_count -= oop_ins_cost[oop_cmd];
+		oop_ins_count -= oop_ins_cost[oop_cmd];
 		oop_procs[oop_cmd]();
 	}
 
