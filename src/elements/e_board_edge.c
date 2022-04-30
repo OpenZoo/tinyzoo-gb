@@ -33,14 +33,14 @@ void ElementBoardEdgeTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 		entry_x = 1;
 	}
 
-	// hide player during change
-	zoo_tile_t tile_player;
-	ZOO_TILE_ASSIGN(tile_player, ZOO_STAT(0).x, ZOO_STAT(0).y);
-	ZOO_TILE_CHANGE2(ZOO_STAT(0).x, ZOO_STAT(0).y, ZOO_STAT(0).under.element, ZOO_STAT(0).under.color);
-	board_draw_tile(ZOO_STAT(0).x, ZOO_STAT(0).y);
-	ZOO_TILE_CHANGE2(ZOO_STAT(0).x, ZOO_STAT(0).y, tile_player.element, tile_player.color);
-
 	if (zoo_board_info.neighbor_boards[neighbor_id] != 0) {
+		// hide player during change
+		zoo_tile_t tile_player;
+		ZOO_TILE_ASSIGN(tile_player, ZOO_STAT(0).x, ZOO_STAT(0).y);
+		ZOO_TILE_CHANGE2(ZOO_STAT(0).x, ZOO_STAT(0).y, ZOO_STAT(0).under.element, ZOO_STAT(0).under.color);
+		board_draw_tile(ZOO_STAT(0).x, ZOO_STAT(0).y);
+		ZOO_TILE_CHANGE2(ZOO_STAT(0).x, ZOO_STAT(0).y, tile_player.element, tile_player.color);
+
 		uint8_t prev_board_id = zoo_world_info.current_board;
 		board_change(zoo_board_info.neighbor_boards[neighbor_id]);
 
@@ -63,10 +63,12 @@ void ElementBoardEdgeTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 			board_enter_stage2();
 			board_redraw();
 			board_enter_stage3();
+			return;
 		} else {
 			board_change(prev_board_id);
-			// redraw player (was hidden)
-			board_draw_tile(ZOO_STAT(0).x, ZOO_STAT(0).y);
 		}
+
+		// redraw player (was hidden)
+		board_draw_tile(ZOO_STAT(0).x, ZOO_STAT(0).y);
 	}
 }
