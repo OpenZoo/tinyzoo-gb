@@ -11,10 +11,10 @@
 #define VIEWPORT_MAX_Y (BOARD_HEIGHT - VIEWPORT_HEIGHT + 1)
 
 extern const zoo_stat_t stat_template_default;
-extern const int8_t neighbor_delta_x[4];
-extern const int8_t neighbor_delta_y[4];
-extern const int8_t diagonal_delta_x[8];
-extern const int8_t diagonal_delta_y[8];
+AT(0x0068) extern const int8_t neighbor_delta_x[4];
+AT(0x006C) extern const int8_t neighbor_delta_y[4];
+AT(0x0070) extern const int8_t diagonal_delta_x[8];
+AT(0x0078) extern const int8_t diagonal_delta_y[8];
 
 // game.c (bank 0)
 
