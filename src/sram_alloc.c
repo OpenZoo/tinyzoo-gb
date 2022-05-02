@@ -49,6 +49,82 @@ void sram_sub_ptr(sram_ptr_t *ptr, uint16_t val) {
 	}
 }
 
+#ifdef SM83
+uint8_t sram_read8(sram_ptr_t *ptr) {
+	// de = ptr
+__asm
+        ld      a, (de)
+	ld	c, a ; c = bank
+#ifdef __TPP1__
+        ld      (0x0002), a
+#else
+        ld      (0x4000), a
+#endif
+	inc	de
+	ld	a, (de)
+	ld	l, a
+	inc	de
+	ld	a, (de)
+	or	a, #0xA0
+	ld	h, a
+	ld	a, b
+	ld	a, (hl+)
+	ld	(0xFFA0), a
+	ld	a, h
+	ld	b, a
+	and	a, #0x1F
+	ld	(de), a
+	dec	de
+	ld	a, l
+	ld	(de), a
+	bit	5, b ; position overflow?
+	jr	nz, SramRead8Finish
+	dec	de
+	ld	a, c
+	inc	a
+	ld	(de), a ; increment bank
+SramRead8Finish:
+	ld	a, (0xFFA0)
+__endasm;
+}
+
+void sram_write8(sram_ptr_t *ptr, uint8_t value) {
+	// de = ptr
+	// a = value
+__asm
+	ld	b, a ; b - value
+        ld      a, (de)
+	ld	c, a ; c = bank
+#ifdef __TPP1__
+        ld      (0x0002), a
+#else
+        ld      (0x4000), a
+#endif
+	inc	de
+	ld	a, (de)
+	ld	l, a
+	inc	de
+	ld	a, (de)
+	or	a, #0xA0
+	ld	h, a
+	ld	a, b
+	ld	(hl+), a ; set value
+	ld	a, h
+	ld	b, a
+	and	a, #0x1F
+	ld	(de), a
+	dec	de
+	ld	a, l
+	ld	(de), a
+	bit	5, b ; position overflow?
+	ret	nz
+	dec	de
+	ld	a, c
+	inc	a
+	ld	(de), a ; increment bank
+__endasm;
+}
+#else
 uint8_t sram_read8(sram_ptr_t *ptr) {
 	ZOO_SWITCH_RAM(ptr->bank);
 	uint8_t value = ((uint8_t*) 0xA000)[ptr->position];
@@ -61,6 +137,7 @@ void sram_write8(sram_ptr_t *ptr, uint8_t value) {
 	((uint8_t*) 0xA000)[ptr->position] = value;
 	sram_inc_ptr(ptr);
 }
+#endif
 
 void sram_read(sram_ptr_t *ptr, uint8_t *data, uint16_t len) {
 #if 1
