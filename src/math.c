@@ -8,9 +8,9 @@
 int8_t signum8(int8_t x) NAKED PRESERVES_REGS(b, c, d, h, l) {
 	x;
 __asm
-	ld e, a
-	bit 7, e
+	bit 7, a
 	jr nz, Signum8ReturnMinusOne ; x < 0
+	ld e, a
 	xor a, a
 	cp a, e ; x == 0?
 	ret z

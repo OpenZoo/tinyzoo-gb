@@ -29,7 +29,7 @@ static bool load_world_sram(uint8_t offset) {
 static void save_world_sram(uint8_t offset, bool force) {
 	sram_ptr_t ptr;
 	uint8_t result[2];
-	
+
 	ptr.bank = 0;
 	ptr.position = SRAM_DATA_POS;
 	sram_read(&ptr, result, 2);
@@ -37,7 +37,7 @@ static void save_world_sram(uint8_t offset, bool force) {
 	if (offset != 0xFF) result[1] = offset;
 	sram_sub_ptr(&ptr, 2);
 	sram_write(&ptr, result, 2);
-	
+
 	sram_write(&ptr, &zoo_world_info, sizeof(zoo_world_info_t));
 
 	if (force) {

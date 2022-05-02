@@ -201,6 +201,10 @@ __asm
 	ld h, (hl)
 	ld l, a
 
+	; prepare palette register
+	ld a, #0x80
+	ldh (_BCPS_REG + 0), a
+
 	; increment LY
 	ldh a, (_ly_bank_switch_mirror)
 	ld b, a
@@ -213,10 +217,6 @@ __asm
 	; switch work banks
 	ld a, #0x02
 	ldh (_SVBK_REG + 0), a
-
-	; prepare palette register
-	ld a, #0x80
-	ldh (_BCPS_REG + 0), a
 
 	; set sp for stack copy; hl = BCPD
 	ld sp, hl
@@ -296,10 +296,6 @@ __asm
 	reti
 
 .hblank_update_palette_window:
-	; prepare palette register
-	ld a, #0x80
-	ldh (_BCPS_REG + 0), a
-
 	ld hl, #(_cgb_message_palette)
 
 	; set sp for stack copy; hl = BCPD
