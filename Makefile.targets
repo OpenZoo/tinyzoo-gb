@@ -29,3 +29,9 @@ pocket-clean:
 	${MAKE} clean-target TARGET=pocket
 pocket:
 	${MAKE} build-target PORT=sm83 PLAT=ap TARGET=pocket
+
+
+gg-clean:
+	${MAKE} clean-target TARGET=gg
+gg:
+	${MAKE} build-target PORT=z80 PLAT=gg TARGET=gg

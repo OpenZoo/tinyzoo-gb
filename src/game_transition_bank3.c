@@ -1,6 +1,6 @@
 #pragma bank 3
 
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include "config.h"
 
 #ifdef FEAT_BOARD_TRANSITIONS

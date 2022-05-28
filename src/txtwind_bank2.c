@@ -1,6 +1,6 @@
 #pragma bank 2
 
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 
 #include "bank_switch.h"
 #include "config.h"

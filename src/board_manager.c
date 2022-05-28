@@ -1,5 +1,5 @@
 #include <string.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include "gamevars.h"
 #include "game.h"
 #include "bank_switch.h"

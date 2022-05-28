@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 
 #define VIEWPORT_WIDTH 20
 #define VIEWPORT_HEIGHT 17

@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 
 extern int8_t input_delta_x, input_delta_y;
 extern uint8_t input_held;

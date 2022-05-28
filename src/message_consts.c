@@ -1,6 +1,6 @@
 #pragma bank 3
 #include <stdint.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include "../res/message_consts.inc"
 
 const char *msg_key_pickup_get(uint8_t x) BANKED {

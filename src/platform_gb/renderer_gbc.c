@@ -1,11 +1,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <gb/gb.h>
-#include <gb/cgb.h>
+#include <gbdk/platform.h>
 #include "font_manager.h"
 #include "himem.h"
-#include "renderer.h"
+#include "../renderer.h"
 
 #define COL_LVL_0 0
 #define COL_LVL_1 10

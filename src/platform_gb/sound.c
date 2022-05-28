@@ -1,7 +1,7 @@
 #pragma bank 2
 
 #include <string.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include "config.h"
 #include "timer.h"
 

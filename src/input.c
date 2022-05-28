@@ -1,4 +1,4 @@
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include "input.h"
 
 //#define JOY_REPEAT_DELAY 15

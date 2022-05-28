@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include "sram_alloc.h"
 
 // on bank 0 - do not use

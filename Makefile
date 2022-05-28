@@ -7,14 +7,20 @@
 # to match your GBDK root directory (ex: GBDK_HOME = "C:/GBDK/"
 GBDK_HOME = /opt/gbdk/
 LCC = $(GBDK_HOME)bin/lcc
-TARGETS = gb gb_tpp1 pocket
+TARGETS = gb gb_tpp1 pocket gg
 
 EXT_gb = gb
 EXT_gb_tpp1 = gb
 EXT_pocket = pocket
+EXT_gg = gg
+PLATDIR_gb = platform_gb
+PLATDIR_gb_tpp1 = platform_gb
+PLATDIR_gb_pocket = platform_gb
+PLATDIR_gg = platform_gg
 LCCFLAGS_gb = -Wm-yt27 -DSM83 -D__GB__
 LCCFLAGS_gb_tpp1 = -Wm-yt27 -DSM83 -D__GB__ -D__TPP1__
 LCCFLAGS_pocket = -Wm-yt27 -DSM83 -D__POCKET__
+LCCFLAGS_gg = -DZ80 -D__GG__
 
 # You can set flags for LCC here
 # For example, you can uncomment the line below to turn on debug output
@@ -29,7 +35,8 @@ LCCFLAGS += -Wa-I$(GBDK_HOME)lib/small/asxxxx/ -Wa-l
 LCCFLAGS += -Wm-yc -Wm-ys -Wm-yngbzoo
 
 EXT = $(EXT_$(TARGET))
-LCCFLAGS += $(LCCFLAGS_$(TARGET))
+PLATDIR = $(PLATDIR_$(TARGET))
+LCCFLAGS += $(LCCFLAGS_$(TARGET)) -I$(SRCDIR)/$(PLATDIR) -I$(SRCDIR)
 
 # You can set the name of the .gb ROM file here
 PROJECTNAME    = gbzoo
@@ -41,9 +48,11 @@ MKDIRS      = $(OBJDIR)
 BINS	    = $(OBJDIR)/$(PROJECTNAME).$(EXT)
 CSOURCES    = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.c))) \
 	$(foreach dir,$(SRCDIR)/elements,$(notdir $(wildcard $(dir)/*.c))) \
+	$(foreach dir,$(SRCDIR)/$(PLATDIR),$(notdir $(wildcard $(dir)/*.c))) \
 	$(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/*.c)))
 ASMSOURCES  = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.s))) \
-	$(foreach dir,$(SRCDIR)/elements,$(notdir $(wildcard $(dir)/*.s)))
+	$(foreach dir,$(SRCDIR)/elements,$(notdir $(wildcard $(dir)/*.s))) \
+	$(foreach dir,$(SRCDIR)/$(PLATDIR),$(notdir $(wildcard $(dir)/*.s)))
 OBJS       = $(CSOURCES:%.c=$(OBJDIR)/%.o) $(ASMSOURCES:%.s=$(OBJDIR)/%.o)
 
 all: $(TARGETS)
@@ -58,6 +67,9 @@ $(OBJDIR)/%.o:	$(SRCDIR)/%.c
 
 # Compile .c files in "src/elements/" to .o object files
 $(OBJDIR)/%.o:	$(SRCDIR)/elements/%.c
+	$(LCC) $(LCCFLAGS) -c -o $@ $<
+
+$(OBJDIR)/%.o:	$(SRCDIR)/$(PLATDIR)/%.c
 	$(LCC) $(LCCFLAGS) -c -o $@ $<
 
 # Compile .c files in "res/" to .o object files

@@ -3,10 +3,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <gb/gb.h>
-#include <gb/cgb.h>
-#include "renderer.h"
+#include <gbdk/platform.h>
 #include "font_manager.h"
+#include "../renderer.h"
 
 extern uint16_t cgb_message_palette[];
 extern const uint16_t cgb_palette[];

@@ -1,12 +1,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 
 #include "bank_switch.h"
-#include "game_transition.h"
-#include "input.h"
-#include "renderer.h"
+#include "../game_transition.h"
+#include "../input.h"
+#include "../renderer.h"
 
 renderer_t active_renderer;
 

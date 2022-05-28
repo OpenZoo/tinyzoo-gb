@@ -4,10 +4,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include "gamevars.h"
-#include "renderer_sidebar.h"
-#include "../res/font_small.h"
+#include "../renderer_sidebar.h"
+#include "../../res/font_small.h"
 
 extern uint8_t sidebar_tile_data_ly_switch;
 extern uint8_t sidebar_tile_data[96];

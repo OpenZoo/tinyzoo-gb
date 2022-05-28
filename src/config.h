@@ -4,12 +4,16 @@
 #define ROM_DATA_START_BANK 4
 #define MAX_BOARD 101
 
+#ifdef SM83
 // Use accurate RNG. Very slow, but matches ZZT's original behaviour.
 // #define USE_ACCURATE_RNG
 // Use XorShift-based RNG by John Metcalf. Fast.
 // #define USE_XORSHIFT_RNG
 // Use RNG by Damian Yerrick. Faster.
 #define USE_YERRICK_RNG
+#else
+#define USE_ACCURATE_RNG
+#endif
 
 // #define FEAT_BLACK_KEYS // Black keys/doors compat - costs ~235 bytes (as of 18/12/2021)
 #define FEAT_BOARD_TRANSITIONS

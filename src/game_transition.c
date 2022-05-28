@@ -1,6 +1,6 @@
 #include "game.h"
 
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include "bank_switch.h"
 #include "config.h"
 #include "game_transition.h"

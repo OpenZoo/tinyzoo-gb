@@ -1,4 +1,4 @@
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include <gbdk/emu_debug.h>
 
 #include "bank_switch.h"

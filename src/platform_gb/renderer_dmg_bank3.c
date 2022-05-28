@@ -3,9 +3,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <gb/gb.h>
-#include "renderer.h"
+#include <gbdk/platform.h>
 #include "font_manager.h"
+#include "../renderer.h"
 
 #ifndef __POCKET__
 

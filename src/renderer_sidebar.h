@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include "renderer.h"
 
 void sidebar_set_message_color(uint8_t color) BANKED; // renderer_gbc_bank3.c

@@ -2,7 +2,7 @@
 #define __GAME_H__
 
 #include <stdint.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include "gamevars.h"
 
 #define VIEWPORT_MIN_X 1

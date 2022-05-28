@@ -2,7 +2,7 @@
 #define __BANK_SWITCH_H__
 
 #include <stdint.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 
 uint8_t zoo_get_ram_bank_count(void) BANKED;
 
@@ -16,7 +16,7 @@ uint8_t zoo_get_ram_bank_count(void) BANKED;
 #define ZOO_SWITCH_ROM(bank) \
 	{ \
 		_current_bank = (bank); \
-		*(uint8_t *)0x0000 = (bank); \
+		*(volatile uint8_t *)0x0000 = (bank); \
 		__asm; \
 			nop \
 		__endasm; \
@@ -24,7 +24,7 @@ uint8_t zoo_get_ram_bank_count(void) BANKED;
 
 #define ZOO_SWITCH_RAM(bank) \
 	{ \
-		*(uint8_t *)0x0002 = (bank); \
+		*(volatile uint8_t *)0x0002 = (bank); \
 		__asm; \
 			nop \
 		__endasm; \
@@ -32,12 +32,12 @@ uint8_t zoo_get_ram_bank_count(void) BANKED;
 
 #define ZOO_ENABLE_RAM \
 	{ \
-		*(uint8_t *)0x0003 = 0x03; \
+		*(volatile uint8_t *)0x0003 = 0x03; \
 	}
 
 #define ZOO_DISABLE_RAM \
 	{ \
-		*(uint8_t *)0x0003 = 0x00; \
+		*(volatile uint8_t *)0x0003 = 0x00; \
 	}
 
 #else /* __MBC5__ */
@@ -47,7 +47,7 @@ uint8_t zoo_get_ram_bank_count(void) BANKED;
 #define ZOO_SWITCH_ROM(bank) \
 	{ \
 		_current_bank = (bank); \
-		*(uint8_t *)0x2000 = (bank); \
+		*(volatile uint8_t *)0x2000 = (bank); \
 		__asm; \
 			nop \
 		__endasm; \
@@ -55,7 +55,7 @@ uint8_t zoo_get_ram_bank_count(void) BANKED;
 
 #define ZOO_SWITCH_RAM(bank) \
 	{ \
-		*(uint8_t *)0x4000 = (bank); \
+		*(volatile uint8_t *)0x4000 = (bank); \
 		__asm; \
 			nop \
 		__endasm; \

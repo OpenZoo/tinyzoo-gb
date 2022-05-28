@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include "config.h"
 #include "gamevars.h"
 

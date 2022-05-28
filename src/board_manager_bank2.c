@@ -1,7 +1,7 @@
 #pragma bank 2
 
 #include <string.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 
 #include "bank_switch.h"
 #include "board_manager.h"

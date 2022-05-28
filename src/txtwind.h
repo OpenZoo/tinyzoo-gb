@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include "gamevars.h"
 
 #define TXTWIND_LINE_TYPE_REGULAR 0

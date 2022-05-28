@@ -1,5 +1,5 @@
 #include <string.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include "config.h"
 #include "renderer.h"
 #include "timer.h"

@@ -1,14 +1,13 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 #include <gbdk/emu_debug.h>
 #include "bank_switch.h"
 #include "board_manager.h"
 #include "gamevars.h"
 #include "game.h"
 #include "elements.h"
-#include "himem.h"
 #include "input.h"
 #include "math.h"
 #include "../res/message_consts.h"

@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "font_manager.h"
-#include "../res/font_default.h"
+#include "../../res/font_default.h"
 
 void font_8x8_install(uint8_t color_bg, uint8_t color_fg) BANKED {
 	// TODO: Rewrite to ASM, optimize

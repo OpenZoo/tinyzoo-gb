@@ -1,7 +1,7 @@
 #ifndef __HIMEM_H__
 #define __HIMEM_H__
 
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 
 static volatile SFR AT(0xA0) temp1;
 static volatile SFR AT(0xA1) temp2;
