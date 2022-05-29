@@ -1,0 +1,113 @@
+ZZT-OOP Bytecode Notes
+(May be outdated)
+
+In-world header
+
+byte 0-2	Location in ROM
+byte 3...	Flags
+		0x80? - 1 if SRAM
+		0x00-0x7F - size
+byte 4...	Label zaps
+
+Header
+
+byte 0		Name ID, 255 if no name
+byte 1-2	Offset to window name string (from end), 0000 if not present
+		(This is not actually used at this moment)
+byte 3-4	Offset to label list (from end), 0000 if not present
+byte 5...	Code
+
+Label list:
+
+byte 0		Count of labels (0-255)
+
+byte 1		Label ID
+byte 2-3	Offset (from beginning of code)
+
+Reserved name IDs:
+
+255		no name
+254		ALL
+253		OTHERS
+252		SELF
+251		""
+
+Reserved label IDs:
+
+255		no label
+254		RESTART
+253		SHOT
+252		ENERGIZE
+251		THUD
+250		TOUCH
+249		BOMBED
+
+Direction IDs:
+00		I
+01		N
+02		S
+03		E
+04		W
+05		SEEK
+06		FLOW
+07		RND
+08		RNDNS
+09		RNDNE
+0A		CW
+0B		CCW
+0C		RNDP
+0D		OPP
+
+Code:
+
+00: #END
+01 [dir]: /dir
+02 [dir]: ?dir
+03 [dir]: #GO dir
+04 [dir] [else_cmd_length]: #TRY dir
+05 [dir]: #WALK dir
+06 [fid]: #SET fid
+07 [fid]: #CLEAR fid
+08 [cond] [true_cmd_length]: #IF ... 
+09 [dir]: #SHOOT
+0A [dir]: #THROWSTAR
+0B [ptrid] [amount] [els_cmd_length]: #GIVE/#TAKE
+0C: NOP (replaces no-op-effective commands)
+0D: #ENDGAME
+0E: #IDLE
+0F: #RESTART
+10 [tid] [lid]: #ZAP [tid] [lid]
+11 [tid] [lid]: #RESTORE [tid] [lid]
+12: #LOCK
+13: #UNLOCK
+14 [tid] [lid]: #SEND [tid]:[lid]
+15 [elem] [col]: #BECOME [elem] [col]
+16 [dir] [elem] [col]: #PUT [dir] [elem] [col]
+17 [elem] [col] [elem] [col]: #CHANGE
+18 [data_len] [data]: #PLAY
+19 [cycle]: #CYCLE
+1A [char]: #CHAR
+1B: #DIE
+1C [tid]: #BIND
+1D [zzt_line_count] [actual_line_count] [far ptrs...]: append lines
+
+line data format:
+
+0	type
+	0 = regular
+	1 = centered
+	2 = hyperlink
+1	line length
+2..n	line data
+n+1	target (if hyperlink)
+n+2	label (if hyperlink)
+
+conditions:
+
+00 [cond]	NOT
+01		ALLIGNED
+02		CONTACT
+03 [dir]	BLOCKED
+04		ENERGIZED
+05 [tile]	ANY
+06 [flag_id]	flag
