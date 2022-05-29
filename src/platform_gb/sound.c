@@ -5,14 +5,14 @@
 #include "config.h"
 #include "timer.h"
 
-uint8_t sound_buffer[MAX_SOUND_BUFFER_SIZE];
-volatile uint8_t sound_buffer_pos;
-volatile uint8_t sound_buffer_len;
-volatile uint8_t sound_duration_counter;
-bool sound_enabled;
-bool sound_block_queueing;
-bool sound_is_playing;
-int8_t sound_current_priority;
+extern uint8_t sound_buffer[MAX_SOUND_BUFFER_SIZE];
+extern volatile uint8_t sound_buffer_pos;
+extern volatile uint8_t sound_buffer_len;
+extern volatile uint8_t sound_duration_counter;
+extern bool sound_enabled;
+extern bool sound_block_queueing;
+extern bool sound_is_playing;
+extern int8_t sound_current_priority;
 
 void sound_update(void) {
 __asm
@@ -121,8 +121,4 @@ void sound_clear_queue(void) BANKED {
 	sound_is_playing = false;
 
 	// TODO: reset sound hardware
-}
-
-void sound_queue(int8_t priority, const uint8_t *data) BANKED {
-	sound_queue_nobank(priority, data);
 }

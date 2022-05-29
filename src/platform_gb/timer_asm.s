@@ -56,8 +56,6 @@
 	reti
 
 	.area	_BSS
-_dhsecs:
-	.ds 2
 _timer_state:
 	.ds 1
 _timer_speed_base:

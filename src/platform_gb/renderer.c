@@ -19,7 +19,7 @@ uint8_t lcdc_shadow_reg = 0b11010001;
 uint8_t scx_shadow_reg = 0;
 uint8_t scy_shadow_reg = 0;
 uint8_t ly_bank_switch;
-uint8_t vbl_ticks;
+extern uint8_t vbl_ticks;
 
 uint8_t sidebar_tile_data_ly_switch = 0;
 AT(0xC040) static uint8_t sidebar_tile_data[96];

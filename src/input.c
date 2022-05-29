@@ -5,7 +5,7 @@
 #define JOY_REPEAT_DELAY 11
 #define JOY_REPEAT_DELAY_NEXT 2
 
-extern uint8_t vbl_ticks;
+uint8_t vbl_ticks;
 
 static uint8_t input_keys = 0;
 static uint8_t input_keys_repressed = 0;

@@ -26,10 +26,17 @@ const zoo_stat_t stat_template_default = {
 	0xFFFF, 0
 };
 
+#if defined(NINTENDO)
 AT(0x0068) const int8_t neighbor_delta_x[4] = {0, 0, -1, 1};
 AT(0x006C) const int8_t neighbor_delta_y[4] = {-1, 1, 0, 0};
 AT(0x0070) const int8_t diagonal_delta_x[8] = {-1, 0, 1, 1, 1, 0, -1, -1};
 AT(0x0078) const int8_t diagonal_delta_y[8] = {1, 1, 1, 0, -1, -1, -1, 0};
+#else
+const int8_t neighbor_delta_x[4] = {0, 0, -1, 1};
+const int8_t neighbor_delta_y[4] = {-1, 1, 0, 0};
+const int8_t diagonal_delta_x[8] = {-1, 0, 1, 1, 1, 0, -1, -1};
+const int8_t diagonal_delta_y[8] = {1, 1, 1, 0, -1, -1, -1, 0};
+#endif
 
 int8_t viewport_x = 1;
 int8_t viewport_y = 1;

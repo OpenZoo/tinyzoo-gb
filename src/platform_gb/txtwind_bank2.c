@@ -15,29 +15,7 @@
 #define TEXT_WIDTH_INNER 19
 #define TEXT_WIDTH_OUTER (TEXT_WIDTH_INNER + 2)
 
-uint16_t txtwind_lines;
-
-void txtwind_init(void) BANKED {
-	txtwind_lines = 0;
-}
-
-void txtwind_append(uint16_t line_ptr, uint8_t line_bank) BANKED {
-	if (txtwind_lines > MAX_TEXT_WINDOW_LINES) {
-		return;
-	}
-
-	sram_ptr_t ptr;
-	ptr.bank = 0;
-	ptr.position = SRAM_TEXT_WINDOW_POS + (txtwind_lines * 3);
-
-	ZOO_ENABLE_RAM;
-	sram_write8(&ptr, line_ptr);
-	sram_write8(&ptr, line_ptr >> 8);
-	sram_write8(&ptr, line_bank);
-	ZOO_DISABLE_RAM;
-
-	txtwind_lines++;
-}
+extern uint16_t txtwind_lines;
 
 static void txtwind_draw_line(int16_t idx) {
 	txtwind_line_t line;
@@ -90,18 +68,7 @@ static void txtwind_draw_line(int16_t idx) {
 	}
 }
 
-static bool txtwind_exec_line(uint16_t idx) {
-	txtwind_line_t line;
-	txtwind_read_line(idx, &line);
-
-	if (line.type == TXTWIND_LINE_TYPE_HYPERLINK) {
-		if (oop_send_target(line.text[line.len], false, line.text[line.len + 1], false)) {
-			return true;
-		}
-	}
-
-	return false;
-}
+bool txtwind_exec_line(uint16_t idx);
 
 bool txtwind_run(void) BANKED OLDCALL {
 	uint8_t old_draw_offset_x = draw_offset_x;
