@@ -1,19 +1,17 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#define ROM_DATA_START_BANK 4
+#include "platform_config.h"
+
 #define MAX_BOARD 101
 
-#ifdef SM83
+// (Moved to platform_config.h)
 // Use accurate RNG. Very slow, but matches ZZT's original behaviour.
 // #define USE_ACCURATE_RNG
-// Use XorShift-based RNG by John Metcalf. Fast.
+// Use XorShift-based RNG by John Metcalf. Fast. SM83-only.
 // #define USE_XORSHIFT_RNG
-// Use RNG by Damian Yerrick. Faster.
-#define USE_YERRICK_RNG
-#else
-#define USE_ACCURATE_RNG
-#endif
+// Use RNG by Damian Yerrick. Faster. SM83-only.
+// #define USE_YERRICK_RNG
 
 // #define FEAT_BLACK_KEYS // Black keys/doors compat - costs ~235 bytes (as of 18/12/2021)
 #define FEAT_BOARD_TRANSITIONS
@@ -53,5 +51,6 @@
 
 // #define DEBUG_PRINTFS
 // #define DEBUG_PRINTFS_OOP_EXEC
+// #define DEBUG_SRAM_WRITES
 
 #endif /* __CONFIG_H__ */

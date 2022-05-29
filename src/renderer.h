@@ -4,13 +4,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <gbdk/platform.h>
+#include "config.h"
 
-#define VIEWPORT_WIDTH 20
-#define VIEWPORT_HEIGHT 17
 #define RENDER_MODE_PLAYFIELD 0
 #define RENDER_MODE_TXTWIND 1
-#define RENDER_ID_DMG 0
-#define RENDER_ID_GBC 1
 
 typedef struct {
 	void (*init)(uint8_t mode);

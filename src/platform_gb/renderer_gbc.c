@@ -86,7 +86,7 @@ __asm
 __endasm;
 }
 
-static void vblank_update_palette(void) {
+static void vblank_update_palette(void) PRESERVES_REGS(d, e) {
 __asm
 	; backup sp
 	ld (_hblank_isr_sp), sp
@@ -369,6 +369,9 @@ __asm;
 	ldh a, (_LY_REG + 0)
 	cp a, #137
 	jr nc, GbcSyncDiDone
+//	and a, #0x07
+//	cp a, #0x06
+//	jr c, GbcSyncDiDone
 GbcSyncDiLoop:
 	ldh a, (_LY_REG + 0)
 	and a, #0x07

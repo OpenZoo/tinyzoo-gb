@@ -120,6 +120,7 @@ void gbc_text_init(uint8_t mode) {
 
 		gbc_vblank_isr();
 		add_VBL(gbc_vblank_isr);
+		add_VBL(nowait_int_handler);
 
 		renderer_id = RENDER_ID_GBC;
 	}

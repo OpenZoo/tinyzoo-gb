@@ -22,6 +22,7 @@ void dmg_text_init(uint8_t mode) {
 		wait_vbl_done();
 		dmg_vblank_isr();
 		add_VBL(dmg_vblank_isr);
+		add_VBL(nowait_int_handler);
 
 		renderer_id = RENDER_ID_DMG;
 	}

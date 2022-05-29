@@ -17,17 +17,11 @@ uint8_t zoo_get_ram_bank_count(void) BANKED;
 	{ \
 		_current_bank = (bank); \
 		*(volatile uint8_t *)0x0000 = (bank); \
-		__asm; \
-			nop \
-		__endasm; \
 	}
 
 #define ZOO_SWITCH_RAM(bank) \
 	{ \
 		*(volatile uint8_t *)0x0002 = (bank); \
-		__asm; \
-			nop \
-		__endasm; \
 	}
 
 #define ZOO_ENABLE_RAM \
@@ -48,17 +42,11 @@ uint8_t zoo_get_ram_bank_count(void) BANKED;
 	{ \
 		_current_bank = (bank); \
 		*(volatile uint8_t *)0x2000 = (bank); \
-		__asm; \
-			nop \
-		__endasm; \
 	}
 
 #define ZOO_SWITCH_RAM(bank) \
 	{ \
 		*(volatile uint8_t *)0x4000 = (bank); \
-		__asm; \
-			nop \
-		__endasm; \
 	}
 
 #define ZOO_ENABLE_RAM ENABLE_RAM_MBC5

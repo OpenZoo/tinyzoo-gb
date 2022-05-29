@@ -3,6 +3,7 @@
 #define SRAM_ALLOC_INTERNAL
 
 #include <string.h>
+#include <gbdk/emu_debug.h>
 
 #include "bank_switch.h"
 #include "config.h"
@@ -15,36 +16,35 @@ typedef struct {
 } sram_entry_t;
 
 #define SRAM_HEADER_FLAG_WORLD 0x01
-
 #define SRAM_FLAG_USED 0x01
 
 static void sram_inc_ptr(sram_ptr_t *ptr) {
-	if ((++(ptr->position)) == 0x2000) {
+	if ((++(ptr->position)) == SRAM_BANK_SIZE) {
 		ptr->position = 0;
 		ptr->bank++;
 	}
 }
 
 void sram_add_ptr(sram_ptr_t *ptr, uint16_t val) {
-	while (val >= 0x2000) {
+	while (val >= SRAM_BANK_SIZE) {
 		ptr->bank++;
-		val -= 0x2000;
+		val -= SRAM_BANK_SIZE;
 	}
 	ptr->position += val;
-	if (ptr->position >= 0x2000) {
-		ptr->position -= 0x2000;
+	while (ptr->position >= SRAM_BANK_SIZE) {
+		ptr->position -= SRAM_BANK_SIZE;
 		ptr->bank++;
 	}
 }
 
 void sram_sub_ptr(sram_ptr_t *ptr, uint16_t val) {
-	while (val >= 0x2000) {
+	while (val >= SRAM_BANK_SIZE) {
 		ptr->bank--;
-		val -= 0x2000;
+		val -= SRAM_BANK_SIZE;
 	}
 	ptr->position -= val;
-	if (ptr->position >= 0xE000) {
-		ptr->position += 0x2000;
+	while (ptr->position < 0) {
+		ptr->position += SRAM_BANK_SIZE;
 		ptr->bank--;
 	}
 }
@@ -70,19 +70,19 @@ __asm
 	ld	a, b
 	ld	a, (de)
 	inc	de
-	ld	(0xFFA0), a
+	ld	(0xFFA7), a
 	ld	a, d
 	ld	b, a
 	and	a, #0x1F
 	ld	(hl-), a
-	ld	(hl), e
+	ld	a, e
+	ld	(hl-), a
 	bit	5, b ; position overflow?
 	jr	nz, SramRead8Finish
-	dec	hl
 	inc	c
 	ld	(hl), c ; increment bank
 SramRead8Finish:
-	ld	a, (0xFFA0)
+	ld	a, (0xFFA7)
 __endasm;
 }
 
@@ -112,10 +112,10 @@ __asm
 	ld	b, a
 	and	a, #0x1F
 	ld	(hl-), a
-	ld	(hl), e
+	ld	a, e
+	ld	(hl-), a
 	bit	5, b ; position overflow?
 	ret	nz
-	dec	hl
 	inc	c
 	ld	(hl), c ; increment bank
 __endasm;
@@ -123,14 +123,14 @@ __endasm;
 #else
 uint8_t sram_read8(sram_ptr_t *ptr) {
 	ZOO_SWITCH_RAM(ptr->bank);
-	uint8_t value = ((uint8_t*) 0xA000)[ptr->position];
+	uint8_t value = ((uint8_t*) SRAM_ADDRESS)[ptr->position];
 	sram_inc_ptr(ptr);
 	return value;
 }
 
 void sram_write8(sram_ptr_t *ptr, uint8_t value) {
 	ZOO_SWITCH_RAM(ptr->bank);
-	((uint8_t*) 0xA000)[ptr->position] = value;
+	((uint8_t*) SRAM_ADDRESS)[ptr->position] = value;
 	sram_inc_ptr(ptr);
 }
 #endif
@@ -138,13 +138,18 @@ void sram_write8(sram_ptr_t *ptr, uint8_t value) {
 void sram_read(sram_ptr_t *ptr, uint8_t *data, uint16_t len) {
 #if 1
 	while (len > 0) {
-		uint16_t len_to_read = 0x2000 - ptr->position;
+		ZOO_SWITCH_RAM(ptr->bank);
+
+		uint16_t len_to_read = SRAM_BANK_SIZE - ptr->position;
 		if (len_to_read > len) {
 			len_to_read = len;
+			memcpy(data, ((uint8_t*) (SRAM_ADDRESS + ptr->position)), len_to_read);
+			sram_add_ptr(ptr, len_to_read);
+		} else {
+			memcpy(data, ((uint8_t*) (SRAM_ADDRESS + ptr->position)), len_to_read);
+			ptr->bank++;
+			ptr->position = 0;
 		}
-		ZOO_SWITCH_RAM(ptr->bank);
-		memcpy(data, ((uint8_t*) 0xA000) + ptr->position, len_to_read);
-		sram_add_ptr(ptr, len_to_read);
 		data += len_to_read;
 		len -= len_to_read;
 	}
@@ -158,13 +163,18 @@ void sram_read(sram_ptr_t *ptr, uint8_t *data, uint16_t len) {
 void sram_write(sram_ptr_t *ptr, const uint8_t *data, uint16_t len) {
 #if 1
 	while (len > 0) {
-		uint16_t len_to_read = 0x2000 - ptr->position;
+		ZOO_SWITCH_RAM(ptr->bank);
+
+		uint16_t len_to_read = SRAM_BANK_SIZE - ptr->position;
 		if (len_to_read > len) {
 			len_to_read = len;
+			memcpy(((uint8_t*) (SRAM_ADDRESS + ptr->position)), data, len_to_read);
+			sram_add_ptr(ptr, len_to_read);
+		} else {
+			memcpy(((uint8_t*) (SRAM_ADDRESS + ptr->position)), data, len_to_read);
+			ptr->bank++;
+			ptr->position = 0;
 		}
-		ZOO_SWITCH_RAM(ptr->bank);
-		memcpy(((uint8_t*) 0xA000) + ptr->position, data, len_to_read);
-		sram_add_ptr(ptr, len_to_read);
 		data += len_to_read;
 		len -= len_to_read;
 	}
@@ -174,6 +184,52 @@ void sram_write(sram_ptr_t *ptr, const uint8_t *data, uint16_t len) {
 	}
 #endif
 }
+
+#ifdef DEBUG_SRAM_WRITES
+uint8_t sram_read8_debug(sram_ptr_t *ptr) {
+	EMU_printf("reading 1 from %02X:%04X",
+		(uint16_t) ptr->bank, (uint16_t) ptr->position);
+	return sram_read8(ptr);
+}
+
+void sram_write8_debug(sram_ptr_t *ptr, uint8_t value) {
+	sram_ptr_t tptr, dptr;
+	uint8_t tvalue;
+	tptr = *ptr;
+	dptr = *ptr;
+	EMU_printf("writing 1 to %02X:%04X",
+		(uint16_t) ptr->bank, (uint16_t) ptr->position);
+	sram_write8(ptr, value);
+	if ((tvalue = sram_read8(&tptr)) != value) {
+		EMU_printf("data mismatch %02X:%04X - exp %d, act %d",
+			(uint16_t) dptr.bank, (uint16_t) dptr.position,
+			(uint16_t) value, (uint16_t) tvalue);
+	}
+}
+
+void sram_read_debug(sram_ptr_t *ptr, uint8_t *data, uint16_t len) {
+	EMU_printf("reading %d from %02X:%04X",
+		len, (uint16_t) ptr->bank, (uint16_t) ptr->position);
+	sram_read(ptr, data, len);
+}
+
+void sram_write_debug(sram_ptr_t *ptr, const uint8_t *data, uint16_t len) {
+	sram_ptr_t tptr, dptr;
+	uint8_t tvalue;
+	tptr = *ptr;
+	EMU_printf("writing %d to %02X:%04X",
+		len, (uint16_t) ptr->bank, (uint16_t) ptr->position);
+	sram_write(ptr, data, len);
+	for (uint16_t i = 0; i < len; i++) {
+		dptr = tptr;
+		if ((tvalue = sram_read8(&tptr)) != data[i]) {
+			EMU_printf("data mismatch %02X:%04X - exp %d, act %d",
+				(uint16_t) dptr.bank, (uint16_t) dptr.position,
+				(uint16_t) data[i], (uint16_t) tvalue);
+		}
+	}
+}
+#endif
 
 bool sram_alloc(uint16_t len, sram_ptr_t *ptr) {
 	uint16_t offset, nlen;
@@ -229,11 +285,11 @@ void sram_free(sram_ptr_t *ptr) {
 	sram_write(ptr, (const uint8_t*) &entry, sizeof(sram_entry_t));
 }
 
-static const uint8_t sram_expected_magic[4] = {'G', 'b', 'Z', 0x01};
+static const uint8_t sram_expected_magic[4] = {'T', 'n', 'Z', 0x01};
 
 void sram_toggle_write(void) {
 	ZOO_SWITCH_RAM(0);
-	((uint8_t*) 0xA000)[0] ^= 0x20;
+	((uint8_t*) SRAM_ADDRESS)[0] ^= 0x20;
 }
 
 void sram_init(bool force) BANKED {

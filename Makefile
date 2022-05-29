@@ -80,6 +80,9 @@ $(OBJDIR)/%.o:	$(RESDIR)/%.c
 $(OBJDIR)/%.o:	$(SRCDIR)/%.s
 	$(LCC) $(LCCFLAGS) -c -o $@ $<
 
+$(OBJDIR)/%.o:	$(SRCDIR)/$(PLATDIR)/%.s
+	$(LCC) $(LCCFLAGS) -c -o $@ $<
+
 # If needed, compile .c files i n"src/" to .s assembly files
 # (not required if .c is compiled directly to .o)
 $(OBJDIR)/%.s:	$(SRCDIR)/%.c

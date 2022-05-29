@@ -35,12 +35,20 @@
 	ld a, (__current_bank)
 	push af
 	ld a, #0x02
+.ifdef __TPP1__
+	ld (0x0000), a
+.else
 	ld (0x2000), a
+.endif
 
 	call (_sound_update)
 
 	pop af
+.ifdef __TPP1__
+	ld (0x0000), a
+.else
 	ld (0x2000), a
+.endif
 
 .timer_handler_end:
 	pop		hl
