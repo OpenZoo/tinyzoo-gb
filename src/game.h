@@ -23,9 +23,17 @@ extern const int8_t diagonal_delta_x[8];
 extern const int8_t diagonal_delta_y[8];
 #endif
 
+extern int8_t viewport_x;
+extern int8_t viewport_y;
+extern uint8_t viewport_focus_stat;
+extern bool viewport_focus_locked;
+
 // game.c (bank 0)
 
-void center_viewport_on_player(void);
+void center_viewport_on(int8_t x, int8_t y);
+void viewport_reset(void);
+bool viewport_request_player_focus(void);
+
 void board_redraw(void);
 
 void board_enter_stage1(void); // before transition
@@ -66,7 +74,7 @@ void game_play_loop(bool board_changed) BANKED;
 
 void board_create(void) BANKED;
 void world_create(void) BANKED;
-void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y, bool force) BANKED OLDCALL;
+void move_stat_scroll_focused(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y, bool force) BANKED OLDCALL;
 bool board_shoot(uint8_t element, uint8_t x, uint8_t y, int8_t dx, int8_t dy, uint8_t source) BANKED OLDCALL;
 
 #endif

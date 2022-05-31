@@ -87,11 +87,22 @@ Code:
 18 [data_len] [data]: #PLAY
 19 [cycle]: #CYCLE
 1A [char]: #CHAR
-1B: #DIE
+1B 00: #DIE
 1C [tid]: #BIND
 1D [zzt_line_count] [actual_line_count] [far ptrs...]: append lines
+1E ??: ?dir (Super ZZT-style)
 
-line data format:
+Conditions:
+
+00 [cond]	NOT
+01		ALLIGNED
+02		CONTACT
+03 [dir]	BLOCKED
+04		ENERGIZED
+05 [tile]	ANY
+06 [flag_id]	flag
+
+Line data format:
 
 0	type
 	0 = regular
@@ -102,12 +113,20 @@ line data format:
 n+1	target (if hyperlink)
 n+2	label (if hyperlink)
 
-conditions:
+Code (extensions):
 
-00 [cond]	NOT
-01		ALLIGNED
-02		CONTACT
-03 [dir]	BLOCKED
-04		ENERGIZED
-05 [tile]	ANY
-06 [flag_id]	flag
+// 0000A51E:0002
+1B [flags]: #DIE
+- flag 0x01: ITEM?
+
+// 0000A51E:0007
+1F [type] [...]: #VIEWPORT
+- type 0x00: LOCK
+- type 0x01: UNLOCK
+- type 0x02: FOCUS [target id; 251 = player]
+- type 0x03: MOVE [direction]
+
+Conditions (extensions)
+
+// 0000A51E:0004
+07		RND

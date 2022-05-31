@@ -67,7 +67,7 @@ void board_create(void) BANKED {
 	ZOO_TILE(BOARD_WIDTH >> 1, BOARD_HEIGHT >> 1).color = 0x1F; // TODO
 
 	ZOO_STAT(0) = StatCreatePlayer;
-	center_viewport_on_player();
+	viewport_reset();
 }
 
 void world_create(void) BANKED {
@@ -102,7 +102,9 @@ void damage_stat_stat0(zoo_stat_t *stat, zoo_tile_t *tile) {
 				stat->y = zoo_board_info.start_player_y;
 				// center_viewport_on_player();
 				// board_redraw();
-				move_stat_scroll_stat0(old_x, old_y, stat->x, stat->y, true);
+				if (viewport_request_player_focus()) {
+					move_stat_scroll_focused(old_x, old_y, stat->x, stat->y, true);
+				}
 				text_update();
 
 				zoo_game_state.paused = true;
@@ -118,7 +120,7 @@ void damage_stat_stat0(zoo_stat_t *stat, zoo_tile_t *tile) {
 	}
 }
 
-void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y, bool force) BANKED OLDCALL {
+void move_stat_scroll_focused(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y, bool force) BANKED OLDCALL {
 	bool is_dark = (zoo_board_info.flags & BOARD_IS_DARK) && (zoo_world_info.torch_ticks > 0);
 	bool force_redraw = false;
 	// move viewport?
@@ -128,9 +130,11 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 	int8_t vy = viewport_y;
 	int8_t pox = new_x - vx;
 	int8_t poy = new_y - vy;
-	bool recalc_required = force;
+	bool recalc_required = false;
 
-	if (pox < VIEWPORT_PLAYER_MIN_X && vx > VIEWPORT_MIN_X) {
+	if (viewport_focus_stat != 0 || force) {
+		recalc_required = true;
+	} else if (pox < VIEWPORT_PLAYER_MIN_X && vx > VIEWPORT_MIN_X) {
 		if ((old_x - 1) == new_x) {
 			vx--;
 			if (vx < VIEWPORT_MIN_X) vx = VIEWPORT_MIN_X;
@@ -163,7 +167,7 @@ void move_stat_scroll_stat0(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t
 	}
 
 	if (recalc_required) {
-		center_viewport_on_player();
+		center_viewport_on(new_x, new_y);
 		vx = viewport_x;
 		viewport_x = ovx;
 		vy = viewport_y;

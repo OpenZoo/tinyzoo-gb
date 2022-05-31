@@ -22,6 +22,8 @@ static uint8_t *oop_prog_loc;
 static uint8_t *oop_code_loc;
 static uint8_t *oop_last_code_loc;
 static uint8_t oop_cmd;
+static int8_t oop_source_x;
+static int8_t oop_source_y;
 static int8_t oop_dir_x;
 static int8_t oop_dir_y;
 static uint8_t oop_replace_element;
@@ -29,7 +31,11 @@ static uint8_t oop_replace_color;
 
 uint8_t oop_stat_id = 255;
 static bool oop_running_skippable;
-static bool oop_stop_running;
+
+#define STOP_RUNNING 1
+#define STOP_RUNNING_MOVE_PLAYER 2
+static uint8_t oop_stop_running;
+
 static uint8_t oop_ins_count;
 
 static uint16_t find_label_loc;
@@ -41,7 +47,7 @@ static uint16_t find_label_loc;
 
 static void oop_command_end(void) {
 	oop_pos = 0xFFFF;
-	oop_stop_running = true;
+	oop_stop_running = STOP_RUNNING;
 }
 #define oop_command_error oop_command_end
 
@@ -300,6 +306,12 @@ static void oop_parse_direction(void) {
 	}
 }
 
+static void oop_parse_direction_self(void) {
+	oop_source_x = oop_stat->x;
+	oop_source_y = oop_stat->y;
+	oop_parse_direction();
+}
+
 static bool oop_check_condition(void) {
 	uint8_t i, j, x, y;
 
@@ -311,7 +323,7 @@ static bool oop_check_condition(void) {
 		case 0x02: /* CONTACT */
 			return (abs(oop_stat->x - ZOO_STAT(0).x) + abs(oop_stat->y - ZOO_STAT(0).y)) == 1;
 		case 0x03: /* BLOCKED */
-			oop_parse_direction();
+			oop_parse_direction_self();
 			x = oop_stat->x + oop_dir_x;
 			y = oop_stat->y + oop_dir_y;
 			return !(zoo_element_defs_flags[ZOO_TILE(x, y).element] & ELEMENT_WALKABLE);
@@ -326,6 +338,8 @@ static bool oop_check_condition(void) {
 		case 0x06: /* FLAG */
 			i = *(oop_code_loc++);
 			return i != FLAG_ID_NONE && world_get_flag_pos(i) != FLAG_ID_NONE;
+		case 0x07: /* RND - ZXT 0000A51E:0004 */
+			return RAND2();
 	}
 
 	return false;
@@ -344,9 +358,9 @@ static inline void oop_run_skippable_command(void) {
 typedef void (*oop_command_proc)(void);
 
 static void oop_command_direction(void) {
-	oop_stop_running = true;
+	oop_stop_running = STOP_RUNNING;
 
-	oop_parse_direction();
+	oop_parse_direction_self();
 	if (oop_cmd >= 0x03 || oop_dir_x != 0 || oop_dir_y != 0) {
 		uint8_t dest_x = oop_stat->x + oop_dir_x;
 		uint8_t dest_y = oop_stat->y + oop_dir_y;
@@ -380,12 +394,12 @@ OopDirMoveStat:
 		oop_code_loc = oop_last_code_loc;
 	} else if (oop_cmd == 0x04 /* TRY */) {
 		oop_run_skippable_command();
-		oop_stop_running = false;
+		oop_stop_running = STOP_RUNNING;
 	}
 }
 
 static void oop_command_walk(void) {
-	oop_parse_direction();
+	oop_parse_direction_self();
 	oop_stat->step_x = oop_dir_x;
 	oop_stat->step_y = oop_dir_y;
 }
@@ -411,9 +425,9 @@ static void oop_command_noop(void) {
 }
 
 static void oop_command_shoot(void) {
-	oop_parse_direction();
+	oop_parse_direction_self();
 	board_shoot(oop_cmd == 0x0A ? E_STAR : E_BULLET, oop_stat->x, oop_stat->y, oop_dir_x, oop_dir_y, SHOT_SOURCE_ENEMY);
-	oop_stop_running = true;
+	oop_stop_running = STOP_RUNNING;
 }
 
 static void oop_command_endgame(void) {
@@ -421,7 +435,7 @@ static void oop_command_endgame(void) {
 }
 
 static void oop_command_idle(void) {
-	oop_stop_running = true;
+	oop_stop_running = STOP_RUNNING;
 }
 
 static void oop_command_restart(void) {
@@ -495,7 +509,7 @@ static void oop_command_lock(void) {
 }
 
 static void oop_command_put(void) {
-	oop_parse_direction();
+	oop_parse_direction_self();
 	uint8_t element = *(oop_code_loc++);
 	uint8_t color = *(oop_code_loc++);
 	if (oop_dir_x == 0 && oop_dir_y == 0) {
@@ -551,7 +565,7 @@ static void oop_command_change(void) {
 static void oop_command_become(void) {
 	oop_replace_element = *(oop_code_loc++);
 	oop_replace_color = *(oop_code_loc++);
-	oop_stop_running = true;
+	oop_stop_running = STOP_RUNNING;
 }
 
 static void oop_command_play(void) {
@@ -571,6 +585,7 @@ static void oop_command_char(void) {
 }
 
 static void oop_command_die(void) {
+	uint8_t flags = *(oop_code_loc++);
 #ifdef BUGFIX_DIE_UNDER
 	oop_replace_element = oop_stat->under.element;
 	oop_replace_color = oop_stat->under.color;
@@ -578,7 +593,8 @@ static void oop_command_die(void) {
 	oop_replace_element = E_EMPTY;
 	oop_replace_color = 0x0F;
 #endif
-	oop_stop_running = true;
+	/* #DIE ITEM - ZXT 0000A51E:0002 */
+	oop_stop_running = (flags & 0x02) ? STOP_RUNNING_MOVE_PLAYER : STOP_RUNNING;
 }
 
 static void oop_command_bind(void) {
@@ -611,6 +627,62 @@ static void oop_command_bind(void) {
 	}
 
 	ZOO_SWITCH_ROM(prev_bank);
+}
+
+/* #VIEWPORT - ZXT 0000A51E:0007 */
+static void oop_command_viewport(void) {
+	uint8_t type = *(oop_code_loc++);
+	uint8_t source_x = viewport_x + VIEWPORT_CENTER_X;
+	uint8_t source_y = viewport_y + VIEWPORT_CENTER_Y;
+
+	switch (type) {
+	case 0x00: {
+		viewport_focus_locked = true;
+	} return;
+	case 0x01: {
+		viewport_focus_locked = false;
+	} return;
+	case 0x02: {
+		uint8_t target = *(oop_code_loc++);
+		if (target == 251) {
+			viewport_focus_stat = 0;
+		} else if (target == OOP_TARGET_SELF || target == OOP_TARGET_EMPTY) {
+			viewport_focus_stat = oop_stat_id;
+		} else {
+			uint8_t prev_bank = _current_bank;
+
+			zoo_stat_t *stat = &ZOO_STAT(0);
+			uint8_t stat_id = 0;
+			for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
+				if (stat->data_ofs != 0xFFFF) {
+					uint8_t *data_loc = zoo_stat_data + stat->data_ofs;
+					ZOO_SWITCH_ROM(data_loc[2]);
+					uint8_t *prog_loc = *((uint8_t**) data_loc);
+					if (target == prog_loc[0]) {
+						viewport_focus_stat = stat_id;
+						break;
+					}
+				}
+			}
+
+			ZOO_SWITCH_ROM(prev_bank);
+		}
+
+		move_stat_scroll_focused(
+			source_x, source_y,
+			source_x, source_y,
+			true);
+	} break;
+	case 0x03: {
+		oop_source_x = source_x;
+		oop_source_y = source_y;
+		oop_parse_direction();
+		move_stat_scroll_focused(
+			source_x, source_y,
+			oop_source_x + oop_dir_x, oop_source_y + oop_dir_y,
+			true);
+	} break;
+	}
 }
 
 uint16_t oop_window_zzt_lines;
@@ -670,6 +742,8 @@ static oop_command_proc oop_procs[] = {
 	oop_command_die,
 	oop_command_bind,
 	oop_command_text_line,
+	NULL,
+	oop_command_viewport,
 };
 
 static uint8_t oop_ins_cost[] = {
@@ -703,6 +777,7 @@ static uint8_t oop_ins_cost[] = {
 	1, // #DIE
 	1, // #BIND
 	0, // text line
+	1, // #VIEWPORT
 };
 
 bool oop_handle_txtwind(void) BANKED OLDCALL;
@@ -729,7 +804,7 @@ OopStartParsing:
 
 	oop_prog_loc = *((uint8_t**) oop_data_loc);
 	oop_code_loc = oop_prog_loc + 5 + oop_pos;
-	oop_stop_running = false;
+	oop_stop_running = 0;
 	oop_replace_element = 255;
 	oop_ins_count = MAX_OOP_INSTRUCTION_COUNT;
 	oop_window_zzt_lines = 0;
@@ -771,6 +846,8 @@ OopStartParsing:
 		damage_stat(oop_stat_id);
 		oop_place_tile(ix, iy, oop_replace_element, oop_replace_color);
 		oop_stat_id = STAT_ID_NONE;
+		if (oop_stop_running == STOP_RUNNING_MOVE_PLAYER)
+			move_stat(0, ix, iy);
 		return true;
 	} else {
 		oop_stat_id = STAT_ID_NONE;

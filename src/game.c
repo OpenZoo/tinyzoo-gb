@@ -40,10 +40,12 @@ const int8_t diagonal_delta_y[8] = {1, 1, 1, 0, -1, -1, -1, 0};
 
 int8_t viewport_x = 1;
 int8_t viewport_y = 1;
+uint8_t viewport_focus_stat = 0;
+bool viewport_focus_locked = false;
 
-void center_viewport_on_player(void) {
-	int8_t vx = ZOO_STAT(0).x - VIEWPORT_CENTER_X;
-	int8_t vy = ZOO_STAT(0).y - VIEWPORT_CENTER_Y;
+void center_viewport_on(int8_t x, int8_t y) {
+	int8_t vx = x - VIEWPORT_CENTER_X;
+	int8_t vy = y - VIEWPORT_CENTER_Y;
 	if (vx < VIEWPORT_MIN_X) vx = VIEWPORT_MIN_X;
 	else if (vx > VIEWPORT_MAX_X) vx = VIEWPORT_MAX_X;
 	if (vy < VIEWPORT_MIN_Y) vy = VIEWPORT_MIN_Y;
@@ -53,6 +55,23 @@ void center_viewport_on_player(void) {
 	viewport_y = vy;
 }
 
+void viewport_reset(void) {
+	center_viewport_on(ZOO_STAT(0).x, ZOO_STAT(0).y);
+	viewport_focus_stat = 0;
+	viewport_focus_locked = false;
+}
+
+bool viewport_request_player_focus(void) {
+	if (viewport_focus_stat == 0) {
+		return true;
+	} else if (viewport_focus_locked) {
+		return false;
+	} else {
+		viewport_focus_stat = 0;
+		return true;
+	}
+}
+
 void board_enter_stage1(void) {
 	zoo_board_info.start_player_x = ZOO_STAT(0).x;
 	zoo_board_info.start_player_y = ZOO_STAT(0).y;
@@ -60,7 +79,7 @@ void board_enter_stage1(void) {
 	zoo_world_info.board_time_sec = 0;
 	zoo_game_state.game_state_element = E_PLAYER; // TODO: not here...
 
-	center_viewport_on_player();
+	viewport_reset();
 	text_update();
 }
 
@@ -382,8 +401,8 @@ void move_stat(uint8_t stat_id, uint8_t new_x, uint8_t new_y) {
 		board_draw_tile(old_x, old_y);
 	}
 
-	if (stat_id == 0 && move_stat_enable_scroll) {
-		move_stat_scroll_stat0(old_x, old_y, new_x, new_y, false);
+	if (stat_id == viewport_focus_stat && (stat_id != 0 || !viewport_focus_locked) && move_stat_enable_scroll) {
+		move_stat_scroll_focused(old_x, old_y, new_x, new_y, false);
 	}
 }
 
