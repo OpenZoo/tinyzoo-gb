@@ -780,9 +780,9 @@ static uint8_t oop_ins_cost[] = {
 	1, // #VIEWPORT
 };
 
-bool oop_handle_txtwind(void) BANKED OLDCALL;
+bool oop_handle_txtwind(void) BANKED;
 
-bool oop_execute(uint8_t stat_id, const char *name) OLDCALL {
+bool oop_execute(uint8_t stat_id, const char *name) {
 	uint8_t prev_bank = _current_bank;
 
 	oop_stat_id = stat_id;

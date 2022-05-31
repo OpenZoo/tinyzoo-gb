@@ -194,7 +194,7 @@ void load_board(uint8_t offset) BANKED {
 	}
 }
 
-bool save_board(uint8_t offset) BANKED OLDCALL {
+bool save_board(uint8_t offset) BANKED {
 	sram_ptr_t ptr, board_ptr;
 
 	ptr.bank = 0;
@@ -224,7 +224,7 @@ bool save_board(uint8_t offset) BANKED OLDCALL {
 	return result;
 }
 
-bool save_world(uint8_t offset) BANKED OLDCALL {
+bool save_world(uint8_t offset) BANKED {
 	ZOO_ENABLE_RAM;
 
 	sram_toggle_write();

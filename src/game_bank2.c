@@ -120,7 +120,7 @@ void damage_stat_stat0(zoo_stat_t *stat, zoo_tile_t *tile) {
 	}
 }
 
-void move_stat_scroll_focused(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y, bool force) BANKED OLDCALL {
+void move_stat_scroll_focused(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y, bool force) BANKED {
 	bool is_dark = (zoo_board_info.flags & BOARD_IS_DARK) && (zoo_world_info.torch_ticks > 0);
 	bool force_redraw = false;
 	// move viewport?
@@ -254,7 +254,7 @@ void move_stat_scroll_focused(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8
 	renderer_scrolling = 0;
 }
 
-bool board_shoot(uint8_t element, uint8_t x, uint8_t y, int8_t dx, int8_t dy, uint8_t source) BANKED OLDCALL {
+bool board_shoot(uint8_t element, uint8_t x, uint8_t y, int8_t dx, int8_t dy, uint8_t source) BANKED {
 	zoo_tile_t ntile;
 	if (!ZOO_TILE_WRITEBOUNDS(x + dx, y + dy)) return false;
 

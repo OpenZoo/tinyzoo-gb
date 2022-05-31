@@ -31,7 +31,7 @@ static uint8_t get_color_for_tile_match(uint8_t element, uint8_t color) {
 
 // TODO: This method is *SLOW*. Really, really *SLOW*.
 // TODO (SDCC 4.2.0 upgrade): This is broken, at least as of SDCC r13388 nightly
-bool find_tile_on_board(uint8_t *x, uint8_t *y, uint8_t element, uint8_t color) BANKED OLDCALL {
+bool find_tile_on_board(uint8_t *x, uint8_t *y, uint8_t element, uint8_t color) BANKED {
 	zoo_tile_t tile;
 
 	while (true) {
@@ -54,7 +54,7 @@ bool find_tile_on_board(uint8_t *x, uint8_t *y, uint8_t element, uint8_t color) 
 	}
 }
 
-void oop_place_tile(uint8_t x, uint8_t y, uint8_t element, uint8_t color) BANKED OLDCALL {
+void oop_place_tile(uint8_t x, uint8_t y, uint8_t element, uint8_t color) BANKED {
 	if (!ZOO_TILE_WRITEBOUNDS(x, y)) return;
 
 	zoo_tile_t *src_tile = &ZOO_TILE(x, y);
@@ -94,7 +94,7 @@ void oop_place_tile(uint8_t x, uint8_t y, uint8_t element, uint8_t color) BANKED
 	}
 }
 
-uint16_t oop_dataofs_clone(uint16_t loc) BANKED OLDCALL {
+uint16_t oop_dataofs_clone(uint16_t loc) BANKED {
 	uint8_t len = zoo_stat_data[loc + 3] & 0x7F;
 #ifdef DEBUG_PRINTFS
 	EMU_printf("cloning dataofs @ %u, len %u, size %u", loc, len, zoo_stat_data_size);
@@ -127,7 +127,7 @@ static void oop_dataofs_free(uint16_t loc) {
 	}
 }
 
-void oop_dataofs_free_if_unused(uint16_t loc, uint8_t except_id) BANKED OLDCALL {
+void oop_dataofs_free_if_unused(uint16_t loc, uint8_t except_id) BANKED {
 	zoo_stat_t *stat = &ZOO_STAT(0);
 	uint8_t stat_id = 0;
 	for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
@@ -142,7 +142,7 @@ extern uint16_t oop_window_zzt_lines;
 
 #define TWL_OFS (TXTWIND_LINE_HEADER_LEN - 1)
 
-bool oop_handle_txtwind(void) BANKED OLDCALL {
+bool oop_handle_txtwind(void) BANKED {
 	if (oop_window_zzt_lines > 1) {
 		return txtwind_run();
 	} else if (oop_window_zzt_lines == 1) {

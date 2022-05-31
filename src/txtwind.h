@@ -29,6 +29,6 @@ void txtwind_read_line(int16_t idx, txtwind_line_t *line);
 
 void txtwind_init(void) BANKED;
 void txtwind_append(uint16_t line_ptr, uint8_t line_bank) BANKED;
-bool txtwind_run(void) BANKED OLDCALL;
+bool txtwind_run(void) BANKED;
 
 #endif /* __TXTWIND_H__ */

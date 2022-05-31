@@ -70,7 +70,7 @@ static void txtwind_draw_line(int16_t idx) {
 
 bool txtwind_exec_line(uint16_t idx);
 
-bool txtwind_run(void) BANKED OLDCALL {
+bool txtwind_run(void) BANKED {
 	uint8_t old_draw_offset_x = draw_offset_x;
 	uint8_t old_draw_offset_y = draw_offset_y;
 
