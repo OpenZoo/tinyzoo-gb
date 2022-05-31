@@ -670,7 +670,7 @@ static void oop_command_viewport(void) {
 
 		move_stat_scroll_focused(
 			source_x, source_y,
-			source_x, source_y,
+			ZOO_STAT(viewport_focus_stat).x, ZOO_STAT(viewport_focus_stat).y,
 			true);
 	} break;
 	case 0x03: {

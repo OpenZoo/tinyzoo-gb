@@ -48,7 +48,8 @@ __asm
 	xor a, a
 	ldh (_NR51_REG + 0), a
 	ld b, a ; for sound_buffer_pos
-	ld a, #0xFF
+	dec a
+	; ld a, #0xFF
 	ldh (_NR50_REG + 0), a
 
 	ld a, (_sound_buffer_pos)

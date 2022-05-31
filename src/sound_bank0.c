@@ -1,5 +1,6 @@
 #include <string.h>
 #include <gbdk/platform.h>
+#include <gbdk/emu_debug.h>
 #include "config.h"
 #include "renderer.h"
 #include "timer.h"
@@ -17,6 +18,10 @@ void sound_queue_nobank(int8_t priority, const uint8_t *data) {
 	if (!sound_block_queueing) {
 		if (!sound_is_playing || (((priority >= sound_current_priority) && (sound_current_priority != -1)) || (priority == -1))) {
 			uint8_t data_len = data[0];
+#ifdef DEBUG_SOUND_QUEUE
+			EMU_printf("queueing sound: %d prio %d addr %02X:%04X",
+				(uint16_t) data_len, (int16_t) priority, (uint16_t) _current_bank, (uint16_t) data);
+#endif
 			if (priority >= 0 || !sound_is_playing) {
 				sound_current_priority = priority;
 				text_sync_hblank_safe();

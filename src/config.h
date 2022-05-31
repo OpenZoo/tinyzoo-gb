@@ -52,5 +52,6 @@
 // #define DEBUG_PRINTFS
 // #define DEBUG_PRINTFS_OOP_EXEC
 // #define DEBUG_SRAM_WRITES
+// #define DEBUG_SOUND_QUEUE
 
 #endif /* __CONFIG_H__ */
