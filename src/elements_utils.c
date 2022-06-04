@@ -44,7 +44,7 @@ void ElementPushablePush(uint8_t x, uint8_t y, int8_t dx, int8_t dy) {
 
 		if (!(zoo_element_defs_flags[dtile.element] & ELEMENT_WALKABLE)
 			&& (zoo_element_defs_flags[dtile.element] & ELEMENT_DESTRUCTIBLE)
-			&& (tile.element != E_PLAYER))
+			&& (dtile.element != E_PLAYER))
 		{
 			board_damage_tile(x + dx, y + dy);
 			ZOO_TILE_ASSIGN(dtile, x + dx, y + dy);
