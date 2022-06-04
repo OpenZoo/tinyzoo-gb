@@ -31,6 +31,8 @@ void init_main(void) BANKED {
 	} else {
 		text_init(RENDER_MODE_PLAYFIELD, &renderer_dmg);
 	}
+#else
+	text_init(RENDER_MODE_PLAYFIELD);
 #endif
 
 	sram_init(false);

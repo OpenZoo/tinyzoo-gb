@@ -38,19 +38,23 @@ void text_init(uint8_t mode) {
 	// initialize GG palette
 	set_palette(0, 1, gg_palette);
 
-	uint16_t address = 0x3800 + ((3 * 32 + 6) << 1);
+	volatile uint16_t address = 0x3800 + ((3 * 32 + 6) << 1);
 	uint16_t i = 0;
 	for (uint8_t iy = 0; iy < 18; iy++) {
 		for (uint8_t ix = 0; ix < 20; ix++, i++) {
-			set_vram_byte((uint8_t*) (address++), i);
-			set_vram_byte((uint8_t*) (address++), (i >> 8));
+			set_vram_byte((uint8_t*) (address), (i >> 8));
+			address++;
+			set_vram_byte((uint8_t*) (address), i);
+			address++;
 		}
 		address += 12 << 1;
 	}
 
 	// TODO
 
-	DISPLAY_ON;
+	__WRITE_VDP_REG(VDP_R0, 0x16);
+	__WRITE_VDP_REG(VDP_R1, R1_DEFAULT | R1_DISP_ON | R1_IE)
+	__WRITE_VDP_REG(VDP_R2, R2_MAP_0x3800);
 }
 
 void text_sync_hblank_safe(void) {
@@ -62,16 +66,20 @@ void text_undraw(uint8_t x, uint8_t y) {
 }
 
 void text_draw(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
-	uint16_t vram_address = ((y * 20) + x) * 32;
+	volatile uint16_t vram_address = ((y * 20) + x) * 32;
 	uint16_t char_address = chr * 8;
 	uint8_t prev_bank = _current_bank;
 	ZOO_SWITCH_ROM(3);
 
 	for (uint8_t iy = 0; iy < 8; iy++, char_address++) {
-		set_vram_byte(vram_address++, _font_default_bin[char_address]);
-		set_vram_byte(vram_address++, _font_default_bin[char_address]);
-		set_vram_byte(vram_address++, _font_default_bin[char_address]);
-		set_vram_byte(vram_address++, _font_default_bin[char_address]);
+		set_vram_byte(vram_address, _font_default_bin[char_address]);
+		vram_address++;
+		set_vram_byte(vram_address, _font_default_bin[char_address]);
+		vram_address++;
+		set_vram_byte(vram_address, _font_default_bin[char_address]);
+		vram_address++;
+		set_vram_byte(vram_address, _font_default_bin[char_address]);
+		vram_address++;
 	}
 
 	ZOO_SWITCH_ROM(prev_bank);
