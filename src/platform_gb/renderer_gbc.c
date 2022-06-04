@@ -843,16 +843,25 @@ GbcTextAddColorFinish:
 __endasm;
 }
 
-static void gbc_text_undraw(uint8_t x, uint8_t y) OLDCALL {
+static void gbc_text_undraw(uint8_t x, uint8_t y) {
 __asm
+	ld d, a
+	; de = xy
+
 	; create X/Y pointer
 	ld hl, #(_draw_offset_x)
 	ld a, (hl+)
 	ld b, (hl)
 	ld c, a
 	; b = draw_offset_y, c = draw_offset_x
-	ldhl sp, #3
-	ld a, (hl-)
+
+	ld a, d
+	add a, c
+	and a, #0x1F ; a = (x + draw_offset_x) & 0x1F
+	ld (0xFFA3), a
+
+	ld a, e
+	ld (0xFFA4), a
 	add a, b
 	and a, #0x1F ; a = (y + draw_offset_y) & 0x1F
 	ld d, a
@@ -862,9 +871,8 @@ __asm
 	rra
 .endm
 	ld e, a
-	ld a, (hl)
-	add a, c
-	and a, #0x1F ; a = (x + draw_offset_x) & 0x1F
+
+	ld a, (0xFFA3)
 	or a, e ; da = X/Y pointer
 	ld e, a ; de = X/Y pointer too
 
@@ -886,9 +894,9 @@ __asm
 	ldh (_SVBK_REG + 0), a
 	ei ; SVBK cannot be changed between interrupts
 
-	ldhl sp, #3
-	ld a, (hl)
+	ld a, (0xFFA4)
 	ld e, a
+
 	; de = col, y
 	push bc
 	push de
@@ -896,11 +904,6 @@ __asm
 	pop de
 	pop bc
 __endasm;
-}
-
-// TODO (SDCC 4.2 upgrade) - remove
-static void gbc_text_undraw_wrap(uint8_t x, uint8_t y) {
-	gbc_text_undraw(x, y);
 }
 
 static void gbc_text_draw(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) OLDCALL {
@@ -1123,7 +1126,7 @@ static void gbc_text_scroll(int8_t dx, int8_t dy) {
 const renderer_t renderer_gbc = {
 	gbc_text_init,
 	gbc_text_sync_hblank_safe,
-	gbc_text_undraw_wrap,
+	gbc_text_undraw,
 	gbc_text_draw_wrap,
 	gbc_text_free_line,
 	gbc_text_scroll,
