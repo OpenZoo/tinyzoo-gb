@@ -11,6 +11,9 @@
 #define COL_LVL_2 21
 #define COL_LVL_3 31
 
+#define CGB_PALETTE_IS_PAGE_ALIGNED
+
+__at(0x3FDC)
 const uint16_t cgb_palette[16] = {
 	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_0),
 	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
@@ -435,7 +438,9 @@ __endasm;
 static void gbc_text_remove_color(uint8_t y, uint8_t col) OLDCALL {
 __asm
 	ldhl sp, #2
-	ld a, (hl)
+	; ld a, (hl)
+	; opt1: lower code uses ldhl sp, #3
+	ld a, (hl+)
 
 	ld e, a
 	ld a, (_draw_offset_y)
@@ -450,7 +455,8 @@ __asm
 	ld e, a
 
 	; a = col
-	ldhl sp, #3
+	; ldhl sp, #3
+	; opt1: see above
 	ld a, (hl)
 
 	; de = y << 7 | col
@@ -608,7 +614,9 @@ __endasm;
 static uint8_t gbc_text_add_color(uint8_t y, uint8_t col) OLDCALL {
 __asm
 	ldhl sp, #2
-	ld a, (hl)
+	; ld a, (hl)
+	; opt1: lower code uses ldhl sp, #3
+	ld a, (hl+)
 
 	ld e, a
 	ld a, (_draw_offset_y)
@@ -623,7 +631,8 @@ __asm
 	ld e, a
 
 	; a = col
-	ldhl sp, #3
+	; ldhl sp, #3
+	; opt1: see above
 	ld a, (hl)
 
 	; de = y << 7 | col
@@ -725,7 +734,9 @@ GbcTextAddColorAllocFound:
 	ei ; SVBK cannot be changed between interrupts
 
 	ldhl sp, #2
-	ld a, (hl)
+	; ld a, (hl)
+	; opt1: lower code uses ldhl sp, #3
+	ld a, (hl+)
 
 	ld e, a
 	ld a, (_draw_offset_y)
@@ -755,7 +766,8 @@ GbcTextAddColorAllocFound:
 	ld d, a
 
 	; a = color
-	ldhl sp, #3
+	; ldhl sp, #3
+	; opt1: see above
 	ld a, (hl)
 	ld (0xFFA3), a
 
@@ -773,9 +785,11 @@ GbcTextAddColorAllocFound:
 
 	add a, l
 	ld l, a
+#ifndef CGB_PALETTE_IS_PAGE_ALIGNED
 	ld a, h
 	adc a, #0
 	ld h, a
+#endif
 
 	; copy data
 	ld a, (hl+)
@@ -793,9 +807,11 @@ GbcTextAddColorAllocFound:
 
 	add a, l
 	ld l, a
+#ifndef CGB_PALETTE_IS_PAGE_ALIGNED
 	ld a, h
 	adc a, #0
 	ld h, a
+#endif
 
 	; copy data
 	ld a, (hl+)
