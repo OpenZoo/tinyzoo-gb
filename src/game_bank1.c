@@ -90,6 +90,8 @@ static void game_play_handle_pause(bool pause_blink) {
 
 void game_play_loop(bool board_changed) BANKED {
 RestartGameLoop:
+	sound_block_queueing = false;
+
 	game_update_sidebar_all();
 
 	ZOO_TILE_CHANGE2(ZOO_STAT(0).x, ZOO_STAT(0).y,
