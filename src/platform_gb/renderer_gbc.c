@@ -906,16 +906,22 @@ __asm
 __endasm;
 }
 
-static void gbc_text_draw(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) OLDCALL {
+static void gbc_text_draw(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
 __asm
+	ld d, a
+	push de
+
 	; create X/Y pointer
 	ld hl, #(_draw_offset_x)
 	ld a, (hl+)
 	ld b, (hl)
 	ld c, a
 	; b = draw_offset_y, c = draw_offset_x
-	ldhl sp, #3
-	ld a, (hl-)
+	; ldhl sp, #0
+	; ld a, (hl+)
+	; opt2: y is still in e, but we need to simulate (hl+)
+	ldhl sp, #1
+	ld a, e
 	add a, b
 	and a, #0x1F ; a = (y + draw_offset_y) & 0x1F
 	ld d, a
@@ -977,9 +983,8 @@ GbcTextDrawColorChanged:
 
 	ld c, a ; bc = new, old
 
-	ldhl sp, #3
-	ld a, (hl)
-	ld e, a
+	ldhl sp, #0 ; y
+	ld e, (hl)
 
 	; renderer scrolling check 2 - no remove
 	ld a, (_renderer_scrolling)
@@ -1103,12 +1108,9 @@ GbcTextDrawFinish:
 	xor a, a
 	ldh (_SVBK_REG + 0), a
 	ei ; SVBK cannot be changed between interrupts
-__endasm;
-}
 
-// TODO (SDCC 4.2 upgrade) - remove
-static void gbc_text_draw_wrap(uint8_t x, uint8_t y, uint8_t chr, uint8_t col) {
-	gbc_text_draw(x, y, chr, col);
+	pop de
+__endasm;
 }
 
 void gbc_text_init(uint8_t mode);
@@ -1127,7 +1129,7 @@ const renderer_t renderer_gbc = {
 	gbc_text_init,
 	gbc_text_sync_hblank_safe,
 	gbc_text_undraw,
-	gbc_text_draw_wrap,
+	gbc_text_draw,
 	gbc_text_free_line,
 	gbc_text_scroll,
 	gbc_text_update
