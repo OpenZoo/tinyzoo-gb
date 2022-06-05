@@ -160,7 +160,7 @@ NotDark:
 			uint8_t prev_bank = _current_bank;
 			ZOO_SWITCH_ROM(1);
 
-			if (ZOO_ELEMENT_BOUNDS(tile.element) && zoo_element_defs_drawprocs[tile.element] != 0) {
+			if (zoo_element_defs_drawprocs[tile.element] != 0) {
 				ch = zoo_element_defs_drawprocs[tile.element](x, y);
 			} else {
 				ch = zoo_element_defs_character[tile.element];
