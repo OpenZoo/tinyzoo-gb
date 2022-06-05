@@ -7,8 +7,41 @@
 #include "font_manager.h"
 #include "../renderer.h"
 
+#define COL_LVL_0 0
+#define COL_LVL_1 10
+#define COL_LVL_2 21
+#define COL_LVL_3 31
+
+const uint16_t cgb_empty_palette[16] = {
+	0, 0, 0, 0,
+	0, 0, 0, 0,
+	0, 0, 0, 0,
+	0, 0, 0, 0
+};
+
+const uint16_t cgb_txtwind_palette[10] = {
+	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
+	RGB(COL_LVL_3, COL_LVL_3, COL_LVL_1),
+	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
+	RGB(COL_LVL_3, COL_LVL_3, COL_LVL_3),
+	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
+	RGB(COL_LVL_3, COL_LVL_1, COL_LVL_3),
+	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
+	RGB(COL_LVL_1, COL_LVL_3, COL_LVL_1),
+	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
+	RGB(COL_LVL_3, COL_LVL_1, COL_LVL_1)
+};
+
+const uint16_t cgb_menu_palette[4] = {
+	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_0),
+	RGB(COL_LVL_3, COL_LVL_3, COL_LVL_3),
+	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_0),
+	RGB(COL_LVL_3, COL_LVL_1, COL_LVL_1)
+};
+
 extern uint16_t cgb_message_palette[];
 extern const uint16_t cgb_palette[];
+extern uint16_t *cgb_static_palette;
 
 void gbc_vblank_isr(void);
 
@@ -21,6 +54,18 @@ static uint8_t cgb_sidebar_colors[20] = {
 
 void sidebar_set_message_color(uint8_t color) BANKED {
 	cgb_message_palette[15] = cgb_palette[color];
+}
+
+void gbc_init_set_palette(void) BANKED {
+	if (renderer_mode == RENDER_MODE_TXTWIND) {
+		cgb_static_palette = cgb_txtwind_palette;
+	} else if (renderer_mode == RENDER_MODE_MENU) {
+		cgb_static_palette = cgb_menu_palette;
+	}
+}
+
+void gbc_init_unset_palette(void) BANKED {
+	cgb_static_palette = cgb_empty_palette;
 }
 
 static void gbc_text_init_wram(void) {
@@ -123,6 +168,12 @@ void gbc_text_init(uint8_t mode) {
 		add_VBL(nowait_int_handler);
 
 		renderer_id = RENDER_ID_GBC;
+	}
+
+	if (mode == RENDER_MODE_PLAYFIELD) {
+		cgb_static_palette = NULL;
+	} else {
+		cgb_static_palette = cgb_empty_palette;
 	}
 
 	if (mode == RENDER_MODE_PLAYFIELD) {

@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <gbdk/platform.h>
+#include "bank_switch.h"
 #include "font_manager.h"
 #include "himem.h"
 #include "../renderer.h"
@@ -33,18 +34,7 @@ const uint16_t cgb_palette[16] = {
 	RGB(COL_LVL_3, COL_LVL_3, COL_LVL_3)
 };
 
-const uint16_t cgb_txtwind_palette[10] = {
-	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
-	RGB(COL_LVL_3, COL_LVL_3, COL_LVL_1),
-	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
-	RGB(COL_LVL_3, COL_LVL_3, COL_LVL_3),
-	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
-	RGB(COL_LVL_3, COL_LVL_1, COL_LVL_3),
-	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
-	RGB(COL_LVL_1, COL_LVL_3, COL_LVL_1),
-	RGB(COL_LVL_0, COL_LVL_0, COL_LVL_2),
-	RGB(COL_LVL_3, COL_LVL_1, COL_LVL_1)
-};
+uint16_t *cgb_static_palette = NULL;
 
 uint16_t cgb_message_palette[16];
 
@@ -351,7 +341,12 @@ void gbc_vblank_isr(void) {
 	SCX_REG = scx_shadow_reg;
 	SCY_REG = scy_shadow_reg;
 
-	if (renderer_mode == RENDER_MODE_PLAYFIELD) {
+	if (cgb_static_palette != NULL) {
+		uint8_t prev_bank = _current_bank;
+		ZOO_SWITCH_ROM(3);
+		load_palette(cgb_static_palette);
+		ZOO_SWITCH_ROM(prev_bank);
+	} else {
 		hblank_isr_ip = (uint16_t) hblank_update_palette;
 		hblank_isr_pal_pos = 0xD000 | ((uint16_t)local_doy << 6);
 		LYC_REG = 7;
@@ -360,8 +355,6 @@ void gbc_vblank_isr(void) {
 			? (LCDCF_ON | LCDCF_WIN9C00 | LCDCF_BG8000 | LCDCF_BG9C00 | LCDCF_BGON)
 			: (LCDCF_ON | LCDCF_WIN9C00 | LCDCF_BG9C00 | LCDCF_BGON);
 		vblank_update_palette();
-	} else if (renderer_mode == RENDER_MODE_TXTWIND) {
-		load_palette(cgb_txtwind_palette);
 	}
 
 	global_vblank_isr();

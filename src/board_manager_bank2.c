@@ -164,12 +164,12 @@ static bool save_board_data_sram(sram_ptr_t *new_ptr) {
 
 // on bank 2 - BANKED
 
-void load_world(uint8_t offset) BANKED {
+void load_world(uint8_t offset, bool new_game) BANKED {
 	load_world_rom(offset); // initializes pointers to ROM
 
 	ZOO_ENABLE_RAM;
 
-	if (!load_world_sram(offset)) {
+	if (new_game || !load_world_sram(offset)) {
 		save_world_sram(offset, true);
 	}
 
@@ -192,6 +192,38 @@ void load_board(uint8_t offset) BANKED {
 		ZOO_DISABLE_RAM;
 		load_board_rom(offset);
 	}
+}
+
+bool clear_saved_board(uint8_t offset) BANKED {
+	sram_ptr_t ptr, board_ptr;
+	bool result = false;
+
+	ptr.bank = 0;
+	ptr.position = SRAM_BOARD_PTRS_POS + (offset * sizeof(sram_ptr_t));
+
+	ZOO_ENABLE_RAM;
+
+	sram_read(&ptr, &board_ptr, sizeof(sram_ptr_t));
+
+	sram_toggle_write();
+
+	if (board_ptr.bank != 0 || board_ptr.position != 0) {
+		sram_free(&board_ptr);
+
+		board_ptr.bank = 0;
+		board_ptr.position = 0;
+
+		sram_sub_ptr(&ptr, sizeof(sram_ptr_t));
+		sram_write(&ptr, &board_ptr, sizeof(sram_ptr_t));
+
+		result = true;
+	}
+
+	sram_toggle_write();
+
+	ZOO_DISABLE_RAM;
+
+	return result;
 }
 
 bool save_board(uint8_t offset) BANKED {
@@ -220,6 +252,8 @@ bool save_board(uint8_t offset) BANKED {
 	sram_write(&ptr, &board_ptr, sizeof(sram_ptr_t));
 
 	sram_toggle_write();
+
+	ZOO_DISABLE_RAM;
 
 	return result;
 }

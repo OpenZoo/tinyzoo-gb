@@ -77,4 +77,9 @@ void world_create(void) BANKED;
 void move_stat_scroll_focused(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y, bool force) BANKED;
 bool board_shoot(uint8_t element, uint8_t x, uint8_t y, int8_t dx, int8_t dy, uint8_t source) BANKED;
 
+// game_menus.c (bank 2)
+
+void game_menu_act_enter_world(uint8_t world_id, bool new_game) BANKED;
+bool game_pause_menu(void) BANKED;
+
 #endif

@@ -144,7 +144,7 @@ extern uint16_t oop_window_zzt_lines;
 
 bool oop_handle_txtwind(void) BANKED {
 	if (oop_window_zzt_lines > 1) {
-		return txtwind_run();
+		return txtwind_run(RENDER_MODE_TXTWIND) != 255;
 	} else if (oop_window_zzt_lines == 1) {
 		uint8_t sram_ptr_data[9];
 		sram_ptr_t sram_ptr;

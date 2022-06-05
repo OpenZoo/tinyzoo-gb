@@ -12,6 +12,7 @@
 
 #define RENDER_MODE_PLAYFIELD 0
 #define RENDER_MODE_TXTWIND 1
+#define RENDER_MODE_MENU 2
 
 #ifdef MULTIPLE_RENDERERS
 typedef struct {

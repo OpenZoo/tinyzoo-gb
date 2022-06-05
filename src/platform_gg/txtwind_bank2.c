@@ -14,6 +14,7 @@
 
 bool txtwind_exec_line(uint16_t idx);
 
-bool txtwind_run(void) BANKED {
+uint8_t txtwind_run(uint8_t render_mode) BANKED {
 	// TODO
+	return 0;
 }

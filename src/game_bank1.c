@@ -52,8 +52,6 @@ static void game_play_handle_pause(bool pause_blink) {
 		}
 	}
 
-	input_update();
-
 	if (input_delta_x != 0 || input_delta_y != 0) {
 		uint8_t mpx = px + input_delta_x;
 		uint8_t mpy = py + input_delta_y;
@@ -91,6 +89,7 @@ static void game_play_handle_pause(bool pause_blink) {
 }
 
 void game_play_loop(bool board_changed) BANKED {
+RestartGameLoop:
 	game_update_sidebar_all();
 
 	ZOO_TILE_CHANGE2(ZOO_STAT(0).x, ZOO_STAT(0).y,
@@ -115,6 +114,13 @@ void game_play_loop(bool board_changed) BANKED {
 		if (zoo_game_state.paused) {
 			if (timer_has_time_elapsed(&zoo_game_state.tick_time_counter, 25)) {
 				pause_blink = !pause_blink;
+			}
+			input_update();
+			if (input_start_pressed) {
+				if (game_pause_menu()) {
+					board_changed = true;
+					goto RestartGameLoop;
+				}
 			}
 			game_play_handle_pause(pause_blink);
 		} else if (zoo_game_state.current_stat_ticked <= zoo_stat_count) {
@@ -144,6 +150,12 @@ void game_play_loop(bool board_changed) BANKED {
 			zoo_game_state.current_stat_ticked = 0;
 
 			input_update();
+			if (input_start_pressed) {
+				if (game_pause_menu()) {
+					board_changed = true;
+					goto RestartGameLoop;
+				}
+			}
 		}
 	} while(!zoo_game_state.play_exit_requested);
 }
