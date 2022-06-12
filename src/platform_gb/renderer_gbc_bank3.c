@@ -42,6 +42,8 @@ const uint16_t cgb_menu_palette[4] = {
 extern uint16_t cgb_message_palette[];
 extern const uint16_t cgb_palette[];
 extern uint16_t *cgb_static_palette;
+extern uint8_t cgb_static_palette_offset;
+extern uint8_t cgb_static_palette_bank;
 
 void gbc_vblank_isr(void);
 
@@ -59,8 +61,12 @@ void sidebar_set_message_color(uint8_t color) BANKED {
 void gbc_init_set_palette(void) BANKED {
 	if (renderer_mode == RENDER_MODE_TXTWIND) {
 		cgb_static_palette = cgb_txtwind_palette;
+		cgb_static_palette_offset = 0;
+		cgb_static_palette_bank = 3;
 	} else if (renderer_mode == RENDER_MODE_MENU) {
 		cgb_static_palette = cgb_menu_palette;
+		cgb_static_palette_offset = 0;
+		cgb_static_palette_bank = 3;
 	}
 }
 

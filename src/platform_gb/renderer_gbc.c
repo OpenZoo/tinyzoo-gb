@@ -35,6 +35,8 @@ const uint16_t cgb_palette[16] = {
 };
 
 uint16_t *cgb_static_palette = NULL;
+uint8_t cgb_static_palette_offset;
+uint8_t cgb_static_palette_bank;
 
 uint16_t cgb_message_palette[16];
 
@@ -43,7 +45,7 @@ static uint16_t hblank_isr_pal_pos;
 extern uint8_t ly_bank_switch;
 static uint8_t new_lcdc_val;
 
-static void load_palette(const uint16_t *pal) {
+static void load_palette(const uint16_t *pal, uint8_t offset) PRESERVES_REGS(b, c) {
 __asm
 	; backup sp
 	ld (_hblank_isr_sp), sp
@@ -52,7 +54,8 @@ __asm
 	ld l, e
 
 	; prepare palette register
-	ld a, #0x80
+	sla a
+	or a, #0x80
 	ldh (_BCPS_REG + 0), a
 
 	di
@@ -63,9 +66,9 @@ __asm
 
 	; write 10 color pairs (20 colors)
 .rept 20
-	pop bc
-	ld (hl), c
-	ld (hl), b
+	pop de
+	ld (hl), e
+	ld (hl), d
 .endm
 
 	; restore SP
@@ -343,10 +346,12 @@ void gbc_vblank_isr(void) {
 
 	if (cgb_static_palette != NULL) {
 		uint8_t prev_bank = _current_bank;
-		ZOO_SWITCH_ROM(3);
-		load_palette(cgb_static_palette);
+		ZOO_SWITCH_ROM(cgb_static_palette_bank);
+		load_palette(cgb_static_palette, cgb_static_palette_offset);
 		ZOO_SWITCH_ROM(prev_bank);
-	} else {
+	}
+
+	if (renderer_mode == RENDER_MODE_PLAYFIELD) {
 		hblank_isr_ip = (uint16_t) hblank_update_palette;
 		hblank_isr_pal_pos = 0xD000 | ((uint16_t)local_doy << 6);
 		LYC_REG = 7;
