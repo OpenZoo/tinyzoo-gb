@@ -293,9 +293,13 @@ static void oop_parse_direction(void) {
 		case 0x0C: /* RNDP */
 			oop_parse_direction();
 			if (RAND2() == 0) {
-				oop_dir_x = -oop_dir_x;
+				tmp = oop_dir_x;
+				oop_dir_x = -oop_dir_y;
+				oop_dir_y = tmp;
 			} else {
-				oop_dir_y = -oop_dir_y;
+				tmp = oop_dir_x;
+				oop_dir_x = oop_dir_y;
+				oop_dir_y = -tmp;
 			}
 			break;
 		case 0x0D: /* OPP */
