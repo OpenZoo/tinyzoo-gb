@@ -35,6 +35,7 @@
 	ld a, (__current_bank)
 	push af
 	ld a, #0x02
+	ld (__current_bank), a
 .ifdef __TPP1__
 	ld (0x0000), a
 .else
@@ -44,6 +45,7 @@
 	call (_sound_update)
 
 	pop af
+	ld (__current_bank), a
 .ifdef __TPP1__
 	ld (0x0000), a
 .else
