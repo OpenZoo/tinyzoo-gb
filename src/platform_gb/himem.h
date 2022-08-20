@@ -12,5 +12,7 @@ static volatile SFR AT(0xA5) ly_bank_switch_mirror;
 static volatile SFR AT(0xA6) zoo_stat_count;
 static volatile SFR AT(0xA7) temp6; // NOT used in VBLANK
 static volatile SFR AT(0xA8) ly_offset_mirror;
+static volatile SFR AT(0xA9) temp7; // NOT used in VBLANK
+static volatile SFR AT(0xAA) temp8; // NOT used in VBLANK
 
 #endif

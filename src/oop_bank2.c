@@ -34,20 +34,23 @@ static uint8_t get_color_for_tile_match(uint8_t element, uint8_t color) {
 bool find_tile_on_board(uint8_t *x, uint8_t *y, uint8_t element, uint8_t color) BANKED {
 	zoo_tile_t tile;
 
+	temp7 = *x;
+	temp8 = *y;
+
 	while (true) {
-		if ((++(*x)) > BOARD_WIDTH) {
-			*x = 1;
-			if ((++(*y)) > BOARD_HEIGHT) {
+		if ((++temp7) > BOARD_WIDTH) {
+			temp7 = 1;
+			if ((++temp8) > BOARD_HEIGHT) {
 				return false;
 			}
 		}
 
-		ZOO_TILE_ASSIGN(tile, (*x), (*y));
+		ZOO_TILE_ASSIGN(tile, temp7, temp8);
 		if (tile.element == element) {
-			if (color == 0) {
-				return true;
-			}
-			if (get_color_for_tile_match(tile.element, tile.color) == color) {
+			if (color == 0 ||
+			    get_color_for_tile_match(tile.element, tile.color) == color) {
+				*x = temp7;
+				*y = temp8;
 				return true;
 			}
 		}
