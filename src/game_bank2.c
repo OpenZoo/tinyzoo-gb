@@ -81,7 +81,7 @@ void world_create(void) BANKED {
 	// board_change(0);
 }
 
-void damage_stat_stat0(zoo_stat_t *stat, zoo_tile_t *tile) {
+void damage_stat_stat0(zoo_tile_t *tile) {
 	if (zoo_world_info.health > 0) {
 		zoo_world_info.health -= 10;
 
@@ -94,16 +94,16 @@ void damage_stat_stat0(zoo_stat_t *stat, zoo_tile_t *tile) {
 			if (zoo_board_info.flags & BOARD_REENTER_WHEN_ZAPPED) {
 				sound_queue(4, sound_player_zapped);
 
-				uint8_t old_x = stat->x;
-				uint8_t old_y = stat->y;
+				uint8_t old_x = ZOO_STAT(0).x;
+				uint8_t old_y = ZOO_STAT(0).y;
 				tile->element = E_EMPTY;
 				board_draw_tile(old_x, old_y);
-				stat->x = zoo_board_info.start_player_x;
-				stat->y = zoo_board_info.start_player_y;
+				ZOO_STAT(0).x = zoo_board_info.start_player_x;
+				ZOO_STAT(0).y = zoo_board_info.start_player_y;
 				// center_viewport_on_player();
 				// board_redraw();
 				if (viewport_request_player_focus()) {
-					move_stat_scroll_focused(old_x, old_y, stat->x, stat->y, true);
+					move_stat_scroll_focused(0, old_x, old_y, ZOO_STAT(0).x, ZOO_STAT(0).y, true);
 				}
 				text_update();
 
@@ -120,7 +120,7 @@ void damage_stat_stat0(zoo_stat_t *stat, zoo_tile_t *tile) {
 	}
 }
 
-void move_stat_scroll_focused(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y, bool force) BANKED {
+void move_stat_scroll_focused(uint8_t stat_id, uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y, bool force) BANKED {
 	bool is_dark = (zoo_board_info.flags & BOARD_IS_DARK) && (zoo_world_info.torch_ticks > 0);
 	bool force_redraw = false;
 	// move viewport?
@@ -134,6 +134,9 @@ void move_stat_scroll_focused(uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8
 
 	if (viewport_focus_stat != 0 || force) {
 		recalc_required = true;
+		if (!viewport_focus_locked) {
+			viewport_focus_stat = stat_id;
+		}
 	} else if (pox < VIEWPORT_PLAYER_MIN_X && vx > VIEWPORT_MIN_X) {
 		if ((old_x - 1) == new_x) {
 			vx--;

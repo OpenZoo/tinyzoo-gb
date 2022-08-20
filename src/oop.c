@@ -668,7 +668,7 @@ static void oop_command_viewport(void) {
 			ZOO_SWITCH_ROM(prev_bank);
 		}
 
-		move_stat_scroll_focused(
+		move_stat_scroll_focused(viewport_focus_stat,
 			source_x, source_y,
 			ZOO_STAT(viewport_focus_stat).x, ZOO_STAT(viewport_focus_stat).y,
 			true);
@@ -677,7 +677,7 @@ static void oop_command_viewport(void) {
 		oop_source_x = source_x;
 		oop_source_y = source_y;
 		oop_parse_direction();
-		move_stat_scroll_focused(
+		move_stat_scroll_focused(viewport_focus_stat,
 			source_x, source_y,
 			oop_source_x + oop_dir_x, oop_source_y + oop_dir_y,
 			true);

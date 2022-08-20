@@ -73,7 +73,7 @@ static void game_play_handle_pause(bool pause_blink) {
 				// center_viewport_on_player();
 				// board_redraw();
 				if (viewport_request_player_focus()) {
-					move_stat_scroll_focused(px, py, mpx, mpy, true);
+					move_stat_scroll_focused(0, px, py, mpx, mpy, true);
 				}
 				text_update();
 			}

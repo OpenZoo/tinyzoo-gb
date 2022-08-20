@@ -62,14 +62,15 @@ void viewport_reset(void) {
 }
 
 bool viewport_request_player_focus(void) {
-	if (viewport_focus_stat == 0) {
+	return (viewport_focus_stat == 0) || (!viewport_focus_locked);
+	/* if (viewport_focus_stat == 0) {
 		return true;
 	} else if (viewport_focus_locked) {
 		return false;
 	} else {
 		viewport_focus_stat = 0;
 		return true;
-	}
+	} */
 }
 
 void board_enter_stage1(void) {
@@ -401,12 +402,14 @@ void move_stat(uint8_t stat_id, uint8_t new_x, uint8_t new_y) {
 		board_draw_tile(old_x, old_y);
 	}
 
-	if (stat_id == viewport_focus_stat && (stat_id != 0 || !viewport_focus_locked) && move_stat_enable_scroll) {
-		move_stat_scroll_focused(old_x, old_y, new_x, new_y, false);
+	if (stat_id == viewport_focus_stat || (stat_id == 0 && !viewport_focus_locked)) {
+		if (move_stat_enable_scroll) {
+			move_stat_scroll_focused(stat_id, old_x, old_y, new_x, new_y, false);
+		}
 	}
 }
 
-void damage_stat_stat0(zoo_stat_t *stat, zoo_tile_t *tile);
+void damage_stat_stat0(zoo_tile_t *tile);
 
 void damage_stat(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
@@ -415,7 +418,7 @@ void damage_stat(uint8_t stat_id) {
 	if (stat_id == 0) {
 		uint8_t prev_bank = _current_bank;
 		ZOO_SWITCH_ROM(2);
-		damage_stat_stat0(stat, tile);
+		damage_stat_stat0(tile);
 		ZOO_SWITCH_ROM(prev_bank);
 	} else {
 		switch (tile->element) {

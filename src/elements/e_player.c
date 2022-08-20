@@ -98,8 +98,6 @@ void ElementPlayerTick(uint8_t stat_id) {
 			}
 		}
 	} else if (input_delta_x != 0 || input_delta_y != 0) {
-		viewport_request_player_focus();
-
 		player_dir_x = input_delta_x;
 		player_dir_y = input_delta_y;
 
