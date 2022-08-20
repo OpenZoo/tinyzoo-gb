@@ -44,8 +44,10 @@ void global_vblank_isr(void) {
 
 void text_init(uint8_t mode, const renderer_t *renderer) {
 	IE_REG &= ~LCD_IFLAG;
-	draw_offset_x = 0;
-	draw_offset_y = 0;
+	if (mode > RENDER_MODE_TITLE) {
+		draw_offset_x = 0;
+		draw_offset_y = 0;
+	}
 
 	if (renderer != NULL) {
 		hblank_isr_jp = 0xC3;

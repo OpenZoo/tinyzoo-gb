@@ -83,6 +83,9 @@ static uint8_t txtwind_run_txtwind(void) {
 
 	scx_shadow_reg = 4;
 
+	wait_vbl_done();
+	gbc_init_set_palette();
+
 	if (renderer_id == RENDER_ID_GBC) {
 		VBK_REG = 1;
 		fill_win_rect(0, 0, 1, 32, 2);
@@ -95,9 +98,6 @@ static uint8_t txtwind_run_txtwind(void) {
 	for (i = 0; i < 18; i++) {
 		txtwind_draw_line_txtwind(pos + i);
 	}
-
-	wait_vbl_done();
-	gbc_init_set_palette();
 
 	uint8_t keys;
 	while (true) {
@@ -174,6 +174,9 @@ static uint8_t txtwind_run_menu(void) {
 	uint8_t wnd_y = (18 - (wnd_height + 4)) >> 1;
 	uint8_t arrow_y = 0;
 
+	wait_vbl_done();
+	gbc_init_set_palette();
+
 	// clear + colors
 	if (renderer_id == RENDER_ID_GBC) {
 		VBK_REG = 1;
@@ -201,9 +204,6 @@ static uint8_t txtwind_run_menu(void) {
 		txtwind_read_line(idx, &line);
 		set_win_tiles(wnd_x + 4, wnd_y + 2 + idx, line.len, 1, line.text);
 	}
-
-	wait_vbl_done();
-	gbc_init_set_palette();
 
 	uint8_t keys;
 	while (true) {
