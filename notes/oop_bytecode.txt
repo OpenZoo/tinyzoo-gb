@@ -57,6 +57,8 @@ Direction IDs:
 0B		CCW
 0C		RNDP
 0D		OPP
+OE		BY [x] [y]
+0F		AT [x] [y]
 
 Code:
 

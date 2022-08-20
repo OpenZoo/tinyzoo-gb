@@ -307,6 +307,14 @@ static void oop_parse_direction(void) {
 			oop_dir_x = -oop_dir_x;
 			oop_dir_y = -oop_dir_y;
 			break;
+		case 0x0E: /* BY - ZXT 79656D74:0001 */
+			oop_dir_x = (int8_t) (*(oop_code_loc++));
+			oop_dir_y = (int8_t) (*(oop_code_loc++));
+			break;
+		case 0x0F: /* AT - ZXT 79656D74:0001 */
+			oop_dir_x = ((int8_t) (*(oop_code_loc++))) - oop_source_x;
+			oop_dir_y = ((int8_t) (*(oop_code_loc++))) - oop_source_y;
+			break;
 	}
 }
 
