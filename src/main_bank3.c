@@ -23,16 +23,16 @@ void init_main(void) BANKED {
 
 #if defined(__POCKET__)
 	cpu_fast();
-	text_init(RENDER_MODE_PLAYFIELD, &renderer_gbc);
+	text_init(RENDER_MODE_NONE, &renderer_gbc);
 #elif defined(GAMEBOY)
 	if (_cpu == CGB_TYPE) {
 		cpu_fast();
-		text_init(RENDER_MODE_PLAYFIELD, &renderer_gbc);
+		text_init(RENDER_MODE_NONE, &renderer_gbc);
 	} else {
-		text_init(RENDER_MODE_PLAYFIELD, &renderer_dmg);
+		text_init(RENDER_MODE_NONE, &renderer_dmg);
 	}
 #else
-	text_init(RENDER_MODE_PLAYFIELD);
+	text_init(RENDER_MODE_NONE);
 #endif
 
 	sram_init(false);
@@ -43,5 +43,5 @@ void init_main(void) BANKED {
 
 	timer_init();
 
-	game_menu_act_enter_world(zoo_game_state.world_id, false);
+	game_menu_act_enter_world(zoo_game_state.world_id, false, true);
 }

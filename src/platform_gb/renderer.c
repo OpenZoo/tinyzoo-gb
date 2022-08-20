@@ -4,6 +4,7 @@
 #include <gbdk/platform.h>
 
 #include "bank_switch.h"
+#include "config.h"
 #include "../game_transition.h"
 #include "../input.h"
 #include "../renderer.h"
@@ -15,10 +16,11 @@ uint8_t renderer_mode = 0;
 uint8_t renderer_scrolling = 0;
 uint8_t draw_offset_x = 0;
 uint8_t draw_offset_y = 0;
-uint8_t lcdc_shadow_reg = 0b11010001;
+uint8_t lcdc_shadow_reg = LCDCF_ON;
 uint8_t scx_shadow_reg = 0;
 uint8_t scy_shadow_reg = 0;
 uint8_t ly_bank_switch;
+uint8_t ly_offset;
 extern uint8_t vbl_ticks;
 
 uint8_t sidebar_tile_data_ly_switch = 0;
@@ -56,7 +58,16 @@ void text_init(uint8_t mode, const renderer_t *renderer) {
 		memcpy(&active_renderer, renderer, sizeof(renderer_t));
 	}
 
-	ly_bank_switch = 135;
+	if (mode == RENDER_MODE_TITLE) {
+		ly_bank_switch = 143;
+	} else {
+#ifndef HACK_HIDE_STATUSBAR
+		ly_bank_switch = 135;
+#else
+		ly_bank_switch = 143;
+#endif
+	}
+	ly_offset = ly_bank_switch;
 
 	uint8_t prev_bank = _current_bank;
 	ZOO_SWITCH_ROM(3);

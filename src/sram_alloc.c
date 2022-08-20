@@ -302,12 +302,14 @@ void sram_init(bool force) BANKED {
 
 	ZOO_ENABLE_RAM;
 
+#ifndef RESET_SAVE_ON_START
 	sram_read(&ptr, magic, 4);
 	if (magic[0] != sram_expected_magic[0]
 		|| magic[1] != sram_expected_magic[1]
 		|| magic[2] != sram_expected_magic[2]
 		|| magic[3] != sram_expected_magic[3]
 		|| force)
+#endif
 	{
 		ptr.position = 0;
 		sram_write(&ptr, sram_expected_magic, 4);

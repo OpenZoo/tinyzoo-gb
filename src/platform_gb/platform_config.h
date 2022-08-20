@@ -8,7 +8,7 @@
 #define SRAM_BANK_SIZE 0x2000
 
 #define VIEWPORT_WIDTH 20
-#define VIEWPORT_HEIGHT 17
+#define VIEWPORT_HEIGHT 18
 #define RENDER_ID_DMG 0
 #define RENDER_ID_GBC 1
 

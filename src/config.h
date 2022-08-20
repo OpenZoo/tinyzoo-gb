@@ -31,6 +31,11 @@
 // this makes some parts of the board edge immutable
 #define OPT_BOARD_EDGE_IMMUTABLE
 
+// #define RESET_SAVE_ON_START
+#define SHOW_TITLE
+// #define HACK_HIDE_STATUSBAR
+// #define HACK_PLAYER_INVINCIBLE
+
 #define MAX_SCROLL_DISTANCE_BEFORE_REDRAW 15
 
 #define TORCH_DX 8

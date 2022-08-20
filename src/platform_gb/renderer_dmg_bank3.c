@@ -27,7 +27,7 @@ void dmg_text_init(uint8_t mode) {
 		renderer_id = RENDER_ID_DMG;
 	}
 
-	if (mode == RENDER_MODE_PLAYFIELD) {
+	if (mode <= RENDER_MODE_TITLE) {
 		// set bottom bar
 		uint8_t *bottom_bar_ptr = (uint8_t*) (0x9C00 + (17 << 5));
 		for (uint8_t i = 0; i < 20; i++, bottom_bar_ptr++) {
@@ -37,6 +37,9 @@ void dmg_text_init(uint8_t mode) {
 		STAT_REG = STATF_LYC;
 		IE_REG |= LCD_IFLAG;
 		lcdc_shadow_reg = LCDCF_ON | LCDCF_WIN9C00 | LCDCF_BG8000 | LCDCF_BGON;
+	} else if (mode == RENDER_MODE_NONE) {
+		IE_REG &= ~LCD_IFLAG;
+		lcdc_shadow_reg = LCDCF_ON;
 	} else {
 		IE_REG &= ~LCD_IFLAG;
 		lcdc_shadow_reg = LCDCF_ON | LCDCF_WIN9C00 | LCDCF_BG8000 | LCDCF_BG9C00 | LCDCF_BGON;

@@ -83,9 +83,11 @@ void world_create(void) BANKED {
 
 void damage_stat_stat0(zoo_tile_t *tile) {
 	if (zoo_world_info.health > 0) {
+#ifndef HACK_PLAYER_INVINCIBLE
 		zoo_world_info.health -= 10;
 
 		game_update_sidebar_health();
+#endif
 
 		tile->color = 0x70 | (zoo_element_defs_color[E_PLAYER] & 0xF);
 

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <gbdk/platform.h>
+#include "config.h"
 #include "font_manager.h"
 #include "../renderer.h"
 
@@ -149,21 +150,27 @@ void gbc_text_init(uint8_t mode) {
 	}
 
 	renderer_mode = mode;
+#ifdef HACK_HIDE_STATUSBAR
+	uint8_t *bottom_bar_ptr = (uint8_t*) 0x9C00 + (14 << 5);
+#else
 	uint8_t *bottom_bar_ptr = (uint8_t*) 0x9C00 + (13 << 5);
+#endif
 
 	if (mode == RENDER_MODE_PLAYFIELD) {
 		VBK_REG = 1;
 		vmemset(bottom_bar_ptr, 0b00001011, (32 * 4));
+#ifdef HACK_HIDE_STATUSBAR
+		VBK_REG = 0;
+#else
 		bottom_bar_ptr += 128;
 		vmemcpy(bottom_bar_ptr, cgb_sidebar_colors, 20);
-	}
 
-	if (mode == RENDER_MODE_PLAYFIELD) {
 		// set bottom bar
 		VBK_REG = 0;
 		for (i = 0; i < 20; i++, bottom_bar_ptr++) {
 			set_vram_byte(bottom_bar_ptr, i);
 		}
+#endif
 	}
 
 	if (renderer_id != RENDER_ID_GBC) {
@@ -176,13 +183,13 @@ void gbc_text_init(uint8_t mode) {
 		renderer_id = RENDER_ID_GBC;
 	}
 
-	if (mode == RENDER_MODE_PLAYFIELD) {
+	if (mode <= RENDER_MODE_TITLE) {
 		cgb_static_palette = NULL;
 	} else {
 		cgb_static_palette = cgb_empty_palette;
 	}
 
-	if (mode == RENDER_MODE_PLAYFIELD) {
+	if (mode <= RENDER_MODE_TITLE) {
 		STAT_REG = STATF_LYC;
 		IE_REG |= LCD_IFLAG;
 		lcdc_shadow_reg = LCDCF_ON | LCDCF_WIN9C00 | LCDCF_BG8000 | LCDCF_BGON;

@@ -43,6 +43,7 @@ uint16_t cgb_message_palette[16];
 static uint16_t hblank_isr_sp;
 static uint16_t hblank_isr_pal_pos;
 extern uint8_t ly_bank_switch;
+extern uint8_t ly_offset;
 static uint8_t new_lcdc_val;
 
 static void load_palette(const uint16_t *pal, uint8_t offset) PRESERVES_REGS(b, c) {
@@ -323,7 +324,7 @@ __asm
 	ldh (_SCX_REG + 0), a ; 12
 	ldh (_SCY_REG + 0), a ; 12
 
-	ld a, #135
+	ld a, (_ly_offset_mirror)
 	ldh (_LYC_REG + 0), a
 	ld a, #<(_gbc_hblank_switch_window)
 	ld (_hblank_isr_ip), a
@@ -350,15 +351,18 @@ void gbc_vblank_isr(void) {
 		load_palette(cgb_static_palette, cgb_static_palette_offset);
 	}
 
-	if (renderer_mode == RENDER_MODE_PLAYFIELD) {
+	if (renderer_mode <= RENDER_MODE_TITLE) {
 		hblank_isr_ip = (uint16_t) hblank_update_palette;
 		hblank_isr_pal_pos = 0xD000 | ((uint16_t)local_doy << 6);
 		LYC_REG = 7;
 		ly_bank_switch_mirror = ly_bank_switch;
-		new_lcdc_val = (ly_bank_switch < 135)
+		ly_offset_mirror = ly_offset;
+		new_lcdc_val = (ly_bank_switch < ly_offset)
 			? (LCDCF_ON | LCDCF_WIN9C00 | LCDCF_BG8000 | LCDCF_BG9C00 | LCDCF_BGON)
 			: (LCDCF_ON | LCDCF_WIN9C00 | LCDCF_BG9C00 | LCDCF_BGON);
 		vblank_update_palette();
+	} else {
+		LYC_REG = 255;
 	}
 
 	global_vblank_isr();

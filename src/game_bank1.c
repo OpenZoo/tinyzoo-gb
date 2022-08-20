@@ -101,6 +101,9 @@ RestartGameLoop:
 
 	if (board_changed) {
 		board_redraw();
+		text_reinit(zoo_game_state.game_state_element == E_MONITOR
+			? RENDER_MODE_TITLE
+			: RENDER_MODE_PLAYFIELD);
 		text_update();
 	}
 
@@ -153,7 +156,9 @@ RestartGameLoop:
 
 			input_update();
 			if (input_start_pressed) {
-				if (game_pause_menu()) {
+				if (zoo_game_state.game_state_element == E_MONITOR) {
+					return;
+				} else if (game_pause_menu()) {
 					board_changed = true;
 					goto RestartGameLoop;
 				}

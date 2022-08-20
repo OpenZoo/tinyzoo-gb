@@ -9,6 +9,7 @@
 #ifndef __POCKET__
 
 extern uint8_t ly_bank_switch;
+extern uint8_t ly_offset;
 
 void dmg_hblank_switch_window_pre(void) NAKED {
 __asm
@@ -29,7 +30,7 @@ __asm
 	ld a, #27 ; 8
 	ldh (_BGP_REG + 0), a ; 12
 
-	ld a, #135
+	ld a, (_ly_offset)
 	ldh (_LYC_REG + 0), a
 	
 	ld a, #<(_dmg_hblank_switch_window)
@@ -72,13 +73,15 @@ void dmg_vblank_isr(void) {
 	uint8_t prev_bank = _current_bank;
 	LCDC_REG = lcdc_shadow_reg;
 	BGP_REG = 0b11100100;
-	if (renderer_mode == RENDER_MODE_PLAYFIELD) {
+	if (renderer_mode <= RENDER_MODE_TITLE) {
 		LYC_REG = ly_bank_switch;
-		if (ly_bank_switch < 135) {
-			hblank_isr_ip = (uint16_t) dmg_hblank_switch_window_pre;
-		} else {
-			hblank_isr_ip = (uint16_t) dmg_hblank_switch_window;
-		}
+	} else {
+		LYC_REG = 255;
+	}
+	if (ly_bank_switch < ly_offset) {
+		hblank_isr_ip = (uint16_t) dmg_hblank_switch_window_pre;
+	} else {
+		hblank_isr_ip = (uint16_t) dmg_hblank_switch_window;
 	}
 
 	SCX_REG = scx_shadow_reg;
