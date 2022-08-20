@@ -338,6 +338,7 @@ __endasm;
 void global_vblank_isr(void);
 
 void gbc_vblank_isr(void) {
+	uint8_t prev_bank = _current_bank;
 	uint8_t local_doy = scy_shadow_reg >> 3;
 
 	LCDC_REG = lcdc_shadow_reg;
@@ -345,10 +346,8 @@ void gbc_vblank_isr(void) {
 	SCY_REG = scy_shadow_reg;
 
 	if (cgb_static_palette != NULL) {
-		uint8_t prev_bank = _current_bank;
 		ZOO_SWITCH_ROM(cgb_static_palette_bank);
 		load_palette(cgb_static_palette, cgb_static_palette_offset);
-		ZOO_SWITCH_ROM(prev_bank);
 	}
 
 	if (renderer_mode == RENDER_MODE_PLAYFIELD) {
@@ -363,6 +362,7 @@ void gbc_vblank_isr(void) {
 	}
 
 	global_vblank_isr();
+	ZOO_SWITCH_ROM(prev_bank);
 }
 
 static void gbc_sync_di(void) NAKED PRESERVES_REGS(b, c, d, e, h, l) {

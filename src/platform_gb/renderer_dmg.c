@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <gbdk/platform.h>
+#include "bank_switch.h"
 #include "font_manager.h"
 #include "../renderer.h"
 
@@ -68,6 +69,7 @@ __endasm;
 void global_vblank_isr(void);
 
 void dmg_vblank_isr(void) {
+	uint8_t prev_bank = _current_bank;
 	LCDC_REG = lcdc_shadow_reg;
 	BGP_REG = 0b11100100;
 	if (renderer_mode == RENDER_MODE_PLAYFIELD) {
@@ -82,6 +84,7 @@ void dmg_vblank_isr(void) {
 	SCX_REG = scx_shadow_reg;
 	SCY_REG = scy_shadow_reg;
 	global_vblank_isr();
+	ZOO_SWITCH_ROM(prev_bank);
 }
 
 void dmg_text_init(uint8_t mode); // bank 3
