@@ -25,6 +25,8 @@ static void txtwind_draw_line_txtwind(int16_t idx) {
 	uint8_t pal_color = 0;
 	uint8_t offset = 1;
 
+	IE_REG &= ~TIM_IFLAG;
+
 	if ((idx == -1) || (idx == txtwind_lines)) {
 		if (renderer_id == RENDER_ID_GBC) {
 			VBK_REG = 1;
@@ -68,6 +70,8 @@ static void txtwind_draw_line_txtwind(int16_t idx) {
 		}
 		fill_win_rect(2, idx & 31, 1, 1, 16);
 	}
+
+	IE_REG |= TIM_IFLAG;
 }
 
 bool txtwind_exec_line(uint16_t idx);
@@ -83,6 +87,8 @@ static uint8_t txtwind_run_txtwind(void) {
 
 	scx_shadow_reg = 4;
 
+	IE_REG &= ~TIM_IFLAG;
+
 	if (renderer_id == RENDER_ID_GBC) {
 		VBK_REG = 1;
 		fill_win_rect(0, 0, 1, 32, 2);
@@ -91,6 +97,8 @@ static uint8_t txtwind_run_txtwind(void) {
 	}
 	fill_win_rect(0, 0, 1, 32, 32);
 	fill_win_rect(TEXT_WIDTH_OUTER - 1, 0, 1, 32, 32);
+
+	IE_REG |= TIM_IFLAG;
 
 	for (i = 0; i < 18; i++) {
 		txtwind_draw_line_txtwind(pos + i);
@@ -127,6 +135,8 @@ static uint8_t txtwind_run_txtwind(void) {
 		scx_shadow_reg = 4;
 		wait_vbl_done();
 
+		IE_REG &= ~TIM_IFLAG;
+
 		VBK_REG = 0;
 		if (old_pos != -9 && old_pos != (txtwind_lines - 8)) {
 			fill_win_rect(0, (old_pos + 8) & 31, 1, 1, 32);
@@ -143,6 +153,8 @@ static uint8_t txtwind_run_txtwind(void) {
 			fill_win_rect(0, (draw_offset_y + 8) & 31, 1, 1, 175);
 			fill_win_rect(TEXT_WIDTH_OUTER - 1, (draw_offset_y + 8) & 31, 1, 1, 174);
 		}
+
+		IE_REG |= TIM_IFLAG;
 	}
 
 	while (keys != 0) {
@@ -175,6 +187,8 @@ static uint8_t txtwind_run_menu(void) {
 	uint8_t arrow_y = 0;
 
 	// clear + colors
+	IE_REG &= ~TIM_IFLAG;
+
 	if (renderer_id == RENDER_ID_GBC) {
 		VBK_REG = 1;
 		fill_win_rect(0, 0, 20, 18, 0);
@@ -196,10 +210,14 @@ static uint8_t txtwind_run_menu(void) {
 	// arrow
 	set_win_tile_xy(wnd_x + 2, wnd_y + 2 + arrow_y, 16);
 
+	IE_REG |= TIM_IFLAG;
+
 	// text
 	for (uint8_t idx = 0; idx < wnd_height; idx++) {
 		txtwind_read_line(idx, &line);
+		IE_REG &= ~TIM_IFLAG;
 		set_win_tiles(wnd_x + 4, wnd_y + 2 + idx, line.len, 1, line.text);
+		IE_REG |= TIM_IFLAG;
 	}
 
 	wait_vbl_done();
@@ -210,6 +228,8 @@ static uint8_t txtwind_run_menu(void) {
 		wait_vbl_done();
 		wait_vbl_done();
 		keys = joypad();
+
+		IE_REG &= ~TIM_IFLAG;
 
 		if (keys & J_UP) {
 			if (arrow_y > 0) {
@@ -229,6 +249,8 @@ static uint8_t txtwind_run_menu(void) {
 		} else if (keys & J_B) {
 			break;
 		}
+
+		IE_REG |= TIM_IFLAG;
 
 		wait_vbl_done();
 		wait_vbl_done();
