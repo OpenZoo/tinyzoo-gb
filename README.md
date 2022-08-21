@@ -10,7 +10,7 @@ This project is not affiliated in any way with Nintendo. "Game Boy" and "Game Bo
 
 TinyZoo/GB as a complete work is licensed under the GNU General Public License, version 3 or later.
 
-Some utility code is additionally made available under other licensing terms, such as zlib - check the specific files' copyright notices for more information.
+Some utility code is additionally made available under other licensing terms, such as the zlib license - check the specific files' copyright notices for more information.
 
 Here are some clarifications provided by me to clarify the ways I expect TinyZoo/GB to be used in. **Note that only the official license text is legally binding - the clarifications below are not.**
 
