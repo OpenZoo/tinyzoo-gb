@@ -72,33 +72,10 @@ void gbc_init_set_palette(void) BANKED {
 
 void gbc_init_unset_palette(void) BANKED {
 	cgb_static_palette = cgb_empty_palette;
+	cgb_static_palette_bank = 3;
 }
 
 static void gbc_text_init_wram(void) {
-/* __asm
-	; clear banks 2, 3, 4
-	; TODO: inefficient
-	ld bc, #(_SVBK_REG)
-	ld de, #0xFF00
-	ld hl, #0xD000
-	ld a, #2
-WramClearLoop:
-	ld (bc), a
-	ld (hl), e
-	inc a
-	ld (bc), a
-	ld (hl), d
-	inc a
-	ld (bc), a
-	ld (hl), e
-	ld a, #2
-	inc hl
-	bit 5, h
-	jr z, WramClearLoop
-	; finish
-	xor a, a
-	ld (bc), a
-__endasm; */
 __asm
 	; clear bank 2
 	ld a, #2
