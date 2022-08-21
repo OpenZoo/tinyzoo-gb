@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (c) 2020 Adrian Siekierka
+# Copyright (c) 2021, 2022 Adrian Siekierka
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted.
