@@ -3,7 +3,7 @@
 	.globl	_dhsecs
 	.globl  _timer_state
 	.globl  _timer_speed_base
-	.globl  _timer_speed_drum
+;	.globl  _timer_speed_drum
 
 	.area	_HEADER_TIM (ABS)
 	.org	0x50
@@ -62,5 +62,5 @@ _timer_state:
 	.ds 1
 _timer_speed_base:
 	.ds 1
-_timer_speed_drum:
-	.ds 1
+; _timer_speed_drum:
+;	.ds 1
