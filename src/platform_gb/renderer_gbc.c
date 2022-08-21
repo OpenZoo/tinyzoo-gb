@@ -324,7 +324,7 @@ __asm
 	ldh (_SCX_REG + 0), a ; 12
 	ldh (_SCY_REG + 0), a ; 12
 
-	ld a, (_ly_offset_mirror)
+	ldh a, (_ly_offset_mirror)
 	ldh (_LYC_REG + 0), a
 	ld a, #<(_gbc_hblank_switch_window)
 	ld (_hblank_isr_ip), a
