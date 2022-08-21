@@ -628,7 +628,8 @@ GbcTextFreeLineLoop1:
 	ld a, #0xFF
 .rept 8
 	ld (de), a
-	inc de
+	; inc de
+	inc e ; de is page-aligned
 .endm
 
 	xor a, a
@@ -649,7 +650,8 @@ GbcTextFreeLineLoop1:
 
 GbcTextFreeLineLoop2:
 	ld (bc), a
-	inc bc
+	; inc bc
+	inc c ; bc is page-aligned
 	dec h
 	jr nz, GbcTextFreeLineLoop2
 
@@ -745,7 +747,8 @@ GbcTextAddColorAlloc:
 	cp a, h
 	jr z, GbcTextAddColorAllocFound
 .rept 9
-	inc bc
+	; inc bc
+	inc c ; bc is page-aligned
 	ld a, (bc)
 	cp a, h
 	jr z, GbcTextAddColorAllocFound
@@ -842,10 +845,11 @@ GbcTextAddColorAllocFound:
 	; copy data
 	ld a, (hl+)
 	ld (de), a
-	inc de
+	; inc de
+	inc e ; de is page-aligned
 	ld a, (hl)
 	ld (de), a
-	inc de
+	inc e
 
 	; calculate offset for fg color
 	ld hl, #_cgb_palette
@@ -864,7 +868,7 @@ GbcTextAddColorAllocFound:
 	; copy data
 	ld a, (hl+)
 	ld (de), a
-	inc de
+	inc e
 	ld a, (hl)
 	ld (de), a
 
