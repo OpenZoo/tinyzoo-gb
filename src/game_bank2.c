@@ -41,7 +41,11 @@ void board_create(void) BANKED {
 	
 	zoo_board_info.max_shots = 255;
 
+#ifndef OPT_BOARD_EDGE_IMMUTABLE
 	for (uint8_t iy = 0; iy <= BOARD_HEIGHT + 1; iy++) {
+#else
+	for (uint8_t iy = 0; iy <= BOARD_HEIGHT; iy++) {
+#endif
 		ZOO_TILE(0, iy).element = E_BOARD_EDGE;
 		ZOO_TILE(BOARD_WIDTH + 1, iy).element = E_BOARD_EDGE;
 	}
