@@ -72,6 +72,10 @@ static uint8_t get_color_for_tile_match(uint8_t element, uint8_t color) {
 	}
 }
 
+#ifdef __GG__
+static uint8_t temp7, temp8;
+#endif
+
 // TODO: This method is *SLOW*. Really, really *SLOW*.
 // TODO (SDCC 4.2.0 upgrade): This is broken, at least as of SDCC r13388 nightly
 bool find_tile_on_board(uint8_t *x, uint8_t *y, uint8_t element, uint8_t color) BANKED {

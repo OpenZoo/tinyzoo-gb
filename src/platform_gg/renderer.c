@@ -100,6 +100,10 @@ void text_init(uint8_t mode) {
 	__WRITE_VDP_REG(VDP_R2, R2_MAP_0x3800);
 }
 
+void text_reinit(uint8_t mode) {
+	// TODO
+}
+
 void text_sync_hblank_safe(void) {
 	// TODO
 }

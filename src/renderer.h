@@ -107,6 +107,7 @@ void text_init(uint8_t mode, const renderer_t *renderer);
 #define text_update() active_renderer.update()
 #else
 void text_init(uint8_t mode);
+void text_reinit(uint8_t mode);
 
 void text_sync_hblank_safe(void);
 void text_undraw(uint8_t x, uint8_t y);
