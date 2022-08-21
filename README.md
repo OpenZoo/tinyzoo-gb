@@ -18,6 +18,8 @@ Here are some clarifications provided by me to clarify the ways I expect TinyZoo
     * This does not prevent you from dual-licensing them under different terms.
   * For the purposes of bundling ZZT worlds, "the preferred form of the work for making modifications to it" is considered to be the .ZZT file provided as input to the converter.
   * I do not see a problem with using TinyZoo/GB commercially; however, absent different licensing terms, users must be granted their necessary rights under the GPL.
+  * I do not plan to pursue hobbyist, non-commercial usage of the publicly and freely available, unmodified TinyZoo/GB engine to distribute conversions of publicly and freely available, unmodified ZZT worlds.
+    * Please do not exploit this statement. There can always be exceptions.
 
 The terms are imposed primarily to protect the archival and preservation interests of the ZZT community - in particular, to prevent distribution of compiled ROM images without access to the underlying ZZT world source files.
 
