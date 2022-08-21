@@ -41,12 +41,19 @@ void game_menu_act_enter_world(uint8_t world_id, bool new_game, bool first_launc
 	board_pause_enter();
 }
 
+static void game_menu_act_about(void) {
+	txtwind_open_license();
+	txtwind_run(RENDER_MODE_TXTWIND);
+}
+
 bool game_pause_menu(void) BANKED {
+MenuStart:
 	if (zoo_world_info.health <= 0) {
 		// "Game Over" menu
 		txtwind_init();
 		txtwind_append((uint16_t) menu_entry_new_game, 3);
 		txtwind_append((uint16_t) menu_entry_continue, 3);
+		txtwind_append((uint16_t) menu_entry_about, 3);
 		switch (txtwind_run(RENDER_MODE_MENU)) {
 		case 0: { /* NEW GAME */
 			game_menu_act_enter_world(zoo_game_state.world_id, true, false);
@@ -57,16 +64,25 @@ bool game_pause_menu(void) BANKED {
 			game_menu_act_enter_world(zoo_game_state.world_id, false, false);
 			return true;
 		} break;
+		case 2: { /* ABOUT */
+			game_menu_act_about();
+			goto MenuStart;
+		} break;
 		}
 	} else {
 		// Regular menu
 		txtwind_init();
 		txtwind_append((uint16_t) menu_entry_continue, 3);
 		txtwind_append((uint16_t) menu_entry_restart, 3);
+		txtwind_append((uint16_t) menu_entry_about, 3);
 		switch (txtwind_run(RENDER_MODE_MENU)) {
 		case 1: { /* RESTART */
 			game_menu_act_enter_world(zoo_game_state.world_id, true, false);
 			return true;
+		} break;
+		case 2: { /* ABOUT */
+			game_menu_act_about();
+			goto MenuStart;
 		} break;
 		}
 	}

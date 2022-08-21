@@ -231,6 +231,7 @@ static uint8_t txtwind_run_menu(void) {
 		}
 
 		wait_vbl_done();
+		wait_vbl_done();
 	}
 
 	while (keys != 0) {

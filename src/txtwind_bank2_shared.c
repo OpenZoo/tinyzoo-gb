@@ -12,6 +12,8 @@
 #include "sram_alloc.h"
 #include "txtwind.h"
 
+#include "../res/txtwind_license.inc"
+
 uint16_t txtwind_lines;
 
 void txtwind_init(void) BANKED {
@@ -34,6 +36,18 @@ void txtwind_append(uint16_t line_ptr, uint8_t line_bank) BANKED {
 	ZOO_DISABLE_RAM;
 
 	txtwind_lines++;
+}
+
+static void txtwind_open_static(const uint8_t *data) {
+	txtwind_init();
+	const uint16_t *data_line = (const uint16_t*) data;
+	while (*data_line != 0) {
+		txtwind_append(((uint16_t) data) + (*(data_line++)), _current_bank);
+	}
+}
+
+void txtwind_open_license(void) BANKED {
+	txtwind_open_static(txtwind_license_data);
 }
 
 bool txtwind_exec_line(uint16_t idx) {

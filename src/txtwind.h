@@ -29,6 +29,7 @@ void txtwind_read_line(int16_t idx, txtwind_line_t *line);
 
 void txtwind_init(void) BANKED;
 void txtwind_append(uint16_t line_ptr, uint8_t line_bank) BANKED;
+void txtwind_open_license(void) BANKED;
 uint8_t txtwind_run(uint8_t render_mode) BANKED;
 
 #endif /* __TXTWIND_H__ */
