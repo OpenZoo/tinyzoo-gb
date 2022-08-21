@@ -11,10 +11,23 @@ distributor.
 
        - * -
 
-TinyZoo/GB License
+TinyZoo/GB Engine
 
 Copyright (c)
 2020, 2021, 2022
+Adrian Siekierka
+
+TinyZoo/GB is
+derived from the
+Reconstruction of
+ZZT, which was
+made available
+under the
+following license
+terms:
+
+Copyright (c)
+2020
 Adrian Siekierka
 
 Based on a
