@@ -270,7 +270,7 @@ uint8_t txtwind_run(uint8_t render_mode) BANKED {
 
 	uint8_t result;
 
-	// wait_vbl_done();
+	wait_vbl_done();
 	text_reinit(render_mode);
 
 	if (render_mode == RENDER_MODE_TXTWIND) {
