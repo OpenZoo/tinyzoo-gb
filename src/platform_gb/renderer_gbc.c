@@ -81,12 +81,15 @@ uint16_t *cgb_static_palette = NULL;
 uint8_t cgb_static_palette_offset;
 uint8_t cgb_static_palette_bank;
 
+__at(0xC01E)
 uint16_t cgb_message_palette[16];
 
 static uint16_t hblank_isr_sp;
+__at(0xC03E)
 static uint16_t hblank_isr_pal_pos;
 extern uint8_t ly_bank_switch;
 extern uint8_t ly_offset;
+__at(0xC01D)
 static uint8_t new_lcdc_val;
 
 static void load_palette(const uint16_t *pal, uint8_t offset) PRESERVES_REGS(b, c) {
@@ -229,6 +232,8 @@ __asm
 	; - set IE to only respond to LCD STAT
 	ld a, #0x02
 	ldh (_IE_REG + 0), a
+	; switch work banks - uses 0x02
+	ldh (_SVBK_REG + 0), a
 	; - clear LCD STAT IF
 	ldh a, (_IF_REG + 0)
 	and a, #0xFD
@@ -252,10 +257,6 @@ __asm
 	jr nc, .hblank_update_palette_window
 	add a, #0x08
 	ldh (_LYC_REG + 0), a
-
-	; switch work banks
-	ld a, #0x02
-	ldh (_SVBK_REG + 0), a
 
 	; set sp for stack copy; hl = BCPD
 	ld sp, hl
@@ -364,6 +365,7 @@ __asm
 	ld a, (_new_lcdc_val) ; 8
 	ldh (_LCDC_REG + 0), a ; 12
 	xor a, a ; 4
+	ldh (_SVBK_REG + 0), a
 	ldh (_SCX_REG + 0), a ; 12
 	ldh (_SCY_REG + 0), a ; 12
 
