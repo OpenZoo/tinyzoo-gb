@@ -55,7 +55,7 @@ __asm
 	ld l, e
 
 	; prepare palette register
-	sla a
+	add a, a
 	or a, #0x80
 	ldh (_BCPS_REG + 0), a
 

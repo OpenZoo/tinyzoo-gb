@@ -13,11 +13,10 @@
 #define COL_LVL_2 21
 #define COL_LVL_3 31
 
-const uint16_t cgb_empty_palette[16] = {
+const uint16_t cgb_empty_palette[10] = {
 	0, 0, 0, 0,
 	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0
+	0, 0
 };
 
 const uint16_t cgb_txtwind_palette[10] = {
@@ -173,6 +172,17 @@ void gbc_text_init(uint8_t mode) {
 #endif
 	}
 
+	if (mode <= RENDER_MODE_TITLE) {
+		cgb_static_palette = NULL;
+	} else {
+		cgb_static_palette = cgb_empty_palette;
+		cgb_static_palette_bank = 3;
+		if (renderer_id == RENDER_ID_GBC) {
+			wait_vbl_done();
+			gbc_vblank_isr();
+		}
+	}
+
 	if (renderer_id != RENDER_ID_GBC) {
 		wait_vbl_done();
 
@@ -181,12 +191,6 @@ void gbc_text_init(uint8_t mode) {
 		add_VBL(nowait_int_handler);
 
 		renderer_id = RENDER_ID_GBC;
-	}
-
-	if (mode <= RENDER_MODE_TITLE) {
-		cgb_static_palette = NULL;
-	} else {
-		cgb_static_palette = cgb_empty_palette;
 	}
 
 	if (mode <= RENDER_MODE_TITLE) {
