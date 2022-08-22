@@ -1,3 +1,5 @@
+#pragma bank 2
+
 /**
  * Copyright (c) 2020, 2021, 2022 Adrian Siekierka
  *
@@ -41,24 +43,70 @@
  * SOFTWARE.
  */
 
-#ifndef __INPUT_H__
-#define __INPUT_H__
-
-#include <stdbool.h>
-#include <stdint.h>
 #include <gbdk/platform.h>
+#include "input.h"
 
-extern int8_t input_delta_x, input_delta_y;
-extern uint8_t input_keys, input_held;
+//#define JOY_REPEAT_DELAY 15
+#define JOY_REPEAT_DELAY 11
+#define JOY_REPEAT_DELAY_NEXT 2
 
-#define input_a_pressed ((input_held & J_A) != 0)
-#define input_b_pressed ((input_held & J_B) != 0)
-#define input_select_pressed ((input_held & J_SELECT) != 0)
-#define input_start_pressed ((input_held & J_START) != 0)
-#define input_shift_pressed input_a_pressed
+extern uint8_t vbl_ticks;
 
-void input_update_vbl(void);
-void input_reset(void);
-void input_update(void) BANKED;
+extern uint8_t input_keys_repressed;
+extern uint8_t input_keys_released;
+static uint8_t input_vbls_next[4];
+static uint8_t input_last = 0;
 
-#endif /* __INPUT_H__ */
+void input_update(void) BANKED {
+	uint8_t keys_pressed;
+	uint8_t keys_repressed;
+	uint8_t keys_released;
+
+	CRITICAL {
+		keys_pressed = input_keys;
+		keys_repressed = input_keys_repressed;
+		keys_released = input_keys_released;
+	}
+
+	input_delta_x = 0;
+	input_delta_y = 0;
+
+	input_held = (input_held & 0x0F) | (keys_pressed & 0xF0);
+	if (keys_pressed & 0x0F) for (uint8_t i = 0; i < 4; i++) {
+		uint8_t input_id = (input_last + 1) & 3;
+		uint8_t input_mask = 1 << input_id;
+		input_last = input_id;
+
+		if (keys_pressed & input_mask) {
+			if (keys_repressed & input_mask) {
+				goto KeyRepressed;
+			} else if (input_held & input_mask) {
+				if (keys_released & input_mask) {
+					input_held &= ~input_mask;
+				}
+				if (((uint8_t) (input_vbls_next[input_id] - vbl_ticks)) < 0x80) continue;
+				if (!(keys_released & input_mask)) {
+					input_vbls_next[input_id] = vbl_ticks + JOY_REPEAT_DELAY_NEXT;
+				}
+			} else {
+				if (!(keys_released & input_mask)) {
+KeyRepressed:
+					input_held |= input_mask;
+					input_vbls_next[input_id] = vbl_ticks + JOY_REPEAT_DELAY;
+				}
+			}
+			if (input_mask == J_UP) {
+				input_delta_y = -1;
+			} else if (input_mask == J_DOWN) {
+				input_delta_y = 1;
+			} else if (input_mask == J_LEFT) {
+				input_delta_x = -1;
+			} else if (input_mask == J_RIGHT) {
+				input_delta_x = 1;
+			}
+			break;
+		}
+	}
+
+	input_reset();
+}

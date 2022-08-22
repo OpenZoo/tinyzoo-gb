@@ -150,26 +150,25 @@ static uint8_t txtwind_run_txtwind(void) {
 	wait_vbl_done();
 	gbc_init_set_palette();
 
-	uint8_t keys;
 	while (true) {
+		input_reset();
 		wait_vbl_done();
 		wait_vbl_done();
-		keys = joypad();
 
-		if (keys & J_UP) {
+		if (input_keys & J_UP) {
 			if (pos > -8) {
 				pos--;
 				txtwind_draw_line_txtwind(pos);
 			}
-		} else if (keys & J_DOWN) {
+		} else if (input_keys & J_DOWN) {
 			if (pos < (((int16_t) txtwind_lines) - 9)) {
 				txtwind_draw_line_txtwind(pos + 18);
 				pos++;
 			}
-		} else if (keys & J_A) {
+		} else if (input_keys & J_A) {
 			result = txtwind_exec_line(pos + 8) ? 0 : 255;
 			break;
-		} else if (keys & J_B) {
+		} else if (input_keys & J_B) {
 			break;
 		}
 
@@ -200,9 +199,9 @@ static uint8_t txtwind_run_txtwind(void) {
 		IE_REG |= TIM_IFLAG;
 	}
 
-	while (keys != 0) {
+	while (input_keys != 0) {
+		input_reset();
 		wait_vbl_done();
-		keys = joypad();
 	}
 
 	return result;
@@ -266,30 +265,29 @@ static uint8_t txtwind_run_menu(void) {
 	wait_vbl_done();
 	gbc_init_set_palette();
 
-	uint8_t keys;
 	while (true) {
+		input_reset();
 		wait_vbl_done();
 		wait_vbl_done();
-		keys = joypad();
 
 		IE_REG &= ~TIM_IFLAG;
 
-		if (keys & J_UP) {
+		if (input_keys & J_UP) {
 			if (arrow_y > 0) {
 				set_win_tile_xy(wnd_x + 2, wnd_y + 2 + arrow_y, 0);
 				arrow_y--;
 				set_win_tile_xy(wnd_x + 2, wnd_y + 2 + arrow_y, 16);
 			}
-		} else if (keys & J_DOWN) {
+		} else if (input_keys & J_DOWN) {
 			if (arrow_y < (txtwind_lines - 1)) {
 				set_win_tile_xy(wnd_x + 2, wnd_y + 2 + arrow_y, 0);
 				arrow_y++;
 				set_win_tile_xy(wnd_x + 2, wnd_y + 2 + arrow_y, 16);
 			}
-		} else if (keys & J_A) {
+		} else if (input_keys & J_A) {
 			result = arrow_y;
 			break;
-		} else if (keys & J_B) {
+		} else if (input_keys & J_B) {
 			break;
 		}
 
@@ -299,9 +297,9 @@ static uint8_t txtwind_run_menu(void) {
 		wait_vbl_done();
 	}
 
-	while (keys != 0) {
+	while (input_keys != 0) {
+		input_reset();
 		wait_vbl_done();
-		keys = joypad();
 	}
 
 	return result;
