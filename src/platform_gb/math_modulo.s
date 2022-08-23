@@ -68,15 +68,13 @@ _zoo_modu16_8:
 
 	ld l, a ; l = divisor
 _zoo_modu16_8a:
-	xor a, a
-	ld h, a
-	inc a ; a = multiple
+	ld a, #1 ; a = multiple
 	; while(divisor < 0x80)
 .fastmod_scale_divisor:
 .rept 7
 	bit 7, l
 	jr nz, .fastmod_scale_divisor_end
-	add hl, hl ; scaled_divisor <<= 1
+	sla l ; scaled_divisor <<= 1
 	add a, a ; multiple <<= 1
 .endm
 .fastmod_scale_divisor_end:
