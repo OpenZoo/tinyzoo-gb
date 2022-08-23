@@ -178,7 +178,7 @@ RestartGameLoop:
 
 				if (zoo_element_defs_tickprocs[element] != 0 && stat->cycle != 0) {
 					// if (stat->cycle == 1 || ((zoo_game_state.current_tick % stat->cycle) == (zoo_game_state.current_stat_ticked % stat->cycle))) {
-					if (stat->cycle == 1 || (((int16_t) zoo_game_state.current_tick - zoo_game_state.current_stat_ticked) % stat->cycle) == 0) {
+					if (stat->cycle == 1 || zoo_mods16_8(((int16_t) zoo_game_state.current_tick - zoo_game_state.current_stat_ticked), stat->cycle) == 0) {
 						zoo_element_defs_tickprocs[element](zoo_game_state.current_stat_ticked);
 					}
 				}

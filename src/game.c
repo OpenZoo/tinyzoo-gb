@@ -259,7 +259,7 @@ void init_display_message(uint8_t time, bool visible) {
 SetDuration:
 		dur = time / (zoo_game_state.tick_time_duration + 1);
 		ZOO_STAT(sid).p2 = dur;
-		sidebar_set_message_color(0x9 + (dur % 7));
+		sidebar_set_message_color(0x9 + zoo_modu16_8(dur, 7));
 	}
 }
 

@@ -56,7 +56,7 @@
 void ElementMessageTimerTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
 	if (stat->x == 0) {
-		sidebar_set_message_color(9 + (stat->p2 % 7));
+		sidebar_set_message_color(9 + zoo_modu16_8(stat->p2, 7));
 		if ((--(stat->p2)) == 0) {
 			remove_stat(stat_id);
 			zoo_game_state.current_stat_ticked--;

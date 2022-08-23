@@ -28,18 +28,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-/*
-#define signum(x) _Generic((x), \
-	int8_t: signum8, \
-	default: signum16 \
-)(x)
-
-#define difference(a, b) _Generic(((a)+(b)), \
-	int8_t: difference8, \
-	default: difference16 \
-)(x)
-*/
-
 #if defined(SM83)
 int8_t signum8(int8_t x) PRESERVES_REGS(b, c, d, h, l);
 int8_t difference8(int8_t a, int8_t b) PRESERVES_REGS(b, c, h, l);
@@ -48,10 +36,14 @@ int8_t signum8(int8_t x);
 int8_t difference8(int8_t a, int8_t b);
 #endif
 
-/*
-int8_t signum16(int16_t x);
-int16_t difference16(int16_t a, int16_t b);
-*/
+#if defined(SM83)
+// Optimized modulo routines. Designed for small dividends (<= 9-bit).
+uint8_t zoo_modu16_8(uint16_t a, uint8_t b) PRESERVES_REGS(c);
+uint8_t zoo_mods16_8(int16_t a, uint8_t b);
+#else
+#define zoo_modu16_8(a, b) ((uint8_t) (((uint16_t) (a)) % ((uint8_t) (b))))
+#define zoo_mods16_8(a, b) ((uint8_t) (((int16_t) (a)) % ((uint8_t) (b))))
+#endif
 
 #if defined(USE_XORSHIFT_RNG)
 int16_t rand(int16_t max);

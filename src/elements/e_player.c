@@ -70,7 +70,7 @@ void ElementPlayerTick(uint8_t stat_id) {
 		if ((zoo_game_state.current_tick & 1) != 0) {
 			tile->color = 0x0F;
 		} else {
-			tile->color = ((zoo_game_state.current_tick % 7) << 4) + 0x1F;
+			tile->color = (zoo_modu16_8(zoo_game_state.current_tick, 7) << 4) + 0x1F;
 		}
 
 		board_draw_tile(sx, sy);
@@ -190,7 +190,7 @@ NoKeyInput:
 		}
 
 		// TODO
-		/* if ((zoo_world_info.torch_ticks % 40) == 0) {
+		/* if (zoo_modu16_8(zoo_world_info.torch_ticks, 40) == 0) {
 			game_update_sidebar();
 		} */
 	}
