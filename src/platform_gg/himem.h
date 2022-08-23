@@ -44,6 +44,7 @@
 #ifndef __HIMEM_H__
 #define __HIMEM_H__
 
-// Not used on GG.
+extern uint8_t temp7;
+extern uint8_t temp8;
 
 #endif /* __HIMEM_H__ */

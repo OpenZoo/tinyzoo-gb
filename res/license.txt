@@ -118,7 +118,7 @@ library code:
 
 * gbdk-2020 library
 
-* libbet/rand.z80
+* libbet pads/rand
  (c) Damian Yerrick
 
        - * -

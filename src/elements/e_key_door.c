@@ -56,36 +56,52 @@
 const char *msg_key_pickup_get(uint8_t x) BANKED;
 const char *msg_door_open_get(uint8_t x) BANKED;
 
+static void show_key_pickup_no(uint8_t key) {
+	display_message(200, NULL, msg_key_pickup_no, msg_key_pickup_get(key));
+	sound_queue(2, sound_key_failure);
+}
+
+static void show_key_pickup_yes(uint8_t key) {
+	display_message(200, NULL, msg_key_pickup_yes, msg_key_pickup_get(key));
+	sound_queue(2, sound_key_success);
+}
+
+static void show_door_open_no(uint8_t key) {
+	display_message(200, NULL, msg_door_open_get(key), msg_door_open_no);
+	sound_queue(3, sound_door_failure);
+}
+
+static void show_door_open_yes(uint8_t key) {
+	display_message(200, NULL, msg_door_open_get(key), msg_door_open_yes);
+	sound_queue(3, sound_door_success);
+}
+
 void ElementKeyTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	zoo_tile_t *tile = &ZOO_TILE(x, y);
 	uint8_t key = (tile->color & 7);
 	if (key == 0) {
 #ifdef FEAT_BLACK_KEYS
 		if ((zoo_world_info.gems & 0xFF00) != 0) {
-			display_message(200, NULL, msg_key_pickup_no, msg_key_pickup_08);
-			sound_queue(2, sound_key_failure);
+			show_key_pickup_no(0);
 		} else {
 			zoo_world_info.gems |= 0x100;
 			tile->element = E_EMPTY;
 			game_update_sidebar_gems_time();
 
-			display_message(200, NULL, msg_key_pickup_yes, msg_key_pickup_08);
-			sound_queue(2, sound_key_success);
+			show_key_pickup_yes(0);
 		}
 #endif
 	} else {
 		uint8_t key_shift = 1 << key;
 
 		if (zoo_world_info.keys & key_shift) {
-			display_message(200, NULL, msg_key_pickup_no, msg_key_pickup_get(key));
-			sound_queue(2, sound_key_failure);
+			show_key_pickup_no(key);
 		} else {
 			zoo_world_info.keys |= key_shift;
 			tile->element = E_EMPTY;
 			game_update_sidebar_keys();
 
-			display_message(200, NULL, msg_key_pickup_yes, msg_key_pickup_get(key));
-			sound_queue(2, sound_key_success);
+			show_key_pickup_yes(key);
 		}
 	}
 }
@@ -96,8 +112,7 @@ void ElementDoorTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 	if (key == 0) {
 #ifdef FEAT_BLACK_KEYS
 		if ((zoo_world_info.gems & 0xFF00) == 0) {
-			display_message(200, NULL, msg_door_open_08, msg_door_open_no);
-			sound_queue(3, sound_door_failure);
+			show_door_open_no(0);
 		} else {
 			tile->element = E_EMPTY;
 			board_draw_tile(x, y);
@@ -105,16 +120,14 @@ void ElementDoorTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 			zoo_world_info.gems &= 0x00FF;
 			game_update_sidebar_gems_time();
 
-			display_message(200, NULL, msg_door_open_08, msg_door_open_yes);
-			sound_queue(3, sound_door_success);
+			show_door_open_yes(0);
 		}
 #endif
 	} else {
 		uint8_t key_shift = 1 << key;
 
 		if (!(zoo_world_info.keys & key_shift)) {
-			display_message(200, NULL, msg_door_open_get(key), msg_door_open_no);
-			sound_queue(3, sound_door_failure);
+			show_door_open_no(key);
 		} else {
 			tile->element = E_EMPTY;
 			board_draw_tile(x, y);
@@ -122,8 +135,7 @@ void ElementDoorTouch(uint8_t x, uint8_t y, int8_t *dx, int8_t *dy) {
 			zoo_world_info.keys &= ~key_shift;
 			game_update_sidebar_keys();
 
-			display_message(200, NULL, msg_door_open_get(key), msg_door_open_yes);
-			sound_queue(3, sound_door_success);
+			show_door_open_yes(key);
 		}
 	}
 }
