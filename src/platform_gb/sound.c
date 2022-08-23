@@ -237,8 +237,11 @@ void sound_init(void) BANKED {
 }
 
 void sound_clear_queue(void) BANKED {
-	sound_buffer_len = 0;
-	sound_is_playing = false;
-
-	// TODO: reset sound hardware
+	CRITICAL {
+		sound_buffer_len = 0;
+		// timer will change this and reset sound hardware
+		// sound_is_playing = false;
+		// if it doesn't have to wait for a note to end
+		sound_duration_counter = 0;
+	}
 }

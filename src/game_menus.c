@@ -75,7 +75,13 @@ void game_menu_act_enter_world(uint8_t world_id, bool new_game, bool first_launc
 		zoo_game_state.game_state_element = E_MONITOR;
 		zoo_game_state.paused = false;
 		game_play_loop(true);
-		while (input_start_pressed) input_update();
+
+		while (input_keys != 0) {
+			input_reset();
+			wait_vbl_done();
+		}
+
+		sound_clear_queue();
 	}
 #endif
 

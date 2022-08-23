@@ -176,6 +176,8 @@ void gbc_text_init(uint8_t mode) {
 #endif
 
 	if (mode == RENDER_MODE_PLAYFIELD) {
+		IE_REG &= ~TIM_IFLAG;
+
 		VBK_REG = 1;
 		vmemset(bottom_bar_ptr, 0b00001011, (32 * 4));
 #ifdef HACK_HIDE_STATUSBAR
@@ -190,6 +192,7 @@ void gbc_text_init(uint8_t mode) {
 			set_vram_byte(bottom_bar_ptr, i);
 		}
 #endif
+		IE_REG |= TIM_IFLAG;
 	}
 
 	if (mode <= RENDER_MODE_TITLE) {
