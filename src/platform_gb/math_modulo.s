@@ -35,19 +35,17 @@ _zoo_mods16_8:
 	jr z, _zoo_modu16_8
 
 	ld c, a
-	ld l, a
 
 	; negate dividend
-	ld a, e
-	cpl
-	add a, #1
+	xor a, a
+	sub a, e
 	ld e, a
-	ld a, d
-	cpl
-	adc a, #0
-	ld d, a
+	ld a, #0
+	sbc a, d
+	ld  d, a
 
 	; call unsigned modulo
+	ld a, c
 	call _zoo_modu16_8a
 
 	; result = divisor - result
@@ -66,19 +64,29 @@ _zoo_modu16_8:
 	; h = temp
 	; l = divisor/scaled_divisor
 
-	ld l, a ; l = divisor
+	; a = divisor
 _zoo_modu16_8a:
-	ld a, #1 ; a = multiple
+	ld b, #1 ; b = multiple
 	; while(divisor < 0x80)
 .fastmod_scale_divisor:
-.rept 7
-	bit 7, l
-	jr nz, .fastmod_scale_divisor_end
-	sla l ; scaled_divisor <<= 1
-	add a, a ; multiple <<= 1
-.endm
+	cp a, #0x10
+	jr nc, .fastmod_scale_divisor2
+	swap b ; multiple <<= 4
+	swap a ; scaled_divisor <<= 4
+.fastmod_scale_divisor2:
+	cp a, #0x20
+	jr nc, .fastmod_scale_divisor3
+	sla b ; multiple <<= 1
+	sla b ; multiple <<= 1
+	add a, a ; scaled_divisor <<= 1
+	add a, a ; scaled_divisor <<= 1
+.fastmod_scale_divisor3:
+	cp a, #0x40
+	jr nc, .fastmod_scale_divisor_end
+	sla b ; multiple <<= 1
+	add a, a ; scaled_divisor <<= 1	
 .fastmod_scale_divisor_end:
-	ld b, a ; b = multiple
+	ld l, a ; l = divisor
 .fastmod_remain:
 	; remain -= divisor
 	; if < 0, skip to remain2
