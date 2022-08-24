@@ -184,6 +184,8 @@ extern zoo_stat_t zoo_stats[MAX_STAT + 3];
 extern zoo_game_state_t zoo_game_state;
 #endif
 
+#define ZOO_IN_TITLE() (zoo_game_state.game_state_element == E_MONITOR)
+
 #define ZOO_TILE(x, y) zoo_tiles_y[(uint8_t)(y)][(uint8_t)(x)]
 #define ZOO_TILE_COPY(v, w) *((uint16_t*) &(v)) = *((uint16_t*) &(w))
 #define ZOO_TILE_ASSIGN(v, x, y) *((uint16_t*) &(v)) = *((uint16_t*) &ZOO_TILE((uint8_t)(x), (uint8_t)(y)))

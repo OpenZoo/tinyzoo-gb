@@ -90,10 +90,14 @@ void sidebar_show_message(const char* line1, uint8_t bank1, const char* line2, u
 
 	sidebar_tile_data_ly_switch = ly_offset - (sb_offset >> 2);
 #ifdef HACK_HIDE_STATUSBAR
-	sidebar_copy_data(0x9C00 + (15 << 5) + (96 - sb_offset), sb_offset);
+	if (1) {
 #else
-	sidebar_copy_data(0x9C00 + (14 << 5) + (96 - sb_offset), sb_offset);
+	if (renderer_mode == RENDER_MODE_TITLE) {
 #endif
+		sidebar_copy_data(0x9C00 + (15 << 5) + (96 - sb_offset), sb_offset);
+	} else {
+		sidebar_copy_data(0x9C00 + (14 << 5) + (96 - sb_offset), sb_offset);
+	}
 }
 
 void sidebar_hide_message(void) {

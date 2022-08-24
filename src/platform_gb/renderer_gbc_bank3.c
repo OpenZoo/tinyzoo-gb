@@ -169,29 +169,38 @@ void gbc_text_init(uint8_t mode) {
 	}
 
 	renderer_mode = mode;
-#ifdef HACK_HIDE_STATUSBAR
-	uint8_t *bottom_bar_ptr = (uint8_t*) 0x9C00 + (14 << 5);
-#else
-	uint8_t *bottom_bar_ptr = (uint8_t*) 0x9C00 + (13 << 5);
-#endif
 
-	if (mode == RENDER_MODE_PLAYFIELD) {
+	if (mode <= RENDER_MODE_TITLE) {
+		uint8_t *bottom_bar_ptr;
+
+#ifdef HACK_HIDE_STATUSBAR
+		if (1) {
+#else
+		if (mode == RENDER_MODE_TITLE) {
+#endif
+			bottom_bar_ptr = (uint8_t*) 0x9C00 + (14 << 5);
+		} else {
+			bottom_bar_ptr = (uint8_t*) 0x9C00 + (13 << 5);
+		}
+
 		IE_REG &= ~TIM_IFLAG;
 
 		VBK_REG = 1;
 		vmemset(bottom_bar_ptr, 0b00001011, (32 * 4));
-#ifdef HACK_HIDE_STATUSBAR
-		VBK_REG = 0;
-#else
-		bottom_bar_ptr += 128;
-		vmemcpy(bottom_bar_ptr, cgb_sidebar_colors, 20);
 
-		// set bottom bar
-		VBK_REG = 0;
-		for (i = 0; i < 20; i++, bottom_bar_ptr++) {
-			set_vram_byte(bottom_bar_ptr, i);
+#ifndef HACK_HIDE_STATUSBAR
+		if (mode == RENDER_MODE_PLAYFIELD) {
+			bottom_bar_ptr += 128;
+			vmemcpy(bottom_bar_ptr, cgb_sidebar_colors, 20);
+
+			// set bottom bar
+			VBK_REG = 0;
+			for (i = 0; i < 20; i++, bottom_bar_ptr++) {
+				set_vram_byte(bottom_bar_ptr, i);
+			}
 		}
 #endif
+		VBK_REG = 0;
 		IE_REG |= TIM_IFLAG;
 	}
 

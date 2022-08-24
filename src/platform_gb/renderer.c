@@ -102,14 +102,14 @@ void text_init(uint8_t mode, const renderer_t *renderer) {
 		memcpy(&active_renderer, renderer, sizeof(renderer_t));
 	}
 
+#ifdef HACK_HIDE_STATUSBAR
+	if (1) {
+#else
 	if (mode == RENDER_MODE_TITLE) {
+#endif
 		ly_bank_switch = 143;
 	} else {
-#ifndef HACK_HIDE_STATUSBAR
 		ly_bank_switch = 135;
-#else
-		ly_bank_switch = 143;
-#endif
 	}
 	ly_offset = ly_bank_switch;
 
