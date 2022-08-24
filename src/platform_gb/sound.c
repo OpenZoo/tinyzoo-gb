@@ -96,8 +96,10 @@ __asm
 	jr z, .timer_handler_next_note
 	; _sound_duration_counter < 0
 	bit 7, a
-	jr z, .timer_handler_sound_end
-	jr .timer_handler_next_note
+	jr nz, .timer_handler_next_note
+; matches timer_handler_sound_end
+	pop		bc
+	ret
 
 .timer_handler_no_sound:
 	xor a, a
@@ -128,8 +130,18 @@ __asm
 	; ld a, #0xFF
 	ldh (_NR50_REG + 0), a
 
+	; skip some cycles to cause a more audible pop
+.rept 8
+	nop
+.endm
+
+	; load and update sound_buffer_pos
 	ld a, (_sound_buffer_pos)
 	ld c, a
+	inc a
+	inc a
+	ld (_sound_buffer_pos), a
+
 	ld hl, #(_sound_buffer)
 	add hl, bc ; hl = pointer to next entry
 
@@ -188,11 +200,6 @@ __asm
 	ld a, (hl) ; a = duration counter
 	ld (_sound_duration_counter), a
 
-	; update sound_buffer_pos
-	ld a, (_sound_buffer_pos)
-	inc a
-	inc a
-	ld (_sound_buffer_pos), a
 	jp .timer_handler_sound_end
 
 __endasm;
