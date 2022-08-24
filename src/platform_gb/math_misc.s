@@ -34,8 +34,7 @@ _signum8:
         xor a, a
         cp a, e ; x == 0?
         ret z
-        ; ld a, #0x01 ; x > 0
-	inc a ; equivalent ^
+        ld a, #0x01 ; x > 0
         ret
 .Signum8ReturnMinusOne:
         ld a, #0xFF
