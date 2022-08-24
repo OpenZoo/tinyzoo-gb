@@ -102,8 +102,7 @@ __asm
 .timer_handler_no_sound:
 	xor a, a
 	ld (_sound_is_playing), a
-	ldh (_NR21_REG + 0), a
-	ldh (_NR30_REG + 0), a
+	ldh (_NR22_REG + 0), a
 	ldh (_NR52_REG + 0), a
 
 .timer_handler_sound_end:
@@ -123,6 +122,7 @@ __asm
 	ld a, #0x66
 	ldh (_NR51_REG + 0), a
 	xor a, a
+	ldh (_NR22_REG + 0), a
 	ld b, a ; for sound_buffer_pos
 	dec a
 	; ld a, #0xFF
@@ -156,8 +156,6 @@ __asm
 	ldh (_NR24_REG + 0), a
 	ld a, #0x80
 	ldh (_NR21_REG + 0), a
-	ld a, #0x22
-	; ldh (_NR51_REG + 0), a
 	jr .timer_handler_checks_done
 
 .timer_handler_check_drum:
@@ -183,8 +181,6 @@ __asm
 	ldh (_NR34_REG + 0), a
 	ld a, #0x80
 	ldh (_NR30_REG + 0), a
-	ld a, #0x44
-	; ldh (_NR51_REG + 0), a
 
 .timer_handler_checks_done:
 	pop hl
