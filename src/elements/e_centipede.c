@@ -63,13 +63,13 @@ void ElementCentipedeHeadTick(uint8_t stat_id) {
 	uint8_t head_x = stat->x;
 	uint8_t head_y = stat->y;
 
-	if (head_x == ZOO_STAT(0).x && (rand(10) < stat->p1)) {
+	if (head_x == ZOO_STAT(0).x && (RAND10() < stat->p1)) {
 		stat->step_y = signum8(ZOO_STAT(0).y - head_y);
 		stat->step_x = 0;
-	} else if (head_y == ZOO_STAT(0).y && (rand(10) < stat->p1)) {
+	} else if (head_y == ZOO_STAT(0).y && (RAND10() < stat->p1)) {
 		stat->step_x = signum8(ZOO_STAT(0).x - head_x);
 		stat->step_y = 0;
-	} else if (((rand(10) << 2) < stat->p2) || (stat->step_x == 0 && stat->step_y == 0)) {
+	} else if (((RAND10() << 2) < stat->p2) || (stat->step_x == 0 && stat->step_y == 0)) {
 		calc_direction_rnd(&stat->step_x, &stat->step_y);
 	}
 	

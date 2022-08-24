@@ -67,8 +67,8 @@ void ElementSpinningGunTick(uint8_t stat_id) {
 	int8_t dx, dy;
 	uint8_t element = (stat->p2 & 0x80) ? E_STAR : E_BULLET;
 
-	if (rand(9) < (stat->p2 & 0x7F)) {
-		if (rand(9) <= stat->p1) {
+	if (RAND9() < (stat->p2 & 0x7F)) {
+		if (RAND9() <= stat->p1) {
 			bool shot;
 
 			if (difference8(sx, ZOO_STAT(0).x) <= 2) {

@@ -122,7 +122,7 @@ static void game_play_handle_pause(bool pause_blink) {
 			}
 
 			zoo_game_state.paused = false;
-			zoo_game_state.current_tick = rand(100);
+			zoo_game_state.current_tick = rand_mod(100);
 			zoo_game_state.current_stat_ticked = zoo_stat_count + 1;
 		}
 	} else {
@@ -153,7 +153,7 @@ RestartGameLoop:
 	zoo_game_state.tick_time_duration = 8;
 	zoo_game_state.play_exit_requested = false;
 
-	zoo_game_state.current_tick = rand(100);
+	zoo_game_state.current_tick = rand_mod(100);
 	zoo_game_state.current_stat_ticked = zoo_stat_count + 1;
 
 	bool pause_blink;

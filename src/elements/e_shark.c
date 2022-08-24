@@ -57,7 +57,7 @@ void ElementSharkTick(uint8_t stat_id) {
 	uint8_t sx = stat->x;
 	uint8_t sy = stat->y;
 
-	if (stat->p1 < rand(10)) {
+	if (stat->p1 < RAND10()) {
 		calc_direction_rnd(&dx, &dy);
 	} else {
 		calc_direction_seek(sx, sy, &dx, &dy);

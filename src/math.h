@@ -45,18 +45,25 @@ uint8_t zoo_mods16_8(int16_t a, uint8_t b);
 #define zoo_mods16_8(a, b) ((uint8_t) (((int16_t) (a)) % ((uint8_t) (b))))
 #endif
 
-#if defined(USE_XORSHIFT_RNG)
-int16_t rand(int16_t max);
-int16_t rand_mask(int16_t max) PRESERVES_REGS(b, c);
-#elif defined(USE_YERRICK_RNG)
-int16_t rand(int16_t max);
-int16_t rand_mask(int16_t max);
+#if defined(SM83)
+int16_t rand(void) PRESERVES_REGS(d, e);
+uint8_t rand_mask8(uint8_t max) PRESERVES_REGS(d, e);
+int16_t rand_mod(int16_t max);
+uint8_t rand_np1(uint8_t max) PRESERVES_REGS(c);
 #else
-int16_t rand(int16_t max);
-int16_t rand_mask(int16_t max);
+int16_t rand(void);
+uint8_t rand_mask8(uint8_t max);
+int16_t rand_mod(int16_t max);
+#define rand_np1 rand_mod
 #endif
 void srand(uint16_t seed);
 
-#define RAND2() rand_mask(1)
+#define RAND2() rand_mask8(1)
+#define RAND3() rand_np1(3)
+#define RAND4() rand_mask8(3)
+#define RAND7() rand_mod(7)
+#define RAND9() rand_np1(9)
+#define RAND10() rand_mod(10)
+#define RAND17() rand_np1(17)
 
 #endif /* __MATH_H__ */

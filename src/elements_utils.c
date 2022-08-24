@@ -165,7 +165,7 @@ void DrawPlayerSurroundings(uint8_t x, uint8_t y, uint8_t bomb_phase) {
 
 						if (tile->element == E_EMPTY || tile->element == E_BREAKABLE) {
 							tile->element = E_BREAKABLE;
-							tile->color = 9 + rand(7);
+							tile->color = 9 + RAND7();
 						}
 					} else {
 						if (tile->element == E_BREAKABLE) {

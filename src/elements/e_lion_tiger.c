@@ -57,7 +57,7 @@ void ElementLionTick(uint8_t stat_id) {
 	uint8_t sy = stat->y;
 	int8_t dx, dy;
 
-	if (stat->p1 < rand(10)) {
+	if (stat->p1 < RAND10()) {
 		calc_direction_rnd(&dx, &dy);
 	} else {
 		calc_direction_seek(sx, sy, &dx, &dy);
@@ -75,7 +75,7 @@ void ElementTigerTick(uint8_t stat_id) {
 	zoo_stat_t *stat = &ZOO_STAT(stat_id);
 	uint8_t element = (stat->p2 & 0x80) ? E_STAR : E_BULLET;
 
-	if ((rand(10) * 3) < (stat->p2 & 0x7F)) {
+	if ((RAND10() * 3) < (stat->p2 & 0x7F)) {
 		bool shot;
 
 		if (difference8(stat->x, ZOO_STAT(0).x) <= 2) {

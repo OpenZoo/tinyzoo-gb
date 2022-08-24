@@ -491,7 +491,7 @@ void board_damage_tile(uint8_t x, uint8_t y) {
 }
 
 void calc_direction_rnd(int8_t *dx, int8_t *dy) {
-	*dx = rand(3) - 1;
+	*dx = RAND3() - 1;
 	if (*dx == 0) {
 		*dy = (RAND2() << 1) - 1;
 	} else {
