@@ -61,8 +61,9 @@ _rand:
 	ret
 
 _rand_mask8:
+	ld d, a
 	call .rand_bc
-	and a, c
+	and a, d
 	ret
 
 _rand_mod:

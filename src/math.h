@@ -47,7 +47,7 @@ uint8_t zoo_mods16_8(int16_t a, uint8_t b);
 
 #if defined(SM83)
 int16_t rand(void) PRESERVES_REGS(d, e);
-uint8_t rand_mask8(uint8_t max) PRESERVES_REGS(d, e);
+uint8_t rand_mask8(uint8_t max) PRESERVES_REGS(e);
 int16_t rand_mod(int16_t max);
 uint8_t rand_np1(uint8_t max) PRESERVES_REGS(c);
 #else
