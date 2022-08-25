@@ -274,17 +274,16 @@ uint8_t get_stat_id_at(uint8_t x, uint8_t y) {
 #if defined(SM83)
 	x; y;
 __asm
-	; TODO (SDCC 4.2.0 upgrade): optimize?
 	ld		c, a
 	; (hl) - stat pointer
 	; a - compared value
 	; ec (high, low) - checked value
-	; d - max stat count
-	; b - counter
+	; d - counter (down)
+	; b - max stat count
 	ldh		a, (_zoo_stat_count)
 	inc		a
 	ld		d, a
-	ld		b, #0
+	ld		b, a
 	ld		hl, #(_zoo_stats+16)
 GetStatIdAtLoop:
 	ld		a, (hl+)
@@ -294,6 +293,7 @@ GetStatIdAtLoop:
 	cp		a, e
 	jr		nz, GetStatIdAtNotFound
 	ld		a, b
+	sub		a, d
 	ret
 GetStatIdAtNotFound:
 	; hl += 14
@@ -304,7 +304,6 @@ GetStatIdAtNotFound:
 	sub		a, l
         ld              h, a
 	; d -= 1
-	inc		b
 	dec		d
 	jr		nz, GetStatIdAtLoop
 GetStatIdFinished:
