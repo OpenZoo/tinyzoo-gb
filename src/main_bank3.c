@@ -80,8 +80,6 @@ void init_main(void) BANKED {
 
 	sram_init(false);
 
-	world_create();
-
 	zoo_game_state.world_id = 0;
 
 	timer_init();

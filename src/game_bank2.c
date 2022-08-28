@@ -78,9 +78,11 @@ static const zoo_stat_t StatCreatePlayer = {
 extern int8_t viewport_x;
 extern int8_t viewport_y;
 
-void board_create(void) BANKED {
+void board_create(bool full_create) BANKED {
 	memset(&zoo_board_info, 0, sizeof(zoo_board_info));
-	memset(zoo_tiles, 0, sizeof(zoo_tiles));
+	if (full_create) {
+		memset(zoo_tiles, 0, sizeof(zoo_tiles));
+	}
 	
 	zoo_board_info.max_shots = 255;
 
@@ -108,6 +110,8 @@ void board_create(void) BANKED {
 	}
 
 	zoo_stat_count = 0;
+	zoo_stat_data_size = 0;
+
 	ZOO_STAT(-1) = StatCreateMinusOne; 
 
 	ZOO_TILE(BOARD_WIDTH >> 1, BOARD_HEIGHT >> 1).element = E_PLAYER;
@@ -120,7 +124,7 @@ void board_create(void) BANKED {
 void world_create(void) BANKED {
 	// TODO: boardcount, boardlen
 	memset(&msg_flags, 0, sizeof(msg_flags));
-	board_create();
+	board_create(true);
 	memset(&zoo_world_info, 0, sizeof(zoo_world_info));
 	zoo_world_info.health = 100;
 	memset(&zoo_world_info.oop_flags, FLAG_ID_NONE, sizeof(zoo_world_info.oop_flags));

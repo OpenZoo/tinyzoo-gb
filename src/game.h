@@ -115,7 +115,7 @@ void game_play_loop(bool board_changed) BANKED;
 
 // game_bank2.c (bank 2)
 
-void board_create(void) BANKED;
+void board_create(bool full_create) BANKED;
 void world_create(void) BANKED;
 void scroll_viewport_to(uint8_t vx, uint8_t vy, bool force_redraw);
 void game_scrolling_view(void) BANKED;
