@@ -117,6 +117,8 @@ void game_play_loop(bool board_changed) BANKED;
 
 void board_create(void) BANKED;
 void world_create(void) BANKED;
+void scroll_viewport_to(uint8_t vx, uint8_t vy, bool force_redraw);
+void game_scrolling_view(void) BANKED;
 void move_stat_scroll_focused(uint8_t stat_id, uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y, bool force) BANKED;
 bool board_shoot(uint8_t element, uint8_t x, uint8_t y, int8_t dx, int8_t dy, uint8_t source) BANKED;
 

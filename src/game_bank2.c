@@ -169,8 +169,123 @@ void damage_stat_stat0(zoo_tile_t *tile) {
 	}
 }
 
+void scroll_viewport_to(uint8_t vx, uint8_t vy, bool force_redraw) {
+	int8_t pox = vx - viewport_x;
+	int8_t poy = vy - viewport_y;
+	uint8_t dist = abs(pox) + abs(poy);
+
+	if (force_redraw || dist > MAX_SCROLL_DISTANCE_BEFORE_REDRAW) {
+		viewport_x = vx;
+		viewport_y = vy;
+		board_redraw();
+	} else {
+		renderer_scrolling = 1;
+		if (pox < 0) {
+			// move left
+			pox = -pox;
+			for (uint8_t ix = 0; ix < (uint8_t)pox; ix++) {
+				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
+					board_undraw_tile(viewport_x + VIEWPORT_WIDTH - 1 - ix, iy + viewport_y);
+				}
+			}
+			viewport_x -= pox;
+			text_scroll(-pox, 0);
+			for (uint8_t ix = 0; ix < (uint8_t)pox; ix++) {
+				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
+					board_draw_tile(viewport_x + ix, iy + viewport_y);
+				}
+			}
+		} else if (pox > 0) {
+			// move right
+			for (uint8_t ix = 0; ix < (uint8_t)pox; ix++) {
+				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
+					board_undraw_tile(viewport_x + ix, iy + viewport_y);
+				}
+			}
+			viewport_x += pox;
+			text_scroll(pox, 0);
+			for (uint8_t ix = 0; ix < (uint8_t)pox; ix++) {
+				for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
+					board_draw_tile(viewport_x + VIEWPORT_WIDTH - 1 - ix, iy + viewport_y);
+				}
+			}
+		}
+		if (poy < 0) {
+			// move up
+			viewport_y += poy;
+			text_scroll(0, poy);
+			poy = -poy;
+			for (uint8_t iy = 0; iy < (uint8_t)poy; iy++) {
+				text_free_line(iy);
+				for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
+					board_draw_tile(ix + viewport_x, iy + viewport_y);
+				}
+			}
+		} else if (poy > 0) {
+			// move down
+			viewport_y += poy;
+			text_scroll(0, poy);
+			for (uint8_t iy = 0; iy < (uint8_t)poy; iy++) {
+				text_free_line(VIEWPORT_HEIGHT - 1 - iy);
+				for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
+					board_draw_tile(ix + viewport_x, viewport_y + VIEWPORT_HEIGHT - 1 - iy);
+				}
+			}
+		}
+		renderer_scrolling = 0;
+		bool is_dark = (zoo_board_info.flags & BOARD_IS_DARK) && (zoo_world_info.torch_ticks > 0);
+		if (is_dark) {
+			// redraw tiles around the player, plus one
+			uint8_t py = ZOO_STAT(0).y - viewport_y;
+			for (int8_t iy = -TORCH_DY-1; iy <= TORCH_DY+1; iy++) {
+				// text_free_line(py + iy);
+				for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
+					board_draw_tile(ix + viewport_x, ZOO_STAT(0).y + iy);
+				}
+			}
+		}
+	}
+}
+
+void game_scrolling_view(void) BANKED {
+	int8_t old_vx = viewport_x;
+	int8_t old_vy = viewport_y;
+
+	input_wait_clear();
+	wait_vbl_done();
+	text_reinit(RENDER_MODE_TITLE);
+
+	while (true) {
+		wait_vbl_done();
+		wait_vbl_done();
+
+		input_update();
+		if (input_keys & 0xF0) break;
+
+		int8_t vx = viewport_x + input_delta_x;
+		int8_t vy = viewport_y + input_delta_y;
+		if (vx < VIEWPORT_MIN_X) vx = VIEWPORT_MIN_X;
+		else if (vx > VIEWPORT_MAX_X) vx = VIEWPORT_MAX_X;
+		if (vy < VIEWPORT_MIN_Y) vy = VIEWPORT_MIN_Y;
+		else if (vy > VIEWPORT_MAX_Y) vy = VIEWPORT_MAX_Y;
+
+		if (vx != viewport_x || vy != viewport_y) {
+			scroll_viewport_to(vx, vy, false);
+			text_update();
+		}
+	}
+
+	input_wait_clear();
+
+	if (old_vx != viewport_x || old_vy != viewport_y) {
+		scroll_viewport_to(old_vx, old_vy, false);
+	}
+
+	wait_vbl_done();
+	text_reinit(RENDER_MODE_PLAYFIELD);
+}
+
 void move_stat_scroll_focused(uint8_t stat_id, uint8_t old_x, uint8_t old_y, uint8_t new_x, uint8_t new_y, bool force) BANKED {
-	bool is_dark = (zoo_board_info.flags & BOARD_IS_DARK) && (zoo_world_info.torch_ticks > 0);
 	bool force_redraw = false;
 	// move viewport?
 	int8_t ovx = viewport_x;
@@ -226,81 +341,9 @@ void move_stat_scroll_focused(uint8_t stat_id, uint8_t old_x, uint8_t old_y, uin
 		viewport_y = ovy;
 	}
 
+	bool is_dark = (zoo_board_info.flags & BOARD_IS_DARK) && (zoo_world_info.torch_ticks > 0);
 	if (force_redraw || is_dark || ovx != vx || ovy != vy) {
-		pox = vx - ovx;
-		poy = vy - ovy;
-		uint8_t dist = abs(pox) + abs(poy);
-
-		if (force_redraw || dist > MAX_SCROLL_DISTANCE_BEFORE_REDRAW) {
-			viewport_x = vx;
-			viewport_y = vy;
-			board_redraw();
-		} else {
-			renderer_scrolling = 1;
-			if (pox < 0) {
-				// move left
-				pox = -pox;
-				for (uint8_t ix = 0; ix < (uint8_t)pox; ix++) {
-					for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
-						board_undraw_tile(viewport_x + VIEWPORT_WIDTH - 1 - ix, iy + viewport_y);
-					}
-				}
-				viewport_x -= pox;
-				text_scroll(-pox, 0);
-				for (uint8_t ix = 0; ix < (uint8_t)pox; ix++) {
-					for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
-						board_draw_tile(viewport_x + ix, iy + viewport_y);
-					}
-				}
-			} else if (pox > 0) {
-				// move right
-				for (uint8_t ix = 0; ix < (uint8_t)pox; ix++) {
-					for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
-						board_undraw_tile(viewport_x + ix, iy + viewport_y);
-					}
-				}
-				viewport_x += pox;
-				text_scroll(pox, 0);
-				for (uint8_t ix = 0; ix < (uint8_t)pox; ix++) {
-					for (uint8_t iy = 0; iy < VIEWPORT_HEIGHT; iy++) {
-						board_draw_tile(viewport_x + VIEWPORT_WIDTH - 1 - ix, iy + viewport_y);
-					}
-				}
-			}
-			if (poy < 0) {
-				// move up
-				viewport_y += poy;
-				text_scroll(0, poy);
-				poy = -poy;
-				for (uint8_t iy = 0; iy < (uint8_t)poy; iy++) {
-					text_free_line(iy);
-					for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
-						board_draw_tile(ix + viewport_x, iy + viewport_y);
-					}
-				}
-			} else if (poy > 0) {
-				// move down
-				viewport_y += poy;
-				text_scroll(0, poy);
-				for (uint8_t iy = 0; iy < (uint8_t)poy; iy++) {
-					text_free_line(VIEWPORT_HEIGHT - 1 - iy);
-					for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
-						board_draw_tile(ix + viewport_x, viewport_y + VIEWPORT_HEIGHT - 1 - iy);
-					}
-				}
-			}
-			renderer_scrolling = 0;
-			if (is_dark) {
-				// redraw tiles around the player, plus one
-				uint8_t py = new_y - viewport_y;
-				for (int8_t iy = -TORCH_DY-1; iy <= TORCH_DY+1; iy++) {
-					// text_free_line(py + iy);
-					for (uint8_t ix = 0; ix < VIEWPORT_WIDTH; ix++) {
-						board_draw_tile(ix + viewport_x, new_y + iy);
-					}
-				}
-			}
-		}
+		scroll_viewport_to(vx, vy, force_redraw);
 	}
 
 	renderer_scrolling = 0;

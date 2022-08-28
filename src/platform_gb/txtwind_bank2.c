@@ -199,11 +199,6 @@ static uint8_t txtwind_run_txtwind(void) {
 		IE_REG |= TIM_IFLAG;
 	}
 
-	while (input_keys != 0) {
-		input_reset();
-		wait_vbl_done();
-	}
-
 	return result;
 }
 
@@ -297,11 +292,6 @@ static uint8_t txtwind_run_menu(void) {
 		wait_vbl_done();
 	}
 
-	while (input_keys != 0) {
-		input_reset();
-		wait_vbl_done();
-	}
-
 	return result;
 }
 
@@ -319,6 +309,8 @@ uint8_t txtwind_run(uint8_t render_mode) BANKED {
 	} else if (render_mode == RENDER_MODE_MENU) {
 		result = txtwind_run_menu();
 	}
+
+	input_wait_clear();
 
 	gbc_init_unset_palette();
 	wait_vbl_done();

@@ -110,3 +110,10 @@ KeyRepressed:
 
 	input_reset();
 }
+
+void input_wait_clear(void) BANKED {
+	while (input_keys != 0) {
+		input_reset();
+		wait_vbl_done();
+	}
+}

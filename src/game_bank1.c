@@ -205,6 +205,10 @@ RestartGameLoop:
 					board_changed = true;
 					goto RestartGameLoop;
 				}
+			} else if (input_select_pressed) {
+				if (zoo_game_state.game_state_element != E_MONITOR) {
+					game_scrolling_view();
+				}
 			}
 		}
 	} while(!zoo_game_state.play_exit_requested);

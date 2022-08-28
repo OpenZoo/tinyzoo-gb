@@ -53,6 +53,7 @@
 #include "elements.h"
 #include "game.h"
 #include "input.h"
+#include "timer.h"
 #include "txtwind.h"
 
 static void board_pause_enter(void) {
@@ -76,10 +77,7 @@ void game_menu_act_enter_world(uint8_t world_id, bool new_game, bool first_launc
 		zoo_game_state.paused = false;
 		game_play_loop(true);
 
-		while (input_keys != 0) {
-			input_reset();
-			wait_vbl_done();
-		}
+		input_wait_clear();
 
 		sound_clear_queue();
 	}

@@ -60,5 +60,6 @@ extern uint8_t input_keys, input_held;
 void input_update_vbl(void);
 void input_reset(void);
 void input_update(void) BANKED;
+void input_wait_clear(void) BANKED;
 
 #endif /* __INPUT_H__ */
