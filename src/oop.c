@@ -42,7 +42,6 @@
  */
 
 #include <gbdk/platform.h>
-#include <gbdk/emu_debug.h>
 
 #include "bank_switch.h"
 #include "elements.h"
@@ -526,7 +525,7 @@ static void oop_command_send(void) {
 	oop_code_loc = oop_prog_loc + 5 + oop_pos;
 }
 
-static int16_t *oop_give_ptrs[] = {
+static int16_t* const oop_give_ptrs[] = {
 	&zoo_world_info.health,
 	&zoo_world_info.ammo,
 	&zoo_world_info.gems,
@@ -535,7 +534,7 @@ static int16_t *oop_give_ptrs[] = {
 	&zoo_world_info.board_time_sec
 };
 
-static oop_command_proc oop_give_procs[] = {
+static const oop_command_proc oop_give_procs[] = {
 	game_update_sidebar_health,
 	game_update_sidebar_ammo,
 	game_update_sidebar_gems_time,
@@ -766,7 +765,7 @@ static void oop_command_text_line(void) {
 	}
 }
 
-static oop_command_proc oop_procs[] = {
+static const oop_command_proc oop_procs[] = {
 	oop_command_end,
 	oop_command_direction, // /
 	oop_command_direction, // ?
@@ -801,7 +800,7 @@ static oop_command_proc oop_procs[] = {
 	oop_command_viewport,
 };
 
-static uint8_t oop_ins_cost[] = {
+static const uint8_t oop_ins_cost[] = {
 	1, // #END
 	0, // /
 	0, // ?

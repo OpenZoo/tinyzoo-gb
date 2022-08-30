@@ -43,7 +43,6 @@
 
 #include <string.h>
 #include <gbdk/platform.h>
-#include <gbdk/emu_debug.h>
 #include "config.h"
 #include "renderer.h"
 #include "timer.h"

@@ -46,7 +46,6 @@
 #define SRAM_ALLOC_INTERNAL
 
 #include <string.h>
-#include <gbdk/emu_debug.h>
 
 #include "bank_switch.h"
 #include "config.h"

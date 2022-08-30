@@ -26,7 +26,7 @@
 
 #ifdef __TPP1__
 #else
-static uint8_t mbc5_bank_counts[] = {0, 0, 1, 4, 16, 8};
+static const uint8_t mbc5_bank_counts[] = {0, 0, 1, 4, 16, 8};
 #endif
 
 uint8_t zoo_get_ram_bank_count(void) BANKED {
