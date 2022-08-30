@@ -65,9 +65,7 @@ static void board_pause_enter(void) {
 }
 
 void game_menu_act_enter_world(uint8_t world_id, bool new_game, bool first_launch) BANKED {
-	if (new_game) {
-		world_create();
-	}
+	world_create();
 	load_world(world_id, new_game);
 	uint8_t starting_board = zoo_world_info.current_board;
 
