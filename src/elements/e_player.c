@@ -209,6 +209,7 @@ NoKeyInput:
 	if (zoo_board_info.time_limit_sec > 0 && zoo_world_info.health > 0) {
 		if (timer_has_time_elapsed(&zoo_world_info.board_time_hsec, 100)) {
 			zoo_world_info.board_time_sec++;
+			game_update_sidebar_gems_time();
 
 			if ((zoo_board_info.time_limit_sec - 10) == zoo_world_info.board_time_sec) {
 				display_message(200, NULL, NULL, msg_out_of_time);
