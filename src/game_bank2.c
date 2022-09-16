@@ -176,7 +176,7 @@ void damage_stat_stat0(zoo_tile_t *tile) {
 void scroll_viewport_to(uint8_t vx, uint8_t vy, bool force_redraw) {
 	int8_t pox = vx - viewport_x;
 	int8_t poy = vy - viewport_y;
-	uint8_t dist = abs(pox) + abs(poy);
+	uint8_t dist = difference8(vx, viewport_x) + difference8(vy, viewport_y);
 
 	if (force_redraw || dist > MAX_SCROLL_DISTANCE_BEFORE_REDRAW) {
 		viewport_x = vx;

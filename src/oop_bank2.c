@@ -60,7 +60,7 @@
 
 #include "element_defs_cycles.inc"
 
-static uint8_t get_color_for_tile_match(uint8_t element, uint8_t color) {
+static inline uint8_t get_color_for_tile_match(uint8_t element, uint8_t color) {
 	uint8_t def_color = zoo_element_defs_color[element];
 	if (def_color < COLOR_SPECIAL_MIN) {
 		return def_color & 0x07;
@@ -74,26 +74,47 @@ static uint8_t get_color_for_tile_match(uint8_t element, uint8_t color) {
 // TODO: This method is *SLOW*. Really, really *SLOW*.
 // TODO (SDCC 4.2.0 upgrade): This is broken, at least as of SDCC r13388 nightly
 bool find_tile_on_board(uint8_t *x, uint8_t *y, uint8_t element, uint8_t color) BANKED {
+	zoo_tile_t *tile_ptr;
 	zoo_tile_t tile;
 
 	temp7 = *x;
 	temp8 = *y;
+	tile_ptr = zoo_tiles_y[temp8];
 
-	while (true) {
-		if ((++temp7) > BOARD_WIDTH) {
-			temp7 = 1;
-			if ((++temp8) > BOARD_HEIGHT) {
-				return false;
+	if (color == 0) {
+		while (true) {
+			if ((++temp7) > BOARD_WIDTH) {
+				temp7 = 1;
+				if ((++temp8) > BOARD_HEIGHT) {
+					return false;
+				}
+				tile_ptr = zoo_tiles_y[temp8];
 			}
-		}
 
-		ZOO_TILE_ASSIGN(tile, temp7, temp8);
-		if (tile.element == element) {
-			if (color == 0 ||
-			    get_color_for_tile_match(tile.element, tile.color) == color) {
+			*((uint16_t*) &tile) = ((uint16_t*) tile_ptr)[temp7];
+			if (tile.element == element) {
 				*x = temp7;
 				*y = temp8;
 				return true;
+			}
+		}
+	} else {
+		while (true) {
+			if ((++temp7) > BOARD_WIDTH) {
+				temp7 = 1;
+				if ((++temp8) > BOARD_HEIGHT) {
+					return false;
+				}
+				tile_ptr = zoo_tiles_y[temp8];
+			}
+
+			*((uint16_t*) &tile) = ((uint16_t*) tile_ptr)[temp7];
+			if (tile.element == element) {
+				if (get_color_for_tile_match(tile.element, tile.color) == color) {
+					*x = temp7;
+					*y = temp8;
+					return true;
+				}
 			}
 		}
 	}

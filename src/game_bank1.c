@@ -184,9 +184,7 @@ RestartGameLoop:
 			}
 
 			zoo_game_state.current_stat_ticked++;
-		}
-
-		if (zoo_game_state.current_stat_ticked > zoo_stat_count && !zoo_game_state.play_exit_requested) {
+		} else if (zoo_game_state.current_stat_ticked > zoo_stat_count && !zoo_game_state.play_exit_requested) {
 			text_update();
 
 			ZOO_BUSYLOOP(!timer_has_time_elapsed(&zoo_game_state.tick_time_counter, zoo_game_state.tick_time_duration));

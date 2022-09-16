@@ -375,7 +375,7 @@ static bool oop_check_condition(void) {
 		case 0x01: /* ALLIGNED */
 			return (oop_stat->x == ZOO_STAT(0).x) || (oop_stat->y == ZOO_STAT(0).y);
 		case 0x02: /* CONTACT */
-			return (abs(oop_stat->x - ZOO_STAT(0).x) + abs(oop_stat->y - ZOO_STAT(0).y)) == 1;
+			return (difference8(oop_stat->x, ZOO_STAT(0).x) + difference8(oop_stat->y, ZOO_STAT(0).y)) == 1;
 		case 0x03: /* BLOCKED */
 			oop_parse_direction_self();
 			x = oop_stat->x + oop_dir_x;
