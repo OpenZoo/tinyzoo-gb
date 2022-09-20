@@ -182,6 +182,9 @@ extern uint16_t zoo_stat_data_size;
 extern uint8_t zoo_stat_data[MAX_DATA_OFS_SIZE];
 extern zoo_stat_t zoo_stats[MAX_STAT + 3];
 extern zoo_game_state_t zoo_game_state;
+#ifdef SHOW_CHEATS
+extern uint8_t cheat_active;
+#endif
 #endif
 
 #define ZOO_IN_TITLE() (zoo_game_state.game_state_element == E_MONITOR)

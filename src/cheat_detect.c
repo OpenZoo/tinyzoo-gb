@@ -1,3 +1,5 @@
+#pragma bank 2
+
 /**
  * Copyright (c) 2020, 2021, 2022 Adrian Siekierka
  *
@@ -41,44 +43,38 @@
  * SOFTWARE.
  */
 
-#ifndef __SOUND_CONSTS_H__
-#define __SOUND_CONSTS_H__
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <gbdk/platform.h>
+#include "config.h"
+#include "game.h"
+#include "gamevars.h"
+#include "input.h"
+#include "sound_consts.h"
+#include "timer.h"
 
-#include <stdint.h>
+#ifdef SHOW_CHEATS
 
-extern const uint8_t sound_transporter_move[];
-extern const uint8_t sound_ricochet[];
-extern const uint8_t sound_damage[];
-extern const uint8_t sound_player_zapped[];
-extern const uint8_t sound_player_damage[];
-extern const uint8_t sound_player_shoot[];
-extern const uint8_t sound_player_game_over[];
-extern const uint8_t sound_time_running_out[];
-extern const uint8_t sound_destroy_bullet[];
-extern const uint8_t sound_destroy[];
-extern const uint8_t sound_push[];
-extern const uint8_t sound_forest[];
-extern const uint8_t sound_invisible[];
-extern const uint8_t sound_key_failure[];
-extern const uint8_t sound_key_success[];
-extern const uint8_t sound_door_failure[];
-extern const uint8_t sound_door_success[];
-extern const uint8_t sound_ammo_pickup[];
-extern const uint8_t sound_gem_pickup[];
-extern const uint8_t sound_torch_burnout[];
-extern const uint8_t sound_torch_pickup[];
-extern const uint8_t sound_water_splash[];
-extern const uint8_t sound_bomb_activated[];
-extern const uint8_t sound_bomb_explosion[];
-extern const uint8_t sound_bomb_tick1[];
-extern const uint8_t sound_bomb_tick2[];
-extern const uint8_t sound_slime_touch[];
-extern const uint8_t sound_energizer_loop[];
-extern const uint8_t sound_energizer_finish[];
-extern const uint8_t sound_duplicator_success[];
-extern const uint8_t sound_duplicator_failure[];
-extern const uint8_t sound_passage_teleport[];
-extern const uint8_t sound_scroll_touch[];
-extern const uint8_t sound_cheat[];
+static uint8_t cheat_update_table[] = {
+	J_UP, 0, J_UP,
+	0, J_DOWN, 0, J_DOWN,
+	0, J_LEFT, 0, J_RIGHT,
+	0, J_LEFT, 0, J_RIGHT,
+	0, J_B, 0, J_A
+};
+#define CHEAT_UPDATE_TABLE_LEN 19
 
-#endif /* __SOUND_CONSTS_H__ */
+void cheat_detect_update(void) BANKED {
+	if (cheat_active == 255) return;
+
+	if (input_held == cheat_update_table[cheat_active]) {
+		cheat_active++;
+		if (cheat_active >= CHEAT_UPDATE_TABLE_LEN) {
+			cheat_active = 255;
+			sound_queue(10, sound_cheat);
+		}
+	}
+}
+
+#endif

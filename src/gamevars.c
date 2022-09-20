@@ -133,3 +133,7 @@ zoo_tile_t *const zoo_tiles_y[27] = {
 	zoo_tiles + (62 * 26)
 };
 #endif
+
+#ifdef SHOW_CHEATS
+uint8_t cheat_active = 0;
+#endif

@@ -229,7 +229,12 @@ const uint8_t sound_passage_teleport[] = {
 
 const uint8_t sound_scroll_touch[] = {
 	20,
-	48, 1, 32, 1, 50, 1, 34, 1, 
-	52, 1, 36, 1, 53, 1, 37, 1, 
+	48, 1, 32, 1, 50, 1, 34, 1,
+	52, 1, 36, 1, 53, 1, 37, 1,
 	55, 1, 39, 1
+};
+
+const uint8_t sound_cheat[] = {
+	2,
+	39, 4
 };

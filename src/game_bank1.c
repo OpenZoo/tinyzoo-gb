@@ -47,6 +47,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gbdk/platform.h>
+#include "cheat_detect.h"
 #include "gamevars.h"
 #include "game.h"
 #include "elements.h"
@@ -195,6 +196,9 @@ RestartGameLoop:
 			zoo_game_state.current_stat_ticked = 0;
 
 			input_update();
+#ifdef SHOW_CHEATS
+			cheat_detect_update();
+#endif
 			if (input_start_pressed) {
 				if (zoo_game_state.game_state_element == E_MONITOR) {
 					return;

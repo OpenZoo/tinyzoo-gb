@@ -53,6 +53,7 @@
 #include "elements.h"
 #include "game.h"
 #include "input.h"
+#include "sound_consts.h"
 #include "timer.h"
 #include "txtwind.h"
 
@@ -94,6 +95,42 @@ static void game_menu_act_about(void) {
 	txtwind_run(RENDER_MODE_TXTWIND);
 }
 
+#ifdef SHOW_CHEATS
+static void game_menu_act_trainer(void) {
+	txtwind_init();
+	txtwind_append((uint16_t) menu_entry_trainer_zap, 3);
+	txtwind_append((uint16_t) menu_entry_trainer_health, 3);
+	txtwind_append((uint16_t) menu_entry_trainer_ammo, 3);
+	txtwind_append((uint16_t) menu_entry_trainer_keys, 3);
+	txtwind_append((uint16_t) menu_entry_trainer_torches, 3);
+	txtwind_append((uint16_t) menu_entry_trainer_time, 3);
+	txtwind_append((uint16_t) menu_entry_trainer_gems, 3);
+	txtwind_append((uint16_t) menu_entry_trainer_dark, 3);
+	switch (txtwind_run(RENDER_MODE_MENU)) {
+	case 0: {
+		for (uint8_t i = 0; i < 4; i++) {
+			uint8_t ix = ZOO_STAT(0).x + neighbor_delta_x[i];
+			uint8_t iy = ZOO_STAT(0).y + neighbor_delta_y[i];
+			if (ZOO_TILE_WRITEBOUNDS(ix, iy)) {
+				board_damage_tile(ix, iy);
+				ZOO_TILE(ix, iy).element = E_EMPTY;
+				board_draw_tile(ix, iy);
+			}
+		}
+	} break;
+	case 1: zoo_world_info.health += 50; break;
+	case 2: zoo_world_info.ammo += 20; break;
+	case 3: zoo_world_info.keys = 0xFF; break;
+	case 4: zoo_world_info.torches += 5; break;
+	case 5: zoo_world_info.board_time_sec -= 60; break;
+	case 6: zoo_world_info.gems += 15; break;
+	case 7: zoo_board_info.flags ^= BOARD_IS_DARK; board_redraw(); break;
+	}
+	sound_queue(10, sound_cheat);
+	game_update_sidebar_all();
+}
+#endif
+
 bool game_pause_menu(void) BANKED {
 MenuStart:
 	if (zoo_world_info.health <= 0) {
@@ -102,6 +139,11 @@ MenuStart:
 		txtwind_append((uint16_t) menu_entry_new_game, 3);
 		txtwind_append((uint16_t) menu_entry_continue, 3);
 		txtwind_append((uint16_t) menu_entry_about, 3);
+#ifdef SHOW_CHEATS
+		if (cheat_active == 255) {
+			txtwind_append((uint16_t) menu_entry_trainer, 3);
+		}
+#endif
 		switch (txtwind_run(RENDER_MODE_MENU)) {
 		case 0: { /* NEW GAME */
 			game_menu_act_enter_world(zoo_game_state.world_id, true, false);
@@ -116,6 +158,12 @@ MenuStart:
 			game_menu_act_about();
 			goto MenuStart;
 		} break;
+#ifdef SHOW_CHEATS
+		case 3: { /* TRAINER */
+			game_menu_act_trainer();
+			return false;
+		} break;
+#endif
 		}
 	} else {
 		// Regular menu
@@ -123,6 +171,11 @@ MenuStart:
 		txtwind_append((uint16_t) menu_entry_continue, 3);
 		txtwind_append((uint16_t) menu_entry_restart, 3);
 		txtwind_append((uint16_t) menu_entry_about, 3);
+#ifdef SHOW_CHEATS
+		if (cheat_active == 255) {
+			txtwind_append((uint16_t) menu_entry_trainer, 3);
+		}
+#endif
 		switch (txtwind_run(RENDER_MODE_MENU)) {
 		case 1: { /* RESTART */
 			game_menu_act_enter_world(zoo_game_state.world_id, true, false);
@@ -132,6 +185,12 @@ MenuStart:
 			game_menu_act_about();
 			goto MenuStart;
 		} break;
+#ifdef SHOW_CHEATS
+		case 3: { /* TRAINER */
+			game_menu_act_trainer();
+			return false;
+		} break;
+#endif
 		}
 	}
 
