@@ -59,7 +59,7 @@ int16_t rand(void) {
 	return (rand_seed >> 16);
 }
 
-int16_t rand_mask(int16_t max) {
+uint8_t rand_mask8(uint8_t max) {
 	rand_step();
 	return (rand_seed >> 16) & max;
 }
