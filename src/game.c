@@ -84,6 +84,7 @@ int8_t viewport_x = 1;
 int8_t viewport_y = 1;
 uint8_t viewport_focus_stat = 0;
 bool viewport_focus_locked = false;
+bool viewport_full_board = true;
 
 void center_viewport_on(int8_t x, int8_t y) {
 	int8_t vx = x - VIEWPORT_CENTER_X;

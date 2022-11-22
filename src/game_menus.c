@@ -85,6 +85,10 @@ void game_menu_act_enter_world(uint8_t world_id, bool new_game, bool first_launc
 	}
 #endif
 
+#ifndef HACK_HIDE_STATUSBAR
+	viewport_full_board = false;
+#endif
+
 	zoo_game_state.game_state_element = E_PLAYER;
 	load_board(starting_board);
 	board_pause_enter();
