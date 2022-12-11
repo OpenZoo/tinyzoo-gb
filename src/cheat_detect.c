@@ -65,6 +65,10 @@ static uint8_t cheat_update_table[] = {
 };
 #define CHEAT_UPDATE_TABLE_LEN 19
 
+void cheat_detect_reset(void) BANKED {
+	if (cheat_active != 255) cheat_active = 0;
+}
+
 void cheat_detect_update(void) BANKED {
 	if (cheat_active == 255) return;
 

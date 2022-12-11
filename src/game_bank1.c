@@ -197,10 +197,15 @@ RestartGameLoop:
 
 			input_update();
 #ifdef SHOW_CHEATS
-			cheat_detect_update();
+			if (zoo_game_state.game_state_element == E_MONITOR) {
+				cheat_detect_update();
+			}
 #endif
 			if (input_start_pressed) {
 				if (zoo_game_state.game_state_element == E_MONITOR) {
+#ifdef SHOW_CHEATS
+					cheat_detect_reset();
+#endif
 					return;
 				} else if (game_pause_menu()) {
 					board_changed = true;

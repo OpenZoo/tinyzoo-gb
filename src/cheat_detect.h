@@ -51,6 +51,7 @@
 #include "gamevars.h"
 
 #ifdef SHOW_CHEATS
+void cheat_detect_reset(void) BANKED;
 void cheat_detect_update(void) BANKED;
 #endif
 
