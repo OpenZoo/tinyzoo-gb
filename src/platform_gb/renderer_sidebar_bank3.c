@@ -72,7 +72,8 @@ static void sidebar_draw_char(uint8_t x, uint8_t chr, uint8_t col) {
 	} else {
 		if (col == 2) tile_data++;
 		for (i = 0; i < 8; i++) {
-			*(tile_data++) = font_data[i] & mask;
+			uint8_t f = font_data[i] & mask;
+			*(tile_data++) |= f;
 			tile_data++;
 		}
 	}
