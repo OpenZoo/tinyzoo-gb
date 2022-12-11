@@ -108,10 +108,10 @@ static void txtwind_draw_line_txtwind(int16_t idx) {
 	if (line.type == TXTWIND_LINE_TYPE_HYPERLINK) {
 		if (renderer_id == RENDER_ID_GBC) {
 			VBK_REG = 1;
-			fill_win_rect(2, idx & 31, 1, 1, 1);
+			set_win_tile_xy(2, idx & 31, 1);
 			VBK_REG = 0;
 		}
-		fill_win_rect(2, idx & 31, 1, 1, 16);
+		set_win_tile_xy(2, idx & 31, 16);
 	}
 
 	IE_REG |= TIM_IFLAG;
@@ -181,19 +181,19 @@ static uint8_t txtwind_run_txtwind(void) {
 
 		VBK_REG = 0;
 		if (old_pos != -9 && old_pos != (txtwind_lines - 8)) {
-			fill_win_rect(0, (old_pos + 8) & 31, 1, 1, 32);
-			fill_win_rect(TEXT_WIDTH_OUTER - 1, (old_pos + 8) & 31, 1, 1, 32);
+			set_win_tile_xy(0, (old_pos + 8) & 31, 32);
+			set_win_tile_xy(TEXT_WIDTH_OUTER - 1, (old_pos + 8) & 31, 32);
 		}
 		old_pos = pos;
 		if (pos != -9 && pos != (txtwind_lines - 8)) {
 			if (renderer_id == RENDER_ID_GBC) {
 				VBK_REG = 1;
-				fill_win_rect(0, (draw_offset_y + 8) & 31, 1, 1, 2);
-				fill_win_rect(TEXT_WIDTH_OUTER - 1, (draw_offset_y + 8) & 31, 1, 1, 2);
+				set_win_tile_xy(0, (draw_offset_y + 8) & 31, 2);
+				set_win_tile_xy(TEXT_WIDTH_OUTER - 1, (draw_offset_y + 8) & 31, 2);
 				VBK_REG = 0;
 			}
-			fill_win_rect(0, (draw_offset_y + 8) & 31, 1, 1, 175);
-			fill_win_rect(TEXT_WIDTH_OUTER - 1, (draw_offset_y + 8) & 31, 1, 1, 174);
+			set_win_tile_xy(0, (draw_offset_y + 8) & 31, 175);
+			set_win_tile_xy(TEXT_WIDTH_OUTER - 1, (draw_offset_y + 8) & 31, 174);
 		}
 
 		IE_REG |= TIM_IFLAG;
