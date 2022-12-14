@@ -85,7 +85,8 @@ static uint16_t find_label_loc;
 #define SET_ZAP_NONE 255
 #define SET_ZAP_FALSE 0
 #define SET_ZAP_TRUE 1
-#define SET_ZAP_FALSE_IF_FIND_STRING_VISIBLE 2
+#define SET_ZAP_RESTORE 2
+#define SET_ZAP_RESTORE2 3
 
 static void oop_command_end(void) {
 	oop_pos = 0xFFFF;
@@ -152,9 +153,15 @@ bool oop_find_label_in_stat(uint8_t stat_id, uint8_t label_id, bool zapped, uint
 					(*data_zap_loc) &= ~zap_mask;
 				} else if (set_zap == SET_ZAP_TRUE) {
 					(*data_zap_loc) |= zap_mask;
-				} else if (set_zap == SET_ZAP_FALSE_IF_FIND_STRING_VISIBLE) {
-					if ((find_label_loc & 0x8000) == 0) goto FindLabelNotUsed;
+				} else if (set_zap == SET_ZAP_RESTORE) {
 					(*data_zap_loc) &= ~zap_mask;
+					set_zap = SET_ZAP_RESTORE2;
+					goto FindLabelNotUsed;
+				} else if (set_zap == SET_ZAP_RESTORE2) {
+					if (find_label_loc & 0x8000) {
+						(*data_zap_loc) &= ~zap_mask;
+					}
+					goto FindLabelNotUsed;
 				}
 
 				ZOO_SWITCH_ROM(prev_bank);
@@ -237,14 +244,7 @@ void oop_zap(uint8_t stat_id, uint8_t label_id, bool target_empty) {
 }
 
 void oop_restore(uint8_t stat_id, uint8_t label_id, bool target_empty) {
-	// TODO: Optimize inner loop?
-	if (oop_find_label_in_stat(stat_id, label_id, true, SET_ZAP_FALSE)) {
-		if (target_empty) {
-			while (oop_find_label_in_stat(stat_id, label_id, true, SET_ZAP_FALSE_IF_FIND_STRING_VISIBLE)) {
-				// pass
-			}
-		}
-	}
+	oop_find_label_in_stat(stat_id, label_id, true, target_empty ? SET_ZAP_RESTORE : SET_ZAP_FALSE);
 }
 
 void oop_zap_target(uint8_t target_id, uint8_t label_id, oop_zap_proc zap_proc) {
