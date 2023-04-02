@@ -57,6 +57,8 @@
 #include "timer.h"
 #include "txtwind.h"
 
+uint8_t powersave_enabled = 1;
+
 static void board_pause_enter(void) {
 	zoo_game_state.paused = true; // TODO: not here...
 
@@ -174,6 +176,7 @@ MenuStart:
 		txtwind_init();
 		txtwind_append((uint16_t) menu_entry_continue, 3);
 		txtwind_append((uint16_t) menu_entry_restart, 3);
+		txtwind_append((uint16_t) (powersave_enabled ? menu_entry_power_save_on : menu_entry_power_save_off), 3);
 		txtwind_append((uint16_t) menu_entry_about, 3);
 #ifdef SHOW_CHEATS
 		if (cheat_active == 255) {
@@ -185,12 +188,16 @@ MenuStart:
 			game_menu_act_enter_world(zoo_game_state.world_id, true, false);
 			return true;
 		} break;
-		case 2: { /* ABOUT */
+		case 2: { /* POWER SAVE */
+			powersave_enabled = powersave_enabled ? 0 : 1;
+			goto MenuStart;
+		} break;
+		case 3: { /* ABOUT */
 			game_menu_act_about();
 			goto MenuStart;
 		} break;
 #ifdef SHOW_CHEATS
-		case 3: { /* TRAINER */
+		case 4: { /* TRAINER */
 			game_menu_act_trainer();
 			return false;
 		} break;

@@ -185,6 +185,7 @@ extern zoo_game_state_t zoo_game_state;
 #ifdef SHOW_CHEATS
 extern uint8_t cheat_active;
 #endif
+extern uint8_t powersave_enabled;
 #endif
 
 #define ZOO_IN_TITLE() (zoo_game_state.game_state_element == E_MONITOR)
@@ -197,9 +198,11 @@ extern uint8_t cheat_active;
 #define ZOO_STAT_AT(x, y) zoo_stats[get_stat_id_at((x), (y)) + 1]
 
 #define ZOO_BUSYLOOP(cond) while ((cond)) { \
+	if (powersave_enabled) { \
 	__asm \
 		halt \
 	__endasm; \
+	} \
 }
 
 #endif
