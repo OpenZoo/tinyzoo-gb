@@ -48,9 +48,10 @@ _zoo_mods16_8:
 	ld a, c
 	call _zoo_modu16_8a
 
-	; result = divisor - result
+	; result = divisor - result - 1
 	ld a, c
 	sub a, e
+	dec a
 	ret
 
 _zoo_modu16_8:

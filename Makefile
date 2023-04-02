@@ -30,7 +30,7 @@ LCCFLAGS += -Wf--max-allocs-per-node50000 -Wf--opt-code-speed
 # profiling
 # LCCFLAGS += -DPROFILING -Wf--profile
 # ASM
-LCCFLAGS += -Wa-I$(GBDK_HOME)lib/small/asxxxx/ -Wa-l
+LCCFLAGS += -Wa-I$(GBDK_HOME)lib/sm83/ -Wa-l
 # GBC
 LCCFLAGS += -Wm-yc -Wm-ys -Wm-yngbzoo
 
