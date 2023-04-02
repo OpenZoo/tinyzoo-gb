@@ -14,7 +14,8 @@ distributor.
 TinyZoo/GB Engine
 
 Copyright (c)
-2020, 2021, 2022
+2020, 2021, 2022,
+2023
 Adrian Siekierka
 
 TinyZoo/GB is
@@ -45,7 +46,8 @@ to any person
 obtaining a copy
 of this software
 and associated
-documentation files
+documentation
+files
 (the "Software"),
 to deal in
 the Software
@@ -64,13 +66,15 @@ the Software,
 and to permit
 persons to whom
 the Software is
-furnished to do so,
+furnished to
+do so,
 subject to the
 following
 conditions:
 
-The above copyright
-notice and this
+The above
+copyright notice
+and this
 permission notice
 shall be included
 in all copies
@@ -112,21 +116,23 @@ THE SOFTWARE.
 
 This software makes
 use of additional
-library code:
+library code from
+the following
+projects:
 
-* SDCC std. library
+* SDCC
 
-* gbdk-2020 library
+* GBDK-2020
 
-* libbet pads/rand
- (c) Damian Yerrick
+* libbet
+(c) Damian Yerrick
 
        - * -
 
 Thanks to Calindro
 for developing
-Emulicious. It was
-immensely useful
+Emulicious. It has
+been of great use
 in the development
 of TinyZoo/GB.
 

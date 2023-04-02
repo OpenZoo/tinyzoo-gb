@@ -27,7 +27,7 @@ If deemed necessary for your project, alternate licensing terms can be negotiate
 
 ### License notice
 
-Copyright (c) 2020, 2021, 2022 Adrian Siekierka
+Copyright (c) 2020, 2021, 2022, 2023 Adrian Siekierka
 
 TinyZoo/GB is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
