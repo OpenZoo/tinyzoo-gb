@@ -64,11 +64,7 @@ extern int8_t viewport_x;
 extern int8_t viewport_y;
 
 void game_transition_start(uint8_t color) {
-	while (transition_pos < (TRANSITION_TABLE_20_18_ENTRY_COUNT * 2)) {
-__asm
-		halt
-__endasm;
-	}
+	ZOO_BUSYLOOP(transition_pos < (TRANSITION_TABLE_20_18_ENTRY_COUNT * 2));
 	transition_pos = 0;
 	transition_color = color;
 }
