@@ -210,7 +210,7 @@ bool oop_send_target(uint8_t target_id, bool respect_self_lock, uint8_t label_id
 		/* OTHERS = 253, ALL = 254 */
 		if (target_id >= OOP_TARGET_OTHERS) {
 			for (; stat_id <= zoo_stat_count; stat_id++, stat++) {
-				if (stat_id == oop_stat_id) continue;
+				if (stat_id == oop_stat_id && target_id == OOP_TARGET_OTHERS) continue;
 				if (stat->data_ofs != 0xFFFF) {
 					if (oop_send(stat_id, respect_self_lock, label_id, ignore_lock)) {
 						result = true;
