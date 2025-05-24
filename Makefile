@@ -26,7 +26,7 @@ LCCFLAGS_gg = -DZ80 -D__GG__
 # For example, you can uncomment the line below to turn on debug output
 LCCFLAGS = -debug -Wm-ya16 -Wm-yo4
 # optimizations
-LCCFLAGS += -Wf--max-allocs-per-node50000 -Wf--opt-code-speed
+LCCFLAGS += -Wf--max-allocs-per-node100000 -Wf--opt-code-speed
 # profiling
 # LCCFLAGS += -DPROFILING -Wf--profile
 # ASM
